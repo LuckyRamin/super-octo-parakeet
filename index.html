@@ -12,11 +12,8 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap');
     
-    body { 
-      font-family: 'Vazirmatn', sans-serif; 
-    }
+    body { font-family: 'Vazirmatn', sans-serif; }
 
-    /* Glassmorphism Effects */
     .glass-panel {
       background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(16px);
@@ -31,7 +28,6 @@
       border: 1px solid rgba(30, 41, 59, 0.8);
     }
 
-    /* Smooth Transitions */
     .card-hover {
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -40,7 +36,6 @@
       box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.15);
     }
 
-    /* Custom Scrollbar */
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
@@ -52,13 +47,7 @@
       theme: {
         extend: {
           colors: {
-            brand: {
-              50: '#f0f9ff',
-              100: '#e0f2fe',
-              500: '#0284c7',
-              600: '#0369a1',
-              700: '#075985'
-            }
+            brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7', 600: '#0369a1', 700: '#075985' }
           }
         }
       }
@@ -97,10 +86,10 @@
 
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
 
-    <!-- Top Key Metrics (Unified Equal Heights) -->
+    <!-- Top Key Metrics -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
       
-      <!-- Card 1: Tether Rate -->
+      <!-- Tether Rate Card -->
       <div class="glass-panel p-5 rounded-2xl card-hover flex flex-col justify-between relative overflow-hidden border-r-4 border-r-emerald-500">
         <div>
           <div class="flex items-center justify-between">
@@ -121,7 +110,7 @@
         </div>
       </div>
 
-      <!-- Card 2: Total Portfolio Value -->
+      <!-- Portfolio Total Value Card -->
       <div class="glass-panel p-5 rounded-2xl card-hover flex flex-col justify-between md:col-span-2 border-r-4 border-r-brand-500">
         <div>
           <div class="flex items-center justify-between">
@@ -141,7 +130,7 @@
 
     </div>
 
-    <!-- Live Prices Cards (Fixed Grid System with Equal Heights) -->
+    <!-- Dynamic Cards Grid -->
     <div>
       <div class="flex items-center justify-between mb-3 px-1">
         <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
@@ -150,19 +139,17 @@
         </h3>
       </div>
       
-      <!-- 5 Column Desktop Grid -->
       <div id="pricesCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-stretch">
-        <!-- Dynamic Cards inserted via JavaScript -->
+        <!-- Dynamic Cards -->
       </div>
     </div>
 
-    <!-- Main Workspace Section -->
+    <!-- Inputs & Charts Section -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-      <!-- Left Column: Asset Inputs & Fallbacks (5 cols) -->
+      <!-- Inputs Column -->
       <div class="lg:col-span-5 space-y-6">
 
-        <!-- Asset Quantities Input Card -->
         <div class="glass-panel p-5 rounded-2xl shadow-sm">
           <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80">
             <h3 class="font-bold text-sm flex items-center gap-2 text-slate-800 dark:text-slate-100">
@@ -174,7 +161,7 @@
 
           <form id="assetForm" onsubmit="saveAssets(event)" class="space-y-3.5">
             <div id="assetsInputsContainer" class="space-y-3">
-              <!-- Dynamic Input Fields -->
+              <!-- Inputs -->
             </div>
 
             <button type="submit" class="w-full mt-2 py-3 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-brand-500/25 transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
@@ -184,7 +171,6 @@
           </form>
         </div>
 
-        <!-- Reserve USD Rates Config Card -->
         <div class="glass-panel p-5 rounded-2xl shadow-sm">
           <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-200/80 dark:border-slate-800/80">
             <h3 class="font-bold text-xs flex items-center gap-2 text-slate-700 dark:text-slate-300">
@@ -215,10 +201,9 @@
 
       </div>
 
-      <!-- Right Column: Visual Breakdown & Table (7 cols) -->
+      <!-- Chart & Details Table -->
       <div class="lg:col-span-7 space-y-6">
 
-        <!-- Portfolio Visual Distribution Chart -->
         <div class="glass-panel p-5 rounded-2xl shadow-sm">
           <h3 class="font-bold text-sm mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80 flex items-center gap-2">
             <i data-lucide="pie-chart" class="w-4 h-4 text-brand-500"></i>
@@ -230,12 +215,11 @@
               <canvas id="portfolioChart"></canvas>
             </div>
             <div id="chartLegendContainer" class="md:col-span-6 space-y-2 max-h-52 overflow-y-auto pl-1">
-              <!-- Dynamic Legends -->
+              <!-- Dynamic Legend -->
             </div>
           </div>
         </div>
 
-        <!-- Breakdown Table Card -->
         <div class="glass-panel p-5 rounded-2xl shadow-sm">
           <h3 class="font-bold text-sm mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80 flex items-center gap-2">
             <i data-lucide="list-tree" class="w-4 h-4 text-brand-500"></i>
@@ -254,7 +238,7 @@
                 </tr>
               </thead>
               <tbody id="breakdownTableBody" class="divide-y divide-slate-100 dark:divide-slate-800/60">
-                <!-- Dynamic Rows -->
+                <!-- Rows -->
               </tbody>
             </table>
           </div>
@@ -291,7 +275,7 @@
     });
 
     function loadStoredData() {
-      const q = localStorage.getItem('app_qty_v8');
+      const q = localStorage.getItem('app_qty_v9');
       if (q) assetQuantities = JSON.parse(q);
 
       const fbUsdt = localStorage.getItem('fb_usdt');
@@ -306,7 +290,7 @@
         const input = document.getElementById(`qty_${a.id}`);
         if (input) assetQuantities[a.id] = parseFloat(input.value) || 0;
       });
-      localStorage.setItem('app_qty_v8', JSON.stringify(assetQuantities));
+      localStorage.setItem('app_qty_v9', JSON.stringify(assetQuantities));
       recalculateAndRender();
     }
 
@@ -342,54 +326,60 @@
       lucide.createIcons();
     }
 
-    // Tether Fetching Logic with multiple endpoints
+    // Advanced Multi-Proxy Failover Fetcher for Tether Price
     async function fetchUSDTWithFailover() {
-      // 1. Bitpin API
-      try {
-        const res = await fetch('https://api.bitpin.ir/v1/mth/markets/');
-        if (res.ok) {
+      const endpoints = [
+        // Method 1: Bitpin via CorsProxy.io
+        async () => {
+          const res = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.bitpin.ir/v1/mth/markets/'));
           const data = await res.json();
           const list = data.results || data;
-          if (Array.isArray(list)) {
-            const usdt = list.find(m => m.code === 'USDT_IRT' || m.currency1_code === 'USDT');
-            if (usdt && usdt.price) {
-              let p = parseFloat(usdt.price);
-              return { price: p > 200000 ? p / 10 : p, source: 'بیت‌پین' };
-            }
-          }
-        }
-      } catch (e) {}
-
-      // 2. Nobitex API
-      try {
-        const res = await fetch('https://api.nobitex.ir/v2/trades/USDTIRT');
-        if (res.ok) {
+          const usdt = list.find(m => m.code === 'USDT_IRT' || m.currency1_code === 'USDT');
+          if (usdt && usdt.price) return { price: parseFloat(usdt.price), source: 'بیت‌پین (پروکسی)' };
+        },
+        // Method 2: Nobitex Trades via CorsProxy.io
+        async () => {
+          const res = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.nobitex.ir/v2/trades/USDTIRT'));
           const data = await res.json();
-          if (data?.trades?.[0]?.price) {
-            let p = parseFloat(data.trades[0].price);
-            return { price: p > 200000 ? p / 10 : p, source: 'نوبیتکس' };
-          }
-        }
-      } catch (e) {}
-
-      // 3. Wallex API
-      try {
-        const res = await fetch('https://api.wallex.ir/v1/markets');
-        if (res.ok) {
+          if (data?.trades?.[0]?.price) return { price: parseFloat(data.trades[0].price), source: 'نوبیتکس (پروکسی)' };
+        },
+        // Method 3: Wallex via CodeTabs Proxy
+        async () => {
+          const res = await fetch('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent('https://api.wallex.ir/v1/markets'));
           const data = await res.json();
           if (data?.result?.symbols?.USDTTMN?.stats?.lastPrice) {
-            let p = parseFloat(data.result.symbols.USDTTMN.stats.lastPrice);
-            return { price: p, source: 'والکس' };
+            return { price: parseFloat(data.result.symbols.USDTTMN.stats.lastPrice), source: 'والکس (پروکسی)' };
           }
+        },
+        // Method 4: Bitpin Direct Call
+        async () => {
+          const res = await fetch('https://api.bitpin.ir/v1/mth/markets/');
+          const data = await res.json();
+          const list = data.results || data;
+          const usdt = list.find(m => m.code === 'USDT_IRT');
+          if (usdt && usdt.price) return { price: parseFloat(usdt.price), source: 'بیت‌پین مستقیم' };
         }
-      } catch (e) {}
+      ];
 
-      // Manual Reserve Fallback
+      for (const fn of endpoints) {
+        try {
+          const result = await fn();
+          if (result && result.price && result.price > 1000) {
+            let p = result.price;
+            if (p > 200000) p = p / 10; // Convert Rial to Toman if needed
+            return { price: p, source: result.source };
+          }
+        } catch (e) {
+          console.warn('Endpoint retry...', e);
+        }
+      }
+
+      // Reserve Fallback if all network calls fail
       const fb = parseFloat(document.getElementById('fallback_usdt').value) || 65000;
-      return { price: fb, source: 'پشتیبان دستی (CORS)' };
+      return { price: fb, source: 'پشتیبان رزرو' };
     }
 
-    // Fetch Global USD Prices
+    // Fetch Global USD Prices for Gold, Silver, Copper, BTC
     async function fetchGlobalUSDPrices() {
       usdSources = { gold: 'رزرو دستی', silver: 'رزرو دستی', copper: 'رزرو دستی', btc: 'رزرو دستی' };
 
@@ -419,7 +409,6 @@
         }
       } catch (e) {}
 
-      // Binance API for BTC & Gold PAXG
       try {
         const [btcRes, paxgRes] = await Promise.all([
           fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT'),
@@ -445,7 +434,7 @@
 
     async function updateAllPrices() {
       const icon = document.getElementById('refreshIcon');
-      icon.classList.add('animate-spin');
+      if (icon) icon.classList.add('animate-spin');
 
       liveUSDTPrice = await fetchUSDTWithFailover();
       document.getElementById('usdtDisplayRate').innerText = Math.round(liveUSDTPrice.price).toLocaleString('fa-IR');
@@ -453,7 +442,7 @@
 
       await fetchGlobalUSDPrices();
 
-      icon.classList.remove('animate-spin');
+      if (icon) icon.classList.remove('animate-spin');
       document.getElementById('lastUpdateText').innerText = `آخرین دریافت: ${new Date().toLocaleTimeString('fa-IR')}`;
       recalculateAndRender();
     }
@@ -509,7 +498,6 @@
         const totalValToman = qty * pricePerUnitToman;
         grandTotalToman += totalValToman;
 
-        // FIXED HEIGHT UNIFORM CARD
         const card = document.createElement('div');
         card.className = 'glass-panel p-4 rounded-2xl card-hover flex flex-col justify-between h-full border-t-4';
         card.style.borderTopColor = asset.color;
@@ -533,7 +521,6 @@
         `;
         cardsGrid.appendChild(card);
 
-        // Table Row
         const tr = document.createElement('tr');
         tr.className = 'hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition';
         tr.innerHTML = `
@@ -555,7 +542,6 @@
 
       document.getElementById('totalValueDisplay').innerText = Math.round(grandTotalToman).toLocaleString('fa-IR');
 
-      // Update Chart Legends
       ASSET_DEFINITIONS.forEach((asset, idx) => {
         const val = chartData[idx];
         const percent = grandTotalToman > 0 ? ((val / grandTotalToman) * 100).toFixed(1) : 0;
@@ -609,4 +595,3 @@
   </script>
 </body>
 </html>
-
