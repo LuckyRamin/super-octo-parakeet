@@ -11,23 +11,19 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap');
-    
     body { font-family: 'Vazirmatn', sans-serif; }
-
     .glass-panel {
       background: rgba(255, 255, 255, 0.85);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(226, 232, 240, 0.8);
     }
-    
     .dark .glass-panel {
       background: rgba(15, 23, 42, 0.75);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(30, 41, 59, 0.8);
     }
-
     .card-hover {
       transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
@@ -35,7 +31,6 @@
       transform: translateY(-3px);
       box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.15);
     }
-
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
@@ -59,7 +54,6 @@
   <!-- Header Bar -->
   <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      
       <div class="flex items-center gap-3">
         <div class="w-10 h-10 bg-gradient-to-tr from-brand-600 to-brand-500 text-white rounded-xl shadow-md shadow-brand-500/20 flex items-center justify-center">
           <i data-lucide="wallet" class="w-5 h-5"></i>
@@ -80,7 +74,6 @@
           <i data-lucide="sun" id="themeIcon" class="w-4 h-4"></i>
         </button>
       </div>
-
     </div>
   </header>
 
@@ -88,7 +81,6 @@
 
     <!-- Top Key Metrics -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
-      
       <!-- Tether Rate Card -->
       <div class="glass-panel p-5 rounded-2xl card-hover flex flex-col justify-between relative overflow-hidden border-r-4 border-r-emerald-500">
         <div>
@@ -127,7 +119,6 @@
           <span class="flex items-center gap-1 text-slate-500"><i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> نرخ‌های جهانی دلاری</span>
         </div>
       </div>
-
     </div>
 
     <!-- Dynamic Cards Grid -->
@@ -138,18 +129,12 @@
           نرخ واحد دارایی‌ها (محاسبه‌شده بر حسب تومان)
         </h3>
       </div>
-      
-      <div id="pricesCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-stretch">
-        <!-- Dynamic Cards -->
-      </div>
+      <div id="pricesCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-stretch"></div>
     </div>
 
     <!-- Inputs & Charts Section -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-
-      <!-- Inputs Column -->
       <div class="lg:col-span-5 space-y-6">
-
         <div class="glass-panel p-5 rounded-2xl shadow-sm">
           <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80">
             <h3 class="font-bold text-sm flex items-center gap-2 text-slate-800 dark:text-slate-100">
@@ -160,10 +145,7 @@
           </div>
 
           <form id="assetForm" onsubmit="saveAssets(event)" class="space-y-3.5">
-            <div id="assetsInputsContainer" class="space-y-3">
-              <!-- Inputs -->
-            </div>
-
+            <div id="assetsInputsContainer" class="space-y-3"></div>
             <button type="submit" class="w-full mt-2 py-3 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-brand-500/25 transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
               <i data-lucide="save" class="w-4 h-4"></i>
               ذخیره و محاسبه مجدد
@@ -178,7 +160,6 @@
               تنظیمات نرخ پشتیبان (دلار/رزرو)
             </h3>
           </div>
-
           <div class="grid grid-cols-2 gap-3 text-xs">
             <div>
               <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">تتر رزرو (تومان)</label>
@@ -198,25 +179,19 @@
             </div>
           </div>
         </div>
-
       </div>
 
-      <!-- Chart & Details Table -->
       <div class="lg:col-span-7 space-y-6">
-
         <div class="glass-panel p-5 rounded-2xl shadow-sm">
           <h3 class="font-bold text-sm mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80 flex items-center gap-2">
             <i data-lucide="pie-chart" class="w-4 h-4 text-brand-500"></i>
             ترکیب و پراکندگی ارزش دارایی‌ها
           </h3>
-          
           <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
             <div class="md:col-span-6 relative h-52 flex items-center justify-center">
               <canvas id="portfolioChart"></canvas>
             </div>
-            <div id="chartLegendContainer" class="md:col-span-6 space-y-2 max-h-52 overflow-y-auto pl-1">
-              <!-- Dynamic Legend -->
-            </div>
+            <div id="chartLegendContainer" class="md:col-span-6 space-y-2 max-h-52 overflow-y-auto pl-1"></div>
           </div>
         </div>
 
@@ -225,7 +200,6 @@
             <i data-lucide="list-tree" class="w-4 h-4 text-brand-500"></i>
             جزئیات محاسبات و ارزش ریالی
           </h3>
-
           <div class="overflow-x-auto">
             <table class="w-full text-right text-xs">
               <thead>
@@ -237,15 +211,11 @@
                   <th class="pb-2.5 font-semibold">ارزش کل (تومان)</th>
                 </tr>
               </thead>
-              <tbody id="breakdownTableBody" class="divide-y divide-slate-100 dark:divide-slate-800/60">
-                <!-- Rows -->
-              </tbody>
+              <tbody id="breakdownTableBody" class="divide-y divide-slate-100 dark:divide-slate-800/60"></tbody>
             </table>
           </div>
         </div>
-
       </div>
-
     </div>
   </main>
 
@@ -277,7 +247,6 @@
     function loadStoredData() {
       const q = localStorage.getItem('app_qty_v9');
       if (q) assetQuantities = JSON.parse(q);
-
       const fbUsdt = localStorage.getItem('fb_usdt');
       if (fbUsdt) document.getElementById('fallback_usdt').value = fbUsdt;
       const fbGold = localStorage.getItem('fb_gold');
@@ -326,63 +295,85 @@
       lucide.createIcons();
     }
 
-    // Advanced Multi-Proxy Failover Fetcher for Tether Price
+    // Advanced 6-Layer Failover Engine for Tether Price
     async function fetchUSDTWithFailover() {
       const endpoints = [
-        // Method 1: Bitpin via CorsProxy.io
+        // 1. Exir Direct (Usually Open CORS)
+        async () => {
+          const res = await fetch('https://api.exir.io/v2/ticker?symbol=usdt-irt');
+          const data = await res.json();
+          if (data && data.last) return { price: parseFloat(data.last), source: 'اکسیر (مستقیم)' };
+        },
+        // 2. Ramzinex via AllOrigins
+        async () => {
+          const res = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://publicapi.ramzinex.com/1/pair/11'));
+          const json = await res.json();
+          const data = JSON.parse(json.contents);
+          if (data?.data?.buy) {
+            let p = parseFloat(data.data.buy);
+            if (p > 200000) p = p / 10; // Convert Rial to Toman
+            return { price: p, source: 'رمزینکس (AllOrigins)' };
+          }
+        },
+        // 3. Nobitex via AllOrigins
+        async () => {
+          const res = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.nobitex.ir/v2/trades/USDTIRT'));
+          const json = await res.json();
+          const data = JSON.parse(json.contents);
+          if (data?.trades?.[0]?.price) {
+            let p = parseFloat(data.trades[0].price);
+            if (p > 200000) p = p / 10;
+            return { price: p, source: 'نوبیتکس (AllOrigins)' };
+          }
+        },
+        // 4. Bitpin via CorsProxy
         async () => {
           const res = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.bitpin.ir/v1/mth/markets/'));
           const data = await res.json();
           const list = data.results || data;
           const usdt = list.find(m => m.code === 'USDT_IRT' || m.currency1_code === 'USDT');
-          if (usdt && usdt.price) return { price: parseFloat(usdt.price), source: 'بیت‌پین (پروکسی)' };
+          if (usdt && usdt.price) {
+            let p = parseFloat(usdt.price);
+            if (p > 200000) p = p / 10;
+            return { price: p, source: 'بیت‌پین (CorsProxy)' };
+          }
         },
-        // Method 2: Nobitex Trades via CorsProxy.io
+        // 5. Nobitex Stats Direct
         async () => {
-          const res = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.nobitex.ir/v2/trades/USDTIRT'));
+          const res = await fetch('https://api.nobitex.ir/market/stats?srcCurrency=usdt&dstCurrency=rls');
           const data = await res.json();
-          if (data?.trades?.[0]?.price) return { price: parseFloat(data.trades[0].price), source: 'نوبیتکس (پروکسی)' };
+          if (data?.stats?.['usdt-rls']?.latest) {
+            return { price: parseFloat(data.stats['usdt-rls'].latest) / 10, source: 'نوبیتکس (مستقیم)' };
+          }
         },
-        // Method 3: Wallex via CodeTabs Proxy
+        // 6. CodeTabs Proxy Failover
         async () => {
           const res = await fetch('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent('https://api.wallex.ir/v1/markets'));
           const data = await res.json();
           if (data?.result?.symbols?.USDTTMN?.stats?.lastPrice) {
-            return { price: parseFloat(data.result.symbols.USDTTMN.stats.lastPrice), source: 'والکس (پروکسی)' };
+            return { price: parseFloat(data.result.symbols.USDTTMN.stats.lastPrice), source: 'والکس (CodeTabs)' };
           }
-        },
-        // Method 4: Bitpin Direct Call
-        async () => {
-          const res = await fetch('https://api.bitpin.ir/v1/mth/markets/');
-          const data = await res.json();
-          const list = data.results || data;
-          const usdt = list.find(m => m.code === 'USDT_IRT');
-          if (usdt && usdt.price) return { price: parseFloat(usdt.price), source: 'بیت‌پین مستقیم' };
         }
       ];
 
       for (const fn of endpoints) {
         try {
           const result = await fn();
-          if (result && result.price && result.price > 1000) {
-            let p = result.price;
-            if (p > 200000) p = p / 10; // Convert Rial to Toman if needed
-            return { price: p, source: result.source };
+          if (result && result.price && result.price > 20000 && result.price < 300000) {
+            return result;
           }
         } catch (e) {
           console.warn('Endpoint retry...', e);
         }
       }
 
-      // Reserve Fallback if all network calls fail
       const fb = parseFloat(document.getElementById('fallback_usdt').value) || 65000;
       return { price: fb, source: 'پشتیبان رزرو' };
     }
 
-    // Fetch Global USD Prices for Gold, Silver, Copper, BTC
+    // Fetch Global USD Prices
     async function fetchGlobalUSDPrices() {
       usdSources = { gold: 'رزرو دستی', silver: 'رزرو دستی', copper: 'رزرو دستی', btc: 'رزرو دستی' };
-
       livePricesUSD.gold = parseFloat(document.getElementById('fallback_gold').value) || 2400;
       livePricesUSD.silver = parseFloat(document.getElementById('fallback_silver').value) || 28.5;
       livePricesUSD.copper = parseFloat(document.getElementById('fallback_copper').value) || 4.2;
@@ -392,20 +383,13 @@
           fetch('https://api.gold-api.com/price/XAU'),
           fetch('https://api.gold-api.com/price/XAG')
         ]);
-
         if (gRes.ok) {
           const gData = await gRes.json();
-          if (gData?.price) {
-            livePricesUSD.gold = gData.price;
-            usdSources.gold = 'Gold-API';
-          }
+          if (gData?.price) { livePricesUSD.gold = gData.price; usdSources.gold = 'Gold-API'; }
         }
         if (sRes.ok) {
           const sData = await sRes.json();
-          if (sData?.price) {
-            livePricesUSD.silver = sData.price;
-            usdSources.silver = 'Gold-API';
-          }
+          if (sData?.price) { livePricesUSD.silver = sData.price; usdSources.silver = 'Gold-API'; }
         }
       } catch (e) {}
 
@@ -414,20 +398,13 @@
           fetch('https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT'),
           fetch('https://api.binance.com/api/v3/ticker/price?symbol=PAXGUSDT')
         ]);
-        
         if (btcRes.ok) {
           const data = await btcRes.json();
-          if (data?.price) {
-            livePricesUSD.btc = parseFloat(data.price);
-            usdSources.btc = 'Binance';
-          }
+          if (data?.price) { livePricesUSD.btc = parseFloat(data.price); usdSources.btc = 'Binance'; }
         }
         if (paxgRes.ok && usdSources.gold === 'رزرو دستی') {
           const data = await paxgRes.json();
-          if (data?.price) {
-            livePricesUSD.gold = parseFloat(data.price);
-            usdSources.gold = 'Binance';
-          }
+          if (data?.price) { livePricesUSD.gold = parseFloat(data.price); usdSources.gold = 'Binance'; }
         }
       } catch (e) {}
     }
