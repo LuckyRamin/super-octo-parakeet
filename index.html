@@ -143,7 +143,7 @@
           نرخ واحد دارایی‌ها (محاسبه‌شده بر حسب تومان)
         </h3>
       </div>
-      <div id="pricesCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 items-stretch"></div>
+      <div id="pricesCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-stretch"></div>
     </div>
 
     <!-- Inputs & Charts Section -->
@@ -285,10 +285,11 @@
       { id: 'gold18', name: 'طلا ۱۸ عیار', unit: 'گرم', type: 'gold', purity: 0.75, icon: 'sparkles', color: '#f59e0b' },
       { id: 'silver999', name: 'نقره ۹۹۹', unit: 'گرم', type: 'silver', purity: 0.999, icon: 'disc', color: '#94a3b8' },
       { id: 'copper999', name: 'مس کاتد (۹۹.۹۹٪)', unit: 'گرم', type: 'copper', purity: 1.0, icon: 'box', color: '#d97706' },
-      { id: 'usdt', name: 'تتر / دلار', unit: 'تتر', type: 'usd', purity: 1.0, icon: 'dollar-sign', color: '#10b981' }
+      { id: 'usdt', name: 'تتر / دلار', unit: 'تتر', type: 'usd', purity: 1.0, icon: 'dollar-sign', color: '#10b981' },
+      { id: 'toman', name: 'دارایی نقد', unit: 'تومان', type: 'toman', purity: 1.0, icon: 'banknote', color: '#3b82f6' }
     ];
 
-    let assetQuantities = { gold18: 0, silver999: 0, copper999: 0, usdt: 0 };
+    let assetQuantities = { gold18: 0, silver999: 0, copper999: 0, usdt: 0, toman: 0 };
     let livePricesUSD = { gold: 2400, silver: 28.5, copper: 4.2 };
     let liveUSDTPrice = { price: 65000, source: 'در حال استخراج...' };
     let usdSources = {};
@@ -306,7 +307,7 @@
 
     function loadStoredData() {
       const q = localStorage.getItem('app_qty_v10');
-      if (q) assetQuantities = JSON.parse(q);
+      if (q) assetQuantities = { ...assetQuantities, ...JSON.parse(q) };
       const fbUsdt = localStorage.getItem('fb_usdt');
       if (fbUsdt) document.getElementById('fallback_usdt').value = fbUsdt;
       const fbGold = localStorage.getItem('fb_gold');
@@ -358,39 +359,62 @@
     async function fetchUSDTWithFailover() {
       const endpoints = [
         async () => {
-          const res = await fetch('https://api.exir.io/v2/ticker?symbol=usdt-irt');
+          const res = await fetch('https://api.wallex.ir/v1/markets');
           const data = await res.json();
-          if (data && data.last) return { price: parseFloat(data.last), source: 'اکسیر (مستقیم)' };
+          if (data?.result?.symbols?.USDTTMN?.stats?.lastPrice) {
+            return { price: parseFloat(data.result.symbols.USDTTMN.stats.lastPrice), source: 'والکس' };
+          }
         },
         async () => {
-          const res = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://publicapi.ramzinex.com/1/pair/11'));
-          const json = await res.json();
-          const data = JSON.parse(json.contents);
+          const res = await fetch('https://api.exir.io/v2/ticker?symbol=usdt-irt');
+          const data = await res.json();
+          if (data?.last) return { price: parseFloat(data.last), source: 'اکسیر' };
+        },
+        async () => {
+          const res = await fetch('https://api.nobitex.ir/v3/orderbook/USDTIRT');
+          const data = await res.json();
+          if (data?.lastTradePrice) {
+            let p = parseFloat(data.lastTradePrice);
+            if (p > 200000) p = p / 10;
+            return { price: p, source: 'نوبیتکس' };
+          }
+        },
+        async () => {
+          const res = await fetch('https://publicapi.ramzinex.com/1/pair/11');
+          const data = await res.json();
           if (data?.data?.buy) {
             let p = parseFloat(data.data.buy);
             if (p > 200000) p = p / 10;
-            return { price: p, source: 'رمزینکس (AllOrigins)' };
+            return { price: p, source: 'رمزینکس' };
           }
         },
         async () => {
-          const res = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.nobitex.ir/v2/trades/USDTIRT'));
-          const json = await res.json();
-          const data = JSON.parse(json.contents);
-          if (data?.trades?.[0]?.price) {
-            let p = parseFloat(data.trades[0].price);
-            if (p > 200000) p = p / 10;
-            return { price: p, source: 'نوبیتکس (AllOrigins)' };
-          }
-        },
-        async () => {
-          const res = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://api.bitpin.ir/v1/mth/markets/'));
+          const res = await fetch('https://api.bitpin.ir/v1/mth/markets/');
           const data = await res.json();
-          const list = data.results || data;
-          const usdt = list.find(m => m.code === 'USDT_IRT' || m.currency1_code === 'USDT');
-          if (usdt && usdt.price) {
+          const usdt = (data.results || data).find(m => m.code === 'USDT_IRT' || m.currency1_code === 'USDT');
+          if (usdt?.price) {
             let p = parseFloat(usdt.price);
             if (p > 200000) p = p / 10;
-            return { price: p, source: 'بیت‌پین (CorsProxy)' };
+            return { price: p, source: 'بیت‌پین' };
+          }
+        },
+        async () => {
+          const res = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.nobitex.ir/v3/orderbook/USDTIRT'));
+          const json = await res.json();
+          const data = JSON.parse(json.contents);
+          if (data?.lastTradePrice) {
+            let p = parseFloat(data.lastTradePrice);
+            if (p > 200000) p = p / 10;
+            return { price: p, source: 'نوبیتکس (پراکسی)' };
+          }
+        },
+        async () => {
+          const res = await fetch('https://corsproxy.io/?' + encodeURIComponent('https://publicapi.ramzinex.com/1/pair/11'));
+          const data = await res.json();
+          if (data?.data?.buy) {
+            let p = parseFloat(data.data.buy);
+            if (p > 200000) p = p / 10;
+            return { price: p, source: 'رمزینکس (پراکسی)' };
           }
         }
       ];
@@ -398,7 +422,7 @@
       for (const fn of endpoints) {
         try {
           const result = await fn();
-          if (result && result.price && result.price > 20000 && result.price < 300000) {
+          if (result && result.price && result.price > 30000 && result.price < 300000) {
             return result;
           }
         } catch (e) {}
@@ -486,6 +510,11 @@
           pricePerUnitToman = usdtRate;
           sourceText = liveUSDTPrice.source;
         }
+        else if (asset.type === 'toman') {
+          pricePerUnitUSD = usdtRate > 0 ? (1.0 / usdtRate) : 0;
+          pricePerUnitToman = 1.0;
+          sourceText = 'ارزش ثابت';
+        }
 
         const qty = assetQuantities[asset.id] || 0;
         const totalValToman = qty * pricePerUnitToman;
@@ -504,7 +533,7 @@
             </div>
             <div class="mt-1">
               <div class="text-base font-black text-slate-900 dark:text-white">${Math.round(pricePerUnitToman).toLocaleString('fa-IR')} <span class="text-[10px] text-slate-400 font-normal">تومان</span></div>
-              <div class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5" dir="ltr">$${pricePerUnitUSD < 1 ? pricePerUnitUSD.toFixed(3) : pricePerUnitUSD.toLocaleString('en-US', {maximumFractionDigits: 1})}</div>
+              <div class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5" dir="ltr">${asset.type === 'toman' ? '~ $' : '$'}${pricePerUnitUSD < 1 ? pricePerUnitUSD.toFixed(3) : pricePerUnitUSD.toLocaleString('en-US', {maximumFractionDigits: 1})}</div>
             </div>
           </div>
           <div class="mt-3 pt-2 border-t border-slate-200/50 dark:border-slate-800/50 flex items-center justify-between text-[10px] text-slate-400">
@@ -522,15 +551,17 @@
             ${asset.name}
           </td>
           <td class="py-2.5 text-slate-600 dark:text-slate-300 font-medium">${qty.toLocaleString('fa-IR')} ${asset.unit}</td>
-          <td class="py-2.5 font-mono text-slate-500" dir="ltr">$${pricePerUnitUSD < 1 ? pricePerUnitUSD.toFixed(3) : pricePerUnitUSD.toLocaleString('en-US', {maximumFractionDigits:1})}</td>
+          <td class="py-2.5 font-mono text-slate-500" dir="ltr">$${pricePerUnitUSD < 1 ? pricePerUnitUSD.toFixed(5) : pricePerUnitUSD.toLocaleString('en-US', {maximumFractionDigits:1})}</td>
           <td class="py-2.5 font-semibold text-slate-700 dark:text-slate-200">${Math.round(pricePerUnitToman).toLocaleString('fa-IR')}</td>
           <td class="py-2.5 font-black text-slate-900 dark:text-white">${Math.round(totalValToman).toLocaleString('fa-IR')}</td>
         `;
         tableBody.appendChild(tr);
 
-        chartLabels.push(asset.name);
-        chartData.push(totalValToman);
-        chartColors.push(asset.color);
+        if (totalValToman > 0) {
+          chartLabels.push(asset.name);
+          chartData.push(totalValToman);
+          chartColors.push(asset.color);
+        }
       });
 
       const grandTotalUSDT = usdtRate > 0 ? (grandTotalToman / usdtRate) : 0;
@@ -539,7 +570,8 @@
       document.getElementById('totalValueUSDTDisplay').innerText = `$${grandTotalUSDT.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
 
       ASSET_DEFINITIONS.forEach((asset, idx) => {
-        const val = chartData[idx];
+        const val = chartData[chartLabels.indexOf(asset.name)] || 0;
+        if (val === 0) return;
         const percent = grandTotalToman > 0 ? ((val / grandTotalToman) * 100).toFixed(1) : 0;
 
         const leg = document.createElement('div');
@@ -613,8 +645,9 @@
         else if (asset.type === 'silver') pricePerUnitUSD = (livePricesUSD.silver / GRAMS_PER_TROY_OUNCE) * asset.purity;
         else if (asset.type === 'copper') pricePerUnitUSD = (livePricesUSD.copper / GRAMS_PER_POUND);
         else if (asset.type === 'usd') pricePerUnitUSD = 1.0;
+        else if (asset.type === 'toman') pricePerUnitUSD = usdtRate > 0 ? (1.0 / usdtRate) : 0;
 
-        pricePerUnitToman = pricePerUnitUSD * usdtRate;
+        pricePerUnitToman = asset.type === 'toman' ? 1.0 : pricePerUnitUSD * usdtRate;
         const qty = assetQuantities[asset.id] || 0;
         const totalVal = qty * pricePerUnitToman;
         grandTotalToman += totalVal;
