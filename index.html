@@ -194,6 +194,10 @@
               </label>
               <input type="number" step="any" id="fallback_copper" value="14238.5" onchange="saveConfig()" class="w-full p-2 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-1 focus:ring-brand-500 text-xs transition-colors duration-300">
             </div>
+            <div class="col-span-2">
+              <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">کسر از قیمت مس (درصد %)</label>
+              <input type="number" step="any" id="copper_discount" value="0" onchange="saveConfig()" class="w-full p-2 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-1 focus:ring-brand-500 text-xs">
+            </div>
           </div>
         </div>
       </div>
@@ -322,6 +326,9 @@
       
       const fbCopper = localStorage.getItem('fb_copper');
       if (fbCopper) document.getElementById('fallback_copper').value = fbCopper;
+
+      const fbCopperDiscount = localStorage.getItem('fb_copper_discount');
+      if (fbCopperDiscount) document.getElementById('copper_discount').value = fbCopperDiscount;
     }
 
     function saveAssets(e) {
@@ -339,8 +346,8 @@
       localStorage.setItem('fb_gold', document.getElementById('fallback_gold').value);
       localStorage.setItem('fb_silver', document.getElementById('fallback_silver').value);
       localStorage.setItem('fb_copper', document.getElementById('fallback_copper').value);
+      localStorage.setItem('fb_copper_discount', document.getElementById('copper_discount').value);
       
-      // با تغییر دستی مس، نشانگر آنلاین مخفی شود
       const copperIndicator = document.getElementById('copperSourceIndicator');
       if (copperIndicator) copperIndicator.classList.add('hidden');
       
@@ -440,25 +447,20 @@
       return { price: fb, source: 'پشتیبان رزرو' };
     }
 
-    // لایه هوشمند و قوی برای دریافت آنلاین مس
     async function fetchLiveCopperPrice() {
-      // استفاده از بازه 1 روزه برای اطمینان از برگشت دیتای معتبر توسط یاهو
       const targetUrl = 'https://query1.finance.yahoo.com/v8/finance/chart/HG=F?interval=1d&range=1d';
       
       const endpoints = [
-        // لایه ۱: دریافت تمیز و مستقیم جیسون از AllOrigins
         async () => {
           const res = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl));
           const data = await res.json();
           return data?.chart?.result?.[0]?.meta?.regularMarketPrice;
         },
-        // لایه ۲: CodeTabs Proxy
         async () => {
           const res = await fetch('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(targetUrl));
           const data = await res.json();
           return data?.chart?.result?.[0]?.meta?.regularMarketPrice;
         },
-        // لایه ۳: AllOrigins (روش Get)
         async () => {
           const res = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl));
           const json = await res.json();
@@ -470,15 +472,12 @@
       for (const fn of endpoints) {
         try {
           const price = await fn();
-          // اعتبارسنجی قیمت (باید عدد باشد و در بازه منطقی مس جهانی قرار بگیرد)
           if (price && typeof price === 'number' && price > 1 && price < 20) {
             return parseFloat(price.toFixed(4)); 
           }
-        } catch (e) {
-          // ادامه به لایه بعدی در صورت بروز خطا
-        }
+        } catch (e) {}
       }
-      return null; // در صورتی که همه قطع باشند
+      return null;
     }
 
     async function fetchGlobalUSDPrices() {
@@ -489,15 +488,14 @@
       const copperIndicator = document.getElementById('copperSourceIndicator');
       const copperInput = document.getElementById('fallback_copper');
       
-      // تلاش برای دریافت آنلاین مس
       const liveCopper = await fetchLiveCopperPrice();
       if (liveCopper) {
         livePricesUSD.copper = liveCopper;
         usdSources.copper = 'COMEX (آنلاین)';
         if (copperIndicator && copperInput) {
           copperIndicator.classList.remove('hidden');
-          copperInput.value = liveCopper; // نمایش قیمت زنده به کاربر
-          copperInput.classList.add('bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-200', 'dark:border-emerald-800'); // افکت بصری
+          copperInput.value = liveCopper;
+          copperInput.classList.add('bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-200', 'dark:border-emerald-800');
         }
       } else {
         livePricesUSD.copper = parseFloat(copperInput.value) || 14238.5;
@@ -580,9 +578,16 @@
             pricePerKgUsdt = copperInput * LB_TO_KG;
           }
 
+          const discountStr = document.getElementById('copper_discount')?.value;
+          const discountPercent = parseFloat(discountStr) || 0;
+          
+          if (discountPercent > 0) {
+            pricePerKgUsdt = pricePerKgUsdt * (1 - (discountPercent / 100));
+          }
+
           pricePerUnitUSD = pricePerKgUsdt / 1000;
           pricePerUnitToman = Math.round(pricePerUnitUSD * usdtRate);
-          sourceText = `${usdSources.copper} × تتر`;
+          sourceText = `${usdSources.copper} × تتر` + (discountPercent > 0 ? ` (-${discountPercent}%)` : '');
         } 
         else if (asset.type === 'usd') {
           pricePerUnitUSD = 1.0;
@@ -728,9 +733,18 @@
           let copperInput = livePricesUSD.copper;
           let pricePerKgUsdt = 0;
           const LB_TO_KG = 2.20462262;
+          
           if (copperInput >= 1000) pricePerKgUsdt = copperInput / 1000;
           else if (copperInput >= 100 && copperInput < 1000) pricePerKgUsdt = (copperInput / 100) * LB_TO_KG;
           else pricePerKgUsdt = copperInput * LB_TO_KG;
+
+          const discountStr = document.getElementById('copper_discount')?.value;
+          const discountPercent = parseFloat(discountStr) || 0;
+          
+          if (discountPercent > 0) {
+            pricePerKgUsdt = pricePerKgUsdt * (1 - (discountPercent / 100));
+          }
+
           pricePerUnitUSD = pricePerKgUsdt / 1000;
         } else if (asset.type === 'usd') {
           pricePerUnitUSD = 1.0;
