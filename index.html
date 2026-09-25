@@ -7,8 +7,9 @@
   <!-- Tailwind CSS & Lucide Icons -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Chart.js -->
+  <!-- Chart.js & DataLabels Plugin -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
   <!-- HTML2Canvas for Image Export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
@@ -109,20 +110,27 @@
         </div>
       </div>
 
-      <!-- Initial Capital Card -->
+      <!-- Initial Capital & PnL Card -->
       <div class="glass-panel p-5 rounded-2xl card-hover flex flex-col justify-between relative overflow-hidden border-r-4 border-r-blue-500">
         <div>
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-slate-500 dark:text-slate-400">سرمایه اولیه (دلار)</span>
             <i data-lucide="piggy-bank" class="w-4 h-4 text-blue-500"></i>
           </div>
-          <div class="mt-2 flex items-baseline gap-1.5" dir="ltr">
+          <div class="mt-1 flex items-baseline gap-1.5" dir="ltr">
             <span class="text-xs font-bold text-slate-500">$</span>
-            <h2 id="initialCapitalDisplay" class="text-3xl font-black text-blue-600 dark:text-blue-400">0</h2>
+            <h2 id="initialCapitalDisplay" class="text-2xl font-black text-blue-600 dark:text-blue-400">0</h2>
           </div>
         </div>
-        <div class="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400">
-          <span>صرفاً نمایشی</span>
+        <div class="mt-3 pt-2 border-t border-slate-200/60 dark:border-slate-800/60">
+           <div class="flex items-center justify-between">
+              <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400">سود / زیان (دلار)</span>
+              <span id="pnlBadge" class="text-[10px] px-1.5 py-0.5 rounded font-bold bg-slate-100 dark:bg-slate-800 text-slate-500" dir="ltr">---</span>
+           </div>
+           <div class="mt-1 flex items-baseline gap-1.5" dir="ltr">
+              <span class="text-xs font-bold text-slate-500">$</span>
+              <h2 id="pnlDisplay" class="text-xl font-black text-slate-700 dark:text-slate-300">0.00</h2>
+           </div>
         </div>
       </div>
 
@@ -181,7 +189,7 @@
             <div class="mt-4 pt-4 border-t border-slate-200/80 dark:border-slate-800/80">
               <label class="text-[11px] font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1.5 mb-2">
                 <i data-lucide="piggy-bank" class="w-3.5 h-3.5 text-blue-500"></i>
-                سرمایه اولیه وارد شده (دلار - صرفاً نمایشی)
+                سرمایه اولیه وارد شده (دلار - مبنای سود/زیان)
               </label>
               <div class="relative">
                 <input type="number" step="any" id="initial_capital" value="0" placeholder="0" class="w-full pl-3 pr-9 py-2 bg-blue-50/50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs font-semibold transition">
@@ -240,10 +248,10 @@
             ترکیب و پراکندگی ارزش دارایی‌ها
           </h3>
           <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-            <div class="md:col-span-6 relative h-52 flex items-center justify-center">
+            <div class="md:col-span-6 relative h-72 flex items-center justify-center">
               <canvas id="portfolioChart"></canvas>
             </div>
-            <div id="chartLegendContainer" class="md:col-span-6 space-y-2 max-h-52 overflow-y-auto pl-1"></div>
+            <div id="chartLegendContainer" class="md:col-span-6 space-y-2 max-h-72 overflow-y-auto pl-1"></div>
           </div>
         </div>
 
@@ -307,7 +315,7 @@
         </div>
       </div>
       
-      <!-- Initial Capital Card -->
+      <!-- Initial Capital & PnL Card Snapshot -->
       <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 flex flex-col justify-center shadow-inner">
         <div class="space-y-1">
           <div class="text-xs text-slate-400 font-bold">سرمایه اولیه وارد شده</div>
@@ -316,8 +324,9 @@
             <span class="text-sm font-bold text-slate-300">$</span>
           </div>
         </div>
-        <div class="text-left space-y-1 mt-2 pt-2 border-t border-slate-800/60">
-          <div class="text-[10px] text-slate-500">صرفاً جهت مقایسه و نمایشی ثبت شده است</div>
+        <div class="text-left space-y-1 mt-2 pt-2 border-t border-slate-800/60 flex items-center justify-between">
+          <div class="text-[11px] text-slate-400 font-bold">سود / زیان:</div>
+          <div class="text-xl font-black" dir="ltr" id="snapPnlDisplay">$0.00</div>
         </div>
       </div>
     </div>
@@ -705,6 +714,31 @@
       });
 
       const grandTotalUSDT = usdtRate > 0 ? (grandTotalToman / usdtRate) : 0;
+      
+      const pnlUSD = grandTotalUSDT - initCap;
+      const pnlDisplay = document.getElementById('pnlDisplay');
+      const pnlBadge = document.getElementById('pnlBadge');
+
+      pnlDisplay.innerText = Math.abs(pnlUSD).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+      
+      if (initCap === 0) {
+         pnlDisplay.innerText = "0.00";
+         pnlDisplay.className = "text-xl font-black text-slate-700 dark:text-slate-300";
+         pnlBadge.innerText = "بدون سرمایه";
+         pnlBadge.className = "text-[10px] px-1.5 py-0.5 rounded font-bold bg-slate-100 dark:bg-slate-800 text-slate-500";
+      } else if (pnlUSD > 0) {
+         pnlDisplay.className = "text-xl font-black text-emerald-600 dark:text-emerald-400";
+         pnlBadge.innerText = "+" + ((pnlUSD / initCap) * 100).toFixed(1) + "%";
+         pnlBadge.className = "text-[10px] px-1.5 py-0.5 rounded font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400";
+      } else if (pnlUSD < 0) {
+         pnlDisplay.className = "text-xl font-black text-red-600 dark:text-red-400";
+         pnlBadge.innerText = ((pnlUSD / initCap) * 100).toFixed(1) + "%";
+         pnlBadge.className = "text-[10px] px-1.5 py-0.5 rounded font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400";
+      } else {
+         pnlDisplay.className = "text-xl font-black text-slate-700 dark:text-slate-300";
+         pnlBadge.innerText = "0.0%";
+         pnlBadge.className = "text-[10px] px-1.5 py-0.5 rounded font-bold bg-slate-100 dark:bg-slate-800 text-slate-500";
+      }
 
       document.getElementById('totalValueDisplay').innerText = Math.round(grandTotalToman).toLocaleString('fa-IR');
       document.getElementById('totalValueUSDTDisplay').innerText = `$${grandTotalUSDT.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
@@ -734,15 +768,51 @@
     }
 
     function initChart() {
+      Chart.register(ChartDataLabels);
       const ctx = document.getElementById('portfolioChart').getContext('2d');
       myChart = new Chart(ctx, {
         type: 'doughnut',
         data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderWidth: 0 }] },
         options: { 
           responsive: true, 
-          maintainAspectRatio: false, 
-          plugins: { legend: { display: false } }, 
-          cutout: '72%' 
+          maintainAspectRatio: false,
+          layout: {
+            padding: { top: 45, bottom: 45, left: 60, right: 60 } // Increased padding to make the circle ~15% smaller
+          },
+          plugins: { 
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: 'rgba(15, 23, 42, 0.9)',
+              titleFont: { family: 'Vazirmatn', size: 13 },
+              bodyFont: { family: 'Vazirmatn', size: 13, weight: 'bold' },
+              padding: 10,
+              cornerRadius: 8,
+              rtl: true,
+              callbacks: {
+                label: function(context) {
+                  return ' ' + Math.round(context.raw).toLocaleString('fa-IR') + ' تومان';
+                }
+              }
+            },
+            datalabels: {
+              anchor: 'end',
+              align: 'end',
+              offset: 8,
+              color: (context) => context.chart.data.datasets[0].backgroundColor[context.dataIndex],
+              font: { family: 'Vazirmatn', size: 12, weight: '900' },
+              textStrokeColor: () => document.documentElement.classList.contains('dark') ? 'rgba(15, 23, 42, 0.85)' : 'rgba(255, 255, 255, 0.85)',
+              textStrokeWidth: 4,
+              formatter: (value, context) => {
+                let dataArr = context.chart.data.datasets[0].data;
+                let total = dataArr.reduce((a, b) => a + b, 0);
+                let percentage = total > 0 ? (value * 100 / total).toFixed(1) : 0;
+                if (percentage < 3) return ''; 
+                return context.chart.data.labels[context.dataIndex] + '\n' + percentage + '%';
+              },
+              textAlign: 'center'
+            }
+          }, 
+          cutout: '60%' 
         }
       });
     }
@@ -759,6 +829,7 @@
       const isDark = document.documentElement.classList.toggle('dark');
       document.getElementById('themeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
       lucide.createIcons();
+      if(myChart) myChart.update(); // Update labels stroke color on theme toggle
     }
 
     async function exportSummaryAsImage() {
@@ -836,6 +907,20 @@
       });
 
       const grandTotalUSDT = usdtRate > 0 ? (grandTotalToman / usdtRate) : 0;
+      
+      const pnlUSD = grandTotalUSDT - initCap;
+      const snapPnlDisplay = document.getElementById('snapPnlDisplay');
+      if (initCap === 0) {
+         snapPnlDisplay.innerText = "$0.00";
+         snapPnlDisplay.className = "text-xl font-black text-slate-400";
+      } else if (pnlUSD >= 0) {
+         snapPnlDisplay.innerText = "+$" + pnlUSD.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+         snapPnlDisplay.className = "text-xl font-black text-emerald-400";
+      } else {
+         snapPnlDisplay.innerText = "-$" + Math.abs(pnlUSD).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+         snapPnlDisplay.className = "text-xl font-black text-red-400";
+      }
+
       document.getElementById('snapTotalTomanVal').innerText = Math.round(grandTotalToman).toLocaleString('fa-IR');
       document.getElementById('snapTotalUSDT').innerText = `$${grandTotalUSDT.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
       document.getElementById('snapUsdtRate').innerText = `${Math.round(usdtRate).toLocaleString('fa-IR')} تومان`;
