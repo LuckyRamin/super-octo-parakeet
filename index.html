@@ -143,7 +143,7 @@
           نرخ واحد دارایی‌ها (محاسبه‌شده بر حسب تومان)
         </h3>
       </div>
-      <div id="pricesCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-4 items-stretch"></div>
+      <div id="pricesCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-stretch"></div>
     </div>
 
     <!-- Inputs & Charts Section -->
@@ -293,10 +293,11 @@
       { id: 'silver999', name: 'نقره ۹۹۹', unit: 'گرم', type: 'silver', purity: 0.999, icon: 'disc', color: '#94a3b8' },
       { id: 'copper999', name: 'مس کاتد (۹۹.۹۹٪)', unit: 'گرم', type: 'copper', purity: 1.0, icon: 'box', color: '#d97706' },
       { id: 'usdt', name: 'تتر / دلار', unit: 'تتر', type: 'usd', purity: 1.0, icon: 'dollar-sign', color: '#10b981' },
-      { id: 'toman', name: 'دارایی نقد', unit: 'تومان', type: 'toman', purity: 1.0, icon: 'banknote', color: '#3b82f6' }
+      { id: 'toman', name: 'دارایی نقد', unit: 'تومان', type: 'toman', purity: 1.0, icon: 'banknote', color: '#3b82f6' },
+      { id: 'bourse', name: 'بورس', unit: 'تومان', type: 'toman', purity: 1.0, icon: 'trending-up', color: '#8b5cf6' }
     ];
 
-    let assetQuantities = { gold18: 0, silver999: 0, copper999: 0, usdt: 0, toman: 0 };
+    let assetQuantities = { gold18: 0, silver999: 0, copper999: 0, usdt: 0, toman: 0, bourse: 0 };
     let livePricesUSD = { gold: 2400, silver: 28.5, copper: 14238.5 };
     let liveUSDTPrice = { price: 232000, source: 'در حال استخراج...' };
     let usdSources = {};
