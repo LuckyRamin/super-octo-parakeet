@@ -444,6 +444,61 @@
 
     async function fetchUSDTWithFailover() {
       const endpoints = [
+        // لایه ۱: نبض بازار
+        async () => {
+          const res = await fetch('https://raw.githubusercontent.com/itsyebekhe/nabz/main/market.json');
+          const data = await res.json();
+          let p = null;
+          if (Array.isArray(data)) {
+            let f = data.find(x => ['usd', 'usdt'].includes((x.symbol || '').toLowerCase()));
+            if (f) p = parseFloat(String(f.price || f.v || f.value).replace(/,/g, ''));
+          } else {
+            for (let k of ['usd', 'usdt']) {
+              if (data[k]) {
+                p = typeof data[k] === 'number' ? data[k] : parseFloat(String(data[k].price || data[k].v || data[k].value || data[k]).replace(/,/g, ''));
+                if (p) break;
+              }
+            }
+          }
+          if (p) {
+            if (p > 300000) p = p / 10;
+            if (p > 30000 && p < 300000) return { price: p, source: 'نبض بازار (GitHub)' };
+          }
+        },
+        // لایه ۲: کیف‌پول لایو
+        async () => {
+          const res = await fetch('https://kifpool-live.apidarkness.workers.dev/all');
+          const data = await res.json();
+          const usd = data?.data?.currencies?.find(c => ['usd', 'usdt'].includes(c.symbol.toLowerCase()));
+          if (usd?.price) {
+            let p = parseFloat(String(usd.price).replace(/,/g, ''));
+            if (p > 300000) p = p / 10;
+            if (p > 30000) return { price: p, source: 'کیف‌پول لایو' };
+          }
+        },
+        // لایه ۳: آلان‌چند
+        async () => {
+          const res = await fetch('https://alnchnd.apidarkness.workers.dev/currency');
+          const data = await res.json();
+          const usd = data?.currency_prices?.items?.find(i => ['usd', 'usdt'].includes(i.code.toLowerCase()));
+          if (usd?.sell_price?.value) {
+            let p = parseFloat(String(usd.sell_price.value).replace(/,/g, ''));
+            if (p > 300000) p = p / 10;
+            if (p > 30000) return { price: p, source: 'آلان‌چند' };
+          }
+        },
+        // لایه ۴: TGJU (ارزها)
+        async () => {
+          const res = await fetch('https://tgju.apidarkness.workers.dev/currency');
+          const data = await res.json();
+          const usd = data?.data?.find(i => i.key === 'price_dollar_rl' || i.name.includes('دلار'));
+          if (usd?.price) {
+            let p = parseFloat(String(usd.price).replace(/,/g, ''));
+            if (p > 300000) p = p / 10;
+            if (p > 30000) return { price: p, source: 'TGJU' };
+          }
+        },
+        // لایه‌های بعدی: صرافی‌های ایرانی
         async () => {
           const res = await fetch('https://api.wallex.ir/v1/markets');
           const data = await res.json();
@@ -513,6 +568,21 @@
       const targetUrl = 'https://query1.finance.yahoo.com/v8/finance/chart/HG=F?interval=1d&range=1d';
       
       const endpoints = [
+        // لایه ۱: فلزات جهانی
+        async () => {
+          const res = await fetch('https://metals.apidarkness.workers.dev');
+          const data = await res.json();
+          const copper = data?.metals?.find(i => i.name_en?.toLowerCase() === 'copper' || i.name_fa === 'مس');
+          if (copper?.price) return parseFloat(String(copper.price).replace(/,/g, ''));
+        },
+        // لایه ۲: TGJU Base Metals
+        async () => {
+          const res = await fetch('https://tgju.apidarkness.workers.dev/basemetal');
+          const data = await res.json();
+          const copper = data?.data?.find(i => i.key === 'copper' || i.name === 'مس');
+          if (copper?.price) return parseFloat(String(copper.price).replace(/,/g, ''));
+        },
+        // لایه‌های بعدی: Yahoo Finance Proxies
         async () => {
           const res = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl));
           const data = await res.json();
@@ -565,16 +635,85 @@
         if (copperInput) copperInput.classList.remove('bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-200', 'dark:border-emerald-800');
       }
 
+      let gotGoldFromNabz = false;
+      let gotSilverFromNabz = false;
+
+      // ۱. سعی در دریافت از نبض بازار
+      try {
+        const nabzRes = await fetch('https://raw.githubusercontent.com/itsyebekhe/nabz/main/market.json');
+        if (nabzRes.ok) {
+           const nabzData = await nabzRes.json();
+           
+           const findVal = (keys) => {
+             let val = null;
+             if(Array.isArray(nabzData)) {
+               let found = nabzData.find(x => keys.includes((x.symbol||'').toLowerCase()));
+               if (found) val = found.price || found.v || found.value;
+             } else {
+               for(let k of keys) {
+                 if(nabzData[k]) {
+                   val = typeof nabzData[k] === 'number' ? nabzData[k] : nabzData[k].price || nabzData[k].v || nabzData[k].value || nabzData[k];
+                   break;
+                 }
+               }
+             }
+             if (val) return parseFloat(String(val).replace(/,/g, ''));
+             return null;
+           };
+
+           const goldPrice = findVal(['xau', 'usd_xau', 'gold', 'ons', 'ons_gold']);
+           if (goldPrice && goldPrice > 1000 && goldPrice < 50000) {
+              livePricesUSD.gold = goldPrice;
+              usdSources.gold = 'نبض بازار (GitHub)';
+              gotGoldFromNabz = true;
+           }
+
+           const silverPrice = findVal(['xag', 'usd_xag', 'silver', 'ons_silver']);
+           if (silverPrice && silverPrice > 10 && silverPrice < 200) {
+              livePricesUSD.silver = silverPrice;
+              usdSources.silver = 'نبض بازار (GitHub)';
+              gotSilverFromNabz = true;
+           }
+        }
+      } catch (e) {}
+
+      // ۲. سعی در دریافت از TGJU Global (به عنوان بک‌آپ جدید)
+      if (!gotGoldFromNabz || !gotSilverFromNabz) {
+         try {
+            const tgjuRes = await fetch('https://tgju.apidarkness.workers.dev/gold-global');
+            if (tgjuRes.ok) {
+               const tgjuData = await tgjuRes.json();
+               if (!gotGoldFromNabz) {
+                  const g = tgjuData?.data?.find(i => i.key === 'ons' || i.name.includes('طلا'));
+                  if (g?.price) {
+                     livePricesUSD.gold = parseFloat(String(g.price).replace(/,/g, ''));
+                     usdSources.gold = 'TGJU (Global)';
+                     gotGoldFromNabz = true;
+                  }
+               }
+               if (!gotSilverFromNabz) {
+                  const s = tgjuData?.data?.find(i => i.key === 'silver' || i.name.includes('نقره'));
+                  if (s?.price) {
+                     livePricesUSD.silver = parseFloat(String(s.price).replace(/,/g, ''));
+                     usdSources.silver = 'TGJU (Global)';
+                     gotSilverFromNabz = true;
+                  }
+               }
+            }
+         } catch(e) {}
+      }
+
+      // ۳. سعی در دریافت از Gold-API (به عنوان بک‌آپ نهایی)
       try {
         const [gRes, sRes] = await Promise.all([
-          fetch('https://api.gold-api.com/price/XAU'),
-          fetch('https://api.gold-api.com/price/XAG')
+          !gotGoldFromNabz ? fetch('https://api.gold-api.com/price/XAU') : Promise.resolve(null),
+          !gotSilverFromNabz ? fetch('https://api.gold-api.com/price/XAG') : Promise.resolve(null)
         ]);
-        if (gRes.ok) {
+        if (gRes && gRes.ok) {
           const gData = await gRes.json();
           if (gData?.price) { livePricesUSD.gold = gData.price; usdSources.gold = 'Gold-API'; }
         }
-        if (sRes.ok) {
+        if (sRes && sRes.ok) {
           const sData = await sRes.json();
           if (sData?.price) { livePricesUSD.silver = sData.price; usdSources.silver = 'Gold-API'; }
         }
@@ -777,7 +916,7 @@
           responsive: true, 
           maintainAspectRatio: false,
           layout: {
-            padding: { top: 45, bottom: 45, left: 60, right: 60 } // Increased padding to make the circle ~15% smaller
+            padding: { top: 45, bottom: 45, left: 60, right: 60 } 
           },
           plugins: { 
             legend: { display: false },
@@ -829,7 +968,7 @@
       const isDark = document.documentElement.classList.toggle('dark');
       document.getElementById('themeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
       lucide.createIcons();
-      if(myChart) myChart.update(); // Update labels stroke color on theme toggle
+      if(myChart) myChart.update(); 
     }
 
     async function exportSummaryAsImage() {
