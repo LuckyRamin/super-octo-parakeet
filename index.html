@@ -75,7 +75,7 @@
 
         <button onclick="updateAllPrices()" id="refreshBtn" class="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold bg-brand-50 hover:bg-brand-100 text-brand-600 dark:bg-slate-800/80 dark:text-brand-400 dark:hover:bg-slate-700/80 rounded-xl transition border border-brand-200/50 dark:border-slate-700">
           <i data-lucide="refresh-cw" id="refreshIcon" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">به‌‌روزرسانی آنلاین</span>
+          <span class="hidden sm:inline">به‌روزرسانی آنلاین</span>
         </button>
 
         <button onclick="toggleTheme()" class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 bg-white/50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 transition">
@@ -445,46 +445,6 @@
     async function fetchUSDTWithFailover() {
       const endpoints = [
         async () => {
-          let res;
-          try { res = await fetch('https://raw.githubusercontent.com/itsyebekhe/usd/main/usd.json'); if(!res.ok) throw new Error(); } 
-          catch(e) { res = await fetch('https://itsyebekhe.github.io/usd/usd.json'); }
-          
-          const str = await res.text();
-          let data = JSON.parse(str);
-          
-          const extract = (obj, keywords) => {
-             if (Array.isArray(obj)) {
-                 const item = obj.find(i => {
-                    const s = JSON.stringify(i).toLowerCase();
-                    return keywords.some(k => s.includes(k));
-                 });
-                 if(item) return typeof item === 'object' ? (item.price || item.value || item.v || item.p) : item;
-             } else if (typeof obj === 'object' && obj !== null) {
-                 for (const key of Object.keys(obj)) {
-                     if (keywords.some(k => key.toLowerCase().includes(k))) {
-                         return typeof obj[key] === 'object' ? (obj[key].price || obj[key].value || obj[key].v || obj[key].p) : obj[key];
-                     }
-                 }
-             }
-             return null;
-          };
-
-          let p = extract(data, ['usd', 'dollar', 'تتر', 'دلار']);
-          let g = extract(data, ['gold18', 'gold_18', '18k', 'geram18', 'طلا ۱۸', 'طلای 18', 'geram_18']);
-
-          if (typeof p === 'string') p = parseFloat(p.replace(/[^\d.]/g, ''));
-          if (p > 200000) p = p / 10;
-          
-          if (typeof g === 'string') g = parseFloat(g.replace(/[^\d.]/g, ''));
-          if (g > 200000) g = g / 10; 
-          
-          if (g) window.__GITHUB_GOLD18_TOMAN = g; 
-          
-          if (p && p > 30000 && p < 300000) {
-            return { price: p, source: 'گیت‌هاب (itsyebekhe)' };
-          }
-        },
-        async () => {
           const res = await fetch('https://api.wallex.ir/v1/markets');
           const data = await res.json();
           if (data?.result?.symbols?.USDTTMN?.stats?.lastPrice) {
@@ -619,13 +579,6 @@
           if (sData?.price) { livePricesUSD.silver = sData.price; usdSources.silver = 'Gold-API'; }
         }
       } catch (e) {}
-
-      if (usdSources.gold === 'رزرو دستی' && window.__GITHUB_GOLD18_TOMAN) {
-          const currentUsdt = liveUSDTPrice.price || 232000;
-          const reverseXAU = (window.__GITHUB_GOLD18_TOMAN / currentUsdt) / 0.75 * GRAMS_PER_TROY_OUNCE;
-          livePricesUSD.gold = reverseXAU;
-          usdSources.gold = 'گیت‌هاب (itsyebekhe)';
-      }
     }
 
     async function updateAllPrices() {
@@ -824,16 +777,16 @@
           responsive: true, 
           maintainAspectRatio: false,
           layout: {
-            padding: { top: 45, bottom: 45, left: 60, right: 60 } 
+            padding: { top: 45, bottom: 45, left: 60, right: 60 } // Increased padding to make the circle ~15% smaller
           },
           plugins: { 
             legend: { display: false },
             tooltip: {
-              backgroundColor: 'rgba(15, 23, 42, 0.95)',
+              backgroundColor: 'rgba(15, 23, 42, 0.9)',
               titleFont: { family: 'Vazirmatn', size: 13 },
-              bodyFont: { family: 'Vazirmatn', size: 14, weight: '900' },
-              padding: 12,
-              cornerRadius: 12,
+              bodyFont: { family: 'Vazirmatn', size: 13, weight: 'bold' },
+              padding: 10,
+              cornerRadius: 8,
               rtl: true,
               callbacks: {
                 label: function(context) {
@@ -876,7 +829,7 @@
       const isDark = document.documentElement.classList.toggle('dark');
       document.getElementById('themeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
       lucide.createIcons();
-      if(myChart) myChart.update(); 
+      if(myChart) myChart.update(); // Update labels stroke color on theme toggle
     }
 
     async function exportSummaryAsImage() {
