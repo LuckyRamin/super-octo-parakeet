@@ -1,384 +1,55 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>داشبورد مدیریت دارایی و نرخ ارز/فلزات</title>
-  <!-- Tailwind CSS & Lucide Icons -->
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>داشبورد هوشمند مدیریت دارایی و نرخ ارز/فلزات</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Chart.js & DataLabels Plugin -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
-  <!-- HTML2Canvas for Image Export -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&display=swap');
-    body, #exportSnapshotContainer { font-family: 'Vazirmatn', sans-serif !important; }
-    .glass-panel {
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(226, 232, 240, 0.8);
-    }
-    .dark .glass-panel {
-      background: rgba(15, 23, 42, 0.75);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(30, 41, 59, 0.8);
-    }
-    .card-hover {
-      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .card-hover:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 12px 24px -10px rgba(0, 0, 0, 0.15);
-    }
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
-    .dark ::-webkit-scrollbar-thumb { background: #334155; }
-    
-    /* انیمیشن نرم برای تب‌ها */
-    .fade-in {
-      animation: fadeIn 0.3s ease-in-out;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+    body, #exportSnapshotContainer { font-family: 'Vazirmatn', sans-serif !important; font-feature-settings: "ss01"; }
+    .num-tabular { font-variant-numeric: tabular-nums; }
+    .bg-grid-pattern { background-size: 32px 32px; background-image: linear-gradient(to right, rgba(148, 163, 184, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(148, 163, 184, 0.05) 1px, transparent 1px); }
+    .glass-panel { background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(226, 232, 240, 0.9); }
+    .dark .glass-panel { background: rgba(15, 23, 42, 0.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(51, 65, 85, 0.55); }
+    .card-hover { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
+    .card-hover:hover { transform: translateY(-3px); box-shadow: 0 14px 28px -10px rgba(0, 0, 0, 0.2); }
+    .dark .card-hover:hover { border-color: rgba(56, 189, 248, 0.35); box-shadow: 0 14px 30px -12px rgba(2, 132, 199, 0.15); }
+    input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type=number] { -moz-appearance: textfield; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; } .dark ::-webkit-scrollbar-thumb { background: #334155; }
+    .fade-in { animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1); } @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
   </style>
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          colors: {
-            brand: { 50: '#f0f9ff', 100: '#e0f2fe', 500: '#0284c7', 600: '#0369a1', 700: '#075985' }
-          }
-        }
-      }
-    }
-  </script>
+  <script>tailwind.config = { darkMode: 'class', theme: { extend: { colors: { brand: { 50: '#f0f9ff', 100: '#e0f2fe', 400: '#38bdf8', 500: '#0284c7', 600: '#0369a1', 700: '#075985', 950: '#082f49' } } } } };</script>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300 pb-16">
-
-  <!-- Header Bar -->
-  <header class="sticky top-0 z-50 glass-panel border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-gradient-to-tr from-brand-600 to-brand-500 text-white rounded-xl shadow-md shadow-brand-500/20 flex items-center justify-center">
-          <i data-lucide="wallet" class="w-5 h-5"></i>
-        </div>
-        <div>
-          <h1 class="text-base font-bold text-slate-900 dark:text-white leading-tight">داشبورد هوشمند دارایی‌ها</h1>
-          <p class="text-[11px] text-slate-500 dark:text-slate-400">محاسبه دقیق بر پایه نرخ جهانی × تتر آنلاین</p>
-        </div>
-      </div>
-
-      <div class="flex items-center gap-2">
-        <button onclick="exportSummaryAsImage()" class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 rounded-xl transition border border-emerald-500/30">
-          <i data-lucide="camera" class="w-4 h-4"></i>
-          <span class="hidden sm:inline">خروجی تصویر خلاصه</span>
-        </button>
-
-        <button onclick="updateAllPrices()" id="refreshBtn" class="flex items-center gap-2 px-3 py-1.5 text-xs font-semibold bg-brand-50 hover:bg-brand-100 text-brand-600 dark:bg-slate-800/80 dark:text-brand-400 dark:hover:bg-slate-700/80 rounded-xl transition border border-brand-200/50 dark:border-slate-700">
-          <i data-lucide="refresh-cw" id="refreshIcon" class="w-3.5 h-3.5"></i>
-          <span class="hidden sm:inline">به‌روزرسانی آنلاین</span>
-        </button>
-
-        <button onclick="toggleTheme()" class="p-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 bg-white/50 dark:bg-slate-800/50 rounded-xl border border-slate-200 dark:border-slate-700 transition">
-          <i data-lucide="sun" id="themeIcon" class="w-4 h-4"></i>
-        </button>
-      </div>
-    </div>
-  </header>
-
+<body class="bg-slate-100 dark:bg-slate-950 bg-grid-pattern text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300 pb-16 relative overflow-x-hidden">
+  <div class="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 w-[650px] h-[220px] bg-brand-500/10 dark:bg-brand-500/15 blur-[110px] rounded-full -z-10"></div>
+  <div id="toastContainer" class="fixed bottom-5 left-5 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300"><div class="glass-panel px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 border border-emerald-500/30 bg-slate-900/95 text-white text-xs font-bold"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0"></i><span id="toastMessage">اطلاعات با موفقیت ذخیره شد</span></div></div>
+  <header class="sticky top-0 z-40 glass-panel border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-gradient-to-tr from-brand-600 to-brand-400 text-white rounded-xl shadow-lg shadow-brand-500/25 flex items-center justify-center shrink-0"><i data-lucide="wallet" class="w-5 h-5"></i></div><div><div class="flex items-center gap-2"><h1 class="text-sm sm:text-base font-black text-slate-900 dark:text-white leading-tight">داشبورد هوشمند دارایی‌ها</h1><span class="hidden md:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20">Pro</span></div><p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">نرخ مستقیم بازار داخل + رزرو خودکار جهانی و تتر</p></div></div><div class="flex items-center gap-2"><button id="exportBtn" onclick="exportSummaryAsImage()" class="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-xl transition border border-emerald-500/30 active:scale-95"><i data-lucide="camera" class="w-4 h-4"></i><span class="hidden sm:inline" id="exportBtnText">خروجی تصویر خلاصه</span></button><button onclick="updateAllPrices()" id="refreshBtn" class="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-brand-500/10 hover:bg-brand-500/20 text-brand-700 dark:text-brand-400 rounded-xl transition border border-brand-500/30 active:scale-95"><i data-lucide="refresh-cw" id="refreshIcon" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">به‌روزرسانی آنلاین</span></button><button onclick="toggleTheme()" title="تغییر تم" class="p-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-200/60 dark:bg-slate-800/70 rounded-xl border border-slate-300/60 dark:border-slate-700 transition active:scale-95"><i data-lucide="sun" id="themeIcon" class="w-4 h-4"></i></button></div></div></header>
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-
-    <!-- Tabs Navigation -->
-    <div class="glass-panel rounded-2xl p-1.5 flex gap-1 overflow-x-auto mb-6 shadow-sm">
-      <button id="btn-tab-dashboard" onclick="switchTab('dashboard')" class="whitespace-nowrap flex-1 py-2.5 px-4 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all bg-brand-500 text-white shadow-md shadow-brand-500/20">
-        <i data-lucide="layout-dashboard" class="w-4 h-4"></i> داشبورد خلاصه
-      </button>
-      <button id="btn-tab-manage" onclick="switchTab('manage')" class="whitespace-nowrap flex-1 py-2.5 px-4 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50">
-        <i data-lucide="sliders-horizontal" class="w-4 h-4"></i> مدیریت موجودی و تنظیمات
-      </button>
-      <button id="btn-tab-analysis" onclick="switchTab('analysis')" class="whitespace-nowrap flex-1 py-2.5 px-4 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/50">
-        <i data-lucide="pie-chart" class="w-4 h-4"></i> ترکیب و جزئیات
-      </button>
-    </div>
-
-    <!-- ================= TAB 1: داشبورد خلاصه ================= -->
+    <div class="glass-panel rounded-2xl p-1.5 flex gap-1.5 overflow-x-auto mb-6 shadow-sm"><button id="btn-tab-dashboard" onclick="switchTab('dashboard')" class="whitespace-nowrap flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-md shadow-brand-500/25"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>داشبورد خلاصه</span></button><button id="btn-tab-manage" onclick="switchTab('manage')" class="whitespace-nowrap flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/60"><i data-lucide="sliders-horizontal" class="w-4 h-4"></i><span>مدیریت موجودی و تنظیمات</span></button><button id="btn-tab-analysis" onclick="switchTab('analysis')" class="whitespace-nowrap flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/60"><i data-lucide="pie-chart" class="w-4 h-4"></i><span>ترکیب و جزئیات</span></button></div>
     <div id="tab-dashboard" class="tab-pane fade-in space-y-6">
-      
-      <!-- Top Key Metrics -->
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-stretch">
-        <!-- Tether Rate Card -->
-        <div class="glass-panel p-5 rounded-2xl card-hover flex flex-col justify-between relative overflow-hidden border-r-4 border-r-emerald-500">
-          <div>
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-500 dark:text-slate-400">نرخ زنده تتر</span>
-              <span id="livePulse" class="flex h-2 w-2 relative">
-                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-              </span>
-            </div>
-            <div class="mt-2 flex items-baseline gap-1.5">
-              <h2 id="usdtDisplayRate" class="text-3xl font-black text-emerald-600 dark:text-emerald-400">---</h2>
-              <span class="text-xs font-bold text-slate-500">تومان</span>
-            </div>
-          </div>
-          <div class="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between text-[11px]">
-            <span class="text-slate-400">منبع استخراج:</span>
-            <span id="usdtSourceBadge" class="font-medium text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">در حال دریافت...</span>
-          </div>
-        </div>
-
-        <!-- Initial Capital & PnL Card -->
-        <div class="glass-panel p-5 rounded-2xl card-hover flex flex-col justify-between relative overflow-hidden border-r-4 border-r-blue-500">
-          <div>
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-500 dark:text-slate-400">سرمایه اولیه (دلار)</span>
-              <i data-lucide="piggy-bank" class="w-4 h-4 text-blue-500"></i>
-            </div>
-            <div class="mt-1 flex items-baseline gap-1.5" dir="ltr">
-              <span class="text-xs font-bold text-slate-500">$</span>
-              <h2 id="initialCapitalDisplay" class="text-2xl font-black text-blue-600 dark:text-blue-400">0</h2>
-            </div>
-          </div>
-          <div class="mt-3 pt-2 border-t border-slate-200/60 dark:border-slate-800/60">
-             <div class="flex items-center justify-between">
-                <span class="text-[11px] font-bold text-slate-500 dark:text-slate-400">سود / زیان (دلار)</span>
-                <span id="pnlBadge" class="text-[10px] px-1.5 py-0.5 rounded font-bold bg-slate-100 dark:bg-slate-800 text-slate-500" dir="ltr">---</span>
-             </div>
-             <div class="mt-1 flex items-baseline gap-1.5" dir="ltr">
-                <span class="text-xs font-bold text-slate-500">$</span>
-                <h2 id="pnlDisplay" class="text-xl font-black text-slate-700 dark:text-slate-300">0.00</h2>
-             </div>
-          </div>
-        </div>
-
-        <!-- Portfolio Total Value Card -->
-        <div class="glass-panel p-5 rounded-2xl card-hover flex flex-col justify-between md:col-span-2 border-r-4 border-r-brand-500">
-          <div>
-            <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-slate-500 dark:text-slate-400">ارزش کل دارایی‌های ثبت شده</span>
-              <span class="text-[10px] text-slate-400 bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 px-2.5 py-0.5 rounded-full font-semibold">مجموع کل</span>
-            </div>
-            <div class="mt-2 space-y-1">
-              <div class="flex items-baseline gap-2">
-                <h2 id="totalValueDisplay" class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white">0</h2>
-                <span class="text-sm font-bold text-brand-600 dark:text-brand-400">تومان</span>
-              </div>
-              <div class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 text-sm font-bold" dir="ltr">
-                <i data-lucide="dollar-sign" class="w-4 h-4"></i>
-                <span id="totalValueUSDTDisplay">0.00</span>
-                <span class="text-xs font-semibold text-slate-400">USDT</span>
-              </div>
-            </div>
-          </div>
-          <div class="mt-4 pt-3 border-t border-slate-200/60 dark:border-slate-800/60 flex items-center justify-between text-[11px] text-slate-400">
-            <span id="lastUpdateText">آخرین به‌روزرسانی: --</span>
-            <span class="flex items-center gap-1 text-slate-500"><i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i> نرخ‌های جهانی دلاری</span>
-          </div>
-        </div>
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch">
+        <div class="glass-panel p-5 sm:p-6 rounded-2xl card-hover flex flex-col justify-between md:col-span-6 border-r-4 border-r-brand-500 relative overflow-hidden"><div class="pointer-events-none absolute -left-10 -top-10 w-40 h-40 bg-brand-500/10 rounded-full blur-2xl"></div><div><div class="flex items-center justify-between"><span class="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5"><i data-lucide="layers" class="w-3.5 h-3.5 text-brand-500"></i>ارزش کل پرتفوی دارایی‌ها</span><span id="activeAssetsCountBadge" class="text-[10px] bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20 px-2.5 py-0.5 rounded-full font-bold">۰ دارایی فعال</span></div><div class="mt-3 space-y-1.5"><div class="flex items-baseline gap-2"><h2 id="totalValueDisplay" class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white num-tabular tracking-tight">۰</h2><span class="text-xs sm:text-sm font-bold text-brand-600 dark:text-brand-400">تومان</span></div><div class="inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg text-emerald-700 dark:text-emerald-400 text-xs sm:text-sm font-black num-tabular" dir="ltr"><span id="totalValueUSDTDisplay">$0.00</span><span class="text-[10px] font-bold text-emerald-600/80 dark:text-emerald-400/70">USDT</span></div></div></div><div class="mt-4 pt-3 border-t border-slate-200/70 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400"><span id="lastUpdateText" class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i><span>آخرین دریافت: --</span></span><span class="flex items-center gap-1 text-slate-500 dark:text-slate-400 font-medium"><i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>اولویت نرخ مستقیم داخلی</span></div></div>
+        <div class="glass-panel p-5 rounded-2xl card-hover flex flex-col justify-between relative overflow-hidden md:col-span-3 border-r-4 border-r-blue-500"><div><div class="flex items-center justify-between"><span class="text-xs font-bold text-slate-500 dark:text-slate-400">سرمایه اولیه</span><div class="p-1.5 rounded-lg bg-blue-500/10 text-blue-500"><i data-lucide="piggy-bank" class="w-4 h-4"></i></div></div><div class="mt-2 flex items-baseline gap-1 num-tabular" dir="ltr"><span class="text-sm font-bold text-slate-400">$</span><h2 id="initialCapitalDisplay" class="text-2xl font-black text-blue-600 dark:text-blue-400">0</h2></div></div><div class="mt-4 pt-3 border-t border-slate-200/70 dark:border-slate-800/80"><div class="flex items-center justify-between mb-1"><span class="text-[11px] font-bold text-slate-500 dark:text-slate-400">سود / زیان خالص</span><span id="pnlBadge" class="text-[10px] px-2 py-0.5 rounded-md font-bold bg-slate-200/70 dark:bg-slate-800 text-slate-500 num-tabular" dir="ltr">---</span></div><div class="flex items-baseline gap-1 num-tabular" dir="ltr"><span id="pnlSign" class="text-xs font-bold text-slate-400">$</span><h2 id="pnlDisplay" class="text-xl font-black text-slate-700 dark:text-slate-300">0.00</h2></div></div></div>
+        <div class="glass-panel p-5 rounded-2xl card-hover flex flex-col justify-between relative overflow-hidden md:col-span-3 border-r-4 border-r-emerald-500"><div><div class="flex items-center justify-between"><span class="text-xs font-bold text-slate-500 dark:text-slate-400">نرخ لحظه‌ای تتر</span><span id="livePulse" class="flex h-2.5 w-2.5 relative"><span id="pulsePing" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span><span id="pulseDot" class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span></span></div><div class="mt-2 flex items-baseline gap-1.5"><h2 id="usdtDisplayRate" class="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-emerald-400 num-tabular">---</h2><span class="text-xs font-bold text-slate-500">تومان</span></div></div><div class="mt-4 pt-3 border-t border-slate-200/70 dark:border-slate-800/80 flex items-center justify-between text-[11px]"><span class="text-slate-400">منبع نرخ:</span><span id="usdtSourceBadge" class="font-bold text-slate-700 dark:text-slate-300 bg-slate-200/70 dark:bg-slate-800 px-2 py-0.5 rounded-md truncate max-w-[130px]">در حال دریافت...</span></div></div>
       </div>
-
-      <!-- Dynamic Cards Grid -->
-      <div>
-        <div class="flex items-center justify-between mb-3 px-1">
-          <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-            <i data-lucide="globe" class="w-4 h-4 text-brand-500"></i>
-            نرخ واحد دارایی‌ها (محاسبه‌شده بر حسب تومان)
-          </h3>
-        </div>
-        <div id="pricesCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-stretch"></div>
-      </div>
+      <div class="glass-panel px-4 py-3 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs"><div class="flex items-center gap-2 font-bold text-slate-500 dark:text-slate-400"><i data-lucide="globe-2" class="w-4 h-4 text-brand-500"></i><span>نرخ‌های پایه جهانی (پشتیبان محاسبه):</span></div><div class="flex flex-wrap items-center gap-4 sm:gap-6 num-tabular"><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span><span class="text-slate-500 dark:text-slate-400">انس طلا:</span><strong id="spotGoldDisplay" class="font-black text-slate-800 dark:text-slate-100" dir="ltr">$0</strong><span id="spotGoldSource" class="text-[10px] text-slate-400 bg-slate-200/60 dark:bg-slate-800 px-1.5 py-0.5 rounded">--</span></div><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-slate-400"></span><span class="text-slate-500 dark:text-slate-400">انس نقره:</span><strong id="spotSilverDisplay" class="font-black text-slate-800 dark:text-slate-100" dir="ltr">$0</strong><span id="spotSilverSource" class="text-[10px] text-slate-400 bg-slate-200/60 dark:bg-slate-800 px-1.5 py-0.5 rounded">--</span></div><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-600"></span><span class="text-slate-500 dark:text-slate-400">مس جهانی:</span><strong id="spotCopperDisplay" class="font-black text-slate-800 dark:text-slate-100" dir="ltr">$0</strong><span id="spotCopperSource" class="text-[10px] text-slate-400 bg-slate-200/60 dark:bg-slate-800 px-1.5 py-0.5 rounded">--</span></div></div></div>
+      <div><div class="flex items-center justify-between mb-3 px-1"><h3 class="text-xs font-extrabold text-slate-500 dark:text-slate-400 flex items-center gap-1.5"><i data-lucide="coins" class="w-4 h-4 text-brand-500"></i>نرخ واحد و موجودی هر کلاس دارایی</h3><button onclick="switchTab('manage')" class="text-[11px] font-bold text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1"><span>ویرایش موجودی‌ها</span><i data-lucide="arrow-left" class="w-3 h-3"></i></button></div><div id="pricesCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-stretch"></div></div>
     </div>
-
-    <!-- ================= TAB 2: مدیریت موجودی و تنظیمات ================= -->
-    <div id="tab-manage" class="tab-pane hidden fade-in">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
-        <!-- Form Panel -->
-        <div class="glass-panel p-5 rounded-2xl shadow-sm">
-          <div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80">
-            <h3 class="font-bold text-sm flex items-center gap-2 text-slate-800 dark:text-slate-100">
-              <i data-lucide="sliders" class="w-4 h-4 text-brand-500"></i>
-              موجودی دارایی‌های شما
-            </h3>
-            <span class="text-[10px] text-slate-400">ویرایش مقادیر</span>
-          </div>
-
-          <form id="assetForm" onsubmit="saveAssets(event)">
-            <div id="assetsInputsContainer" class="space-y-3"></div>
-            
-            <div class="mt-4 pt-4 border-t border-slate-200/80 dark:border-slate-800/80">
-              <label class="text-[11px] font-bold text-slate-600 dark:text-slate-300 flex items-center gap-1.5 mb-2">
-                <i data-lucide="piggy-bank" class="w-3.5 h-3.5 text-blue-500"></i>
-                سرمایه اولیه وارد شده (دلار - مبنای سود/زیان)
-              </label>
-              <div class="relative">
-                <input type="number" step="any" id="initial_capital" value="0" placeholder="0" class="w-full pl-3 pr-9 py-2 bg-blue-50/50 dark:bg-blue-900/10 border border-blue-200 dark:border-blue-800/50 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs font-semibold transition">
-                <span class="absolute right-3 top-2.5 text-slate-400">
-                  <i data-lucide="dollar-sign" class="w-3.5 h-3.5 text-blue-500"></i>
-                </span>
-              </div>
-            </div>
-
-            <button type="submit" class="w-full mt-4 py-3 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-brand-500/25 transition-all flex items-center justify-center gap-2 active:scale-[0.98]">
-              <i data-lucide="save" class="w-4 h-4"></i>
-              ذخیره اطلاعات
-            </button>
-          </form>
-        </div>
-
-        <!-- Config Panel -->
-        <div class="glass-panel p-5 rounded-2xl shadow-sm">
-          <div class="flex items-center justify-between mb-3 pb-2 border-b border-slate-200/80 dark:border-slate-800/80">
-            <h3 class="font-bold text-xs flex items-center gap-2 text-slate-700 dark:text-slate-300">
-              <i data-lucide="settings-2" class="w-3.5 h-3.5 text-slate-400"></i>
-              تنظیمات نرخ پشتیبان و کسورات
-            </h3>
-          </div>
-          <div class="grid grid-cols-2 gap-3 text-xs">
-            <div>
-              <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">تتر رزرو (تومان)</label>
-              <input type="number" id="fallback_usdt" value="232000" onchange="saveConfig()" class="w-full p-2 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-1 focus:ring-brand-500 text-xs">
-            </div>
-            <div>
-              <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">انس طلا ($ پشتیبان)</label>
-              <input type="number" id="fallback_gold" value="2400" onchange="saveConfig()" class="w-full p-2 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-1 focus:ring-brand-500 text-xs">
-            </div>
-            <div>
-              <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1">انس نقره ($ پشتیبان)</label>
-              <input type="number" id="fallback_silver" value="28.5" onchange="saveConfig()" class="w-full p-2 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-1 focus:ring-brand-500 text-xs">
-            </div>
-            <div>
-              <label class="block text-[11px] text-slate-500 dark:text-slate-400 mb-1 flex items-center justify-between">
-                <span>قیمت مس ($ تن/پوند)</span>
-                <span id="copperSourceIndicator" class="text-[9px] font-bold text-emerald-500 hidden animate-pulse">آنلاین</span>
-              </label>
-              <input type="number" step="any" id="fallback_copper" value="14238.5" onchange="saveConfig()" class="w-full p-2 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-1 focus:ring-brand-500 text-xs transition-colors duration-300">
-            </div>
-            <div class="col-span-2 mt-2 pt-3 border-t border-slate-200/80 dark:border-slate-800/80">
-              <label class="block text-[11px] font-bold text-slate-500 dark:text-slate-400 mb-2 flex items-center gap-1.5">
-                <i data-lucide="percent" class="w-3 h-3 text-brand-500"></i> کسر از قیمت مس (درصد %)
-              </label>
-              <input type="number" step="any" id="copper_discount" value="0" onchange="saveConfig()" class="w-full p-2 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 rounded-lg outline-none focus:ring-1 focus:ring-brand-500 text-xs font-bold text-brand-600 dark:text-brand-400">
-              <p class="text-[9px] text-slate-400 mt-1.5 leading-relaxed">با وارد کردن درصد در کادر بالا، در زمان محاسبه ارزش مس، قیمت جهانی آن به صورت خودکار کاهش می‌یابد.</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ================= TAB 3: ترکیب و جزئیات ================= -->
+    <div id="tab-manage" class="tab-pane hidden fade-in"><div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div class="glass-panel p-5 sm:p-6 rounded-2xl shadow-sm lg:col-span-7"><div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-200/80 dark:border-slate-800/80"><div><h3 class="font-black text-sm flex items-center gap-2 text-slate-800 dark:text-slate-100"><i data-lucide="sliders" class="w-4 h-4 text-brand-500"></i>ثبت و ویرایش موجودی دارایی‌ها</h3><p class="text-[11px] text-slate-400 mt-0.5">مقادیر واردشده در حافظه مرورگر شما ذخیره می‌شوند</p></div><span class="text-[10px] font-bold bg-brand-500/10 text-brand-600 dark:text-brand-400 px-2.5 py-1 rounded-lg">۶ کلاس دارایی</span></div><form id="assetForm" onsubmit="saveAssets(event)"><div id="assetsInputsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div><div class="mt-5 pt-4 border-t border-slate-200/80 dark:border-slate-800/80"><div class="flex items-center justify-between mb-1.5"><label for="initial_capital" class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5"><i data-lucide="piggy-bank" class="w-4 h-4 text-blue-500"></i>سرمایه اولیه واردشده (بر حسب دلار)</label><span id="preview_initial_capital" class="text-[10px] font-bold text-blue-600 dark:text-blue-400 num-tabular" dir="ltr">$0</span></div><div class="relative"><input type="number" step="any" id="initial_capital" value="0" placeholder="0" oninput="updateInputPreview('initial_capital', 'دلار', true)" class="w-full pl-3 pr-9 py-2.5 bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/60 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold num-tabular transition"><span class="absolute right-3 top-2.5 text-blue-500"><i data-lucide="dollar-sign" class="w-4 h-4"></i></span></div></div><button type="submit" class="w-full mt-5 py-3 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-brand-500/25 transition-all flex items-center justify-center gap-2 active:scale-[0.99]"><i data-lucide="save" class="w-4 h-4"></i>ذخیره موجودی و مشاهده داشبورد</button></form></div>
+      <div class="glass-panel p-5 sm:p-6 rounded-2xl shadow-sm lg:col-span-5"><div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80"><div><h3 class="font-black text-sm flex items-center gap-2 text-slate-800 dark:text-slate-100"><i data-lucide="settings-2" class="w-4 h-4 text-amber-500"></i>تنظیمات نرخ رزرو و کسورات مس</h3><p class="text-[11px] text-slate-400 mt-0.5">در صورت عدم دسترسی به نرخ مستقیم، فرمول جهانی و سپس این اعداد اعمال می‌شوند</p></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs"><div><label for="fallback_usdt" class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5">تتر رزرو (تومان)</label><input type="number" step="any" id="fallback_usdt" value="232000" onchange="saveConfig('usdt')" class="w-full p-2.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-xs font-bold num-tabular"></div><div><label for="fallback_gold" class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5">انس طلا ($ پشتیبان)</label><input type="number" step="any" id="fallback_gold" value="2400" onchange="saveConfig('gold')" class="w-full p-2.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-xs font-bold num-tabular"></div><div><label for="fallback_silver" class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5">انس نقره ($ پشتیبان)</label><input type="number" step="any" id="fallback_silver" value="28.5" onchange="saveConfig('silver')" class="w-full p-2.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-xs font-bold num-tabular"></div><div><label for="fallback_copper" class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5 flex items-center justify-between"><span>قیمت مس ($ تن/پوند)</span><span id="copperSourceIndicator" class="text-[9px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded hidden">آنلاین</span></label><input type="number" step="any" id="fallback_copper" value="14238.5" onchange="saveConfig('copper')" class="w-full p-2.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-xs font-bold num-tabular transition-colors duration-300"></div><div class="sm:col-span-2 mt-1 pt-4 border-t border-slate-200/80 dark:border-slate-800/80"><label for="copper_discount" class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5 flex items-center gap-1.5"><i data-lucide="percent" class="w-3.5 h-3.5 text-brand-500"></i>کسر دستی از قیمت جهانی مس (درصد %)</label><input type="number" step="any" id="copper_discount" value="0" onchange="saveConfig('discount')" class="w-full p-2.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-xs font-black text-brand-600 dark:text-brand-400 num-tabular"><div class="mt-2.5 p-3 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200/70 dark:border-slate-800 text-[10px] text-slate-500 dark:text-slate-400 space-y-1 leading-relaxed"><div class="font-bold text-slate-700 dark:text-slate-300">منطق هوشمند قیمت‌گذاری طلا و نقره:</div><div>• <strong>اولویت ۱:</strong> دریافت مستقیم نرخ ۱ گرم طلای ۱۸ عیار و نقره ۹۹۹ از بازار داخل (نبض، TGJU، آلان‌چند، کیف‌پول).</div><div>• <strong>اولویت ۲ (رزرو خودکار):</strong> محاسبه از طریق فرمول <code>(انس جهانی ÷ 31.1034768) × عیار × تتر</code>.</div></div></div></div></div>
+    </div></div>
     <div id="tab-analysis" class="tab-pane hidden fade-in space-y-6">
-      
-      <div class="glass-panel p-5 rounded-2xl shadow-sm">
-        <h3 class="font-bold text-sm mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80 flex items-center gap-2">
-          <i data-lucide="pie-chart" class="w-4 h-4 text-brand-500"></i>
-          ترکیب و پراکندگی ارزش دارایی‌ها
-        </h3>
-        <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
-          <div class="md:col-span-6 relative h-72 flex items-center justify-center">
-            <canvas id="portfolioChart"></canvas>
-          </div>
-          <div id="chartLegendContainer" class="md:col-span-6 space-y-2 max-h-72 overflow-y-auto pl-1"></div>
-        </div>
-      </div>
-
-      <div class="glass-panel p-5 rounded-2xl shadow-sm">
-        <h3 class="font-bold text-sm mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80 flex items-center gap-2">
-          <i data-lucide="list-tree" class="w-4 h-4 text-brand-500"></i>
-          جزئیات محاسبات و ارزش ریالی
-        </h3>
-        <div class="overflow-x-auto">
-          <table class="w-full text-right text-xs">
-            <thead>
-              <tr class="text-slate-400 border-b border-slate-200/60 dark:border-slate-800/60">
-                <th class="pb-2.5 font-semibold">دارایی</th>
-                <th class="pb-2.5 font-semibold">موجودی</th>
-                <th class="pb-2.5 font-semibold">نرخ جهانی</th>
-                <th class="pb-2.5 font-semibold">قیمت واحد (تومان)</th>
-                <th class="pb-2.5 font-semibold">ارزش کل (تومان)</th>
-              </tr>
-            </thead>
-            <tbody id="breakdownTableBody" class="divide-y divide-slate-100 dark:divide-slate-800/60"></tbody>
-          </table>
-        </div>
-      </div>
-
+      <div class="glass-panel p-5 sm:p-6 rounded-2xl shadow-sm"><div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80"><h3 class="font-black text-sm flex items-center gap-2"><i data-lucide="pie-chart" class="w-4 h-4 text-brand-500"></i>ترکیب و وزن دارایی‌های پرتفوی</h3><span class="text-[11px] text-slate-400">بر اساس ارزش تومانی</span></div><div id="analysisEmptyState" class="hidden py-12 text-center space-y-3"><div class="w-12 h-12 rounded-2xl bg-slate-200/70 dark:bg-slate-800 flex items-center justify-center mx-auto text-slate-400"><i data-lucide="pie-chart" class="w-6 h-6"></i></div><div class="text-sm font-bold text-slate-700 dark:text-slate-300">هنوز موجودی فعالی ثبت نشده است</div><p class="text-xs text-slate-400 max-w-sm mx-auto">برای مشاهده نمودار پراکندگی و سهم هر دارایی، ابتدا مقادیر دارایی‌های خود را وارد کنید.</p><button onclick="switchTab('manage')" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-500 text-white text-xs font-bold shadow-md shadow-brand-500/20 hover:bg-brand-600 transition"><i data-lucide="plus-circle" class="w-4 h-4"></i><span>ثبت موجودی دارایی‌ها</span></button></div><div id="analysisChartContent" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center"><div class="lg:col-span-6 relative h-80 flex items-center justify-center"><canvas id="portfolioChart"></canvas><div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center"><span class="text-[10px] font-bold text-slate-400">ارزش کل دلاری</span><span id="chartCenterUSDT" class="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400 num-tabular mt-0.5" dir="ltr">$0.00</span></div></div><div id="chartLegendContainer" class="lg:col-span-6 space-y-2.5 max-h-80 overflow-y-auto pl-1"></div></div></div>
+      <div class="glass-panel p-5 sm:p-6 rounded-2xl shadow-sm"><div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80"><h3 class="font-black text-sm flex items-center gap-2"><i data-lucide="list-tree" class="w-4 h-4 text-brand-500"></i>جدول تفکیکی محاسبات ریالی و دلاری</h3></div><div class="overflow-x-auto"><table class="w-full text-right text-xs num-tabular"><thead><tr class="text-slate-400 border-b border-slate-200/70 dark:border-slate-800/80 text-[11px]"><th class="pb-3 font-bold">کلاس دارایی</th><th class="pb-3 font-bold">موجودی ثبت‌شده</th><th class="pb-3 font-bold">نرخ واحد (USD)</th><th class="pb-3 font-bold">نرخ واحد (تومان)</th><th class="pb-3 font-bold">معادل دلاری کل</th><th class="pb-3 font-bold">ارزش کل (تومان)</th><th class="pb-3 font-bold text-left">سهم</th></tr></thead><tbody id="breakdownTableBody" class="divide-y divide-slate-200/50 dark:divide-slate-800/60"></tbody></table></div></div>
     </div>
-
   </main>
-
-  <!-- High Precision Snapshot Template (Hidden for Export Only) -->
-  <div id="exportSnapshotContainer" class="fixed -left-[9999px] top-0 w-[720px] p-8 bg-slate-950 text-slate-100 border border-slate-800 rounded-3xl space-y-6" style="direction: rtl;">
-    <!-- Header -->
-    <div class="flex items-center justify-between border-b border-slate-800/80 pb-5">
-      <div class="flex items-center gap-4">
-        <div class="w-12 h-12 bg-brand-600 text-white rounded-2xl flex items-center justify-center font-bold shadow-lg shadow-brand-500/20">
-          <i data-lucide="wallet" class="w-6 h-6"></i>
-        </div>
-        <div>
-          <h2 class="text-xl font-black text-white leading-tight">خلاصه وضعیت دارایی‌ها</h2>
-          <p class="text-xs text-slate-400 mt-0.5">گزارش هوشمند ارزش پرتفوی</p>
-        </div>
-      </div>
-      <div class="text-left text-xs text-slate-400 space-y-1">
-        <div><span class="text-slate-200 font-bold text-sm" id="snapJalali">--</span></div>
-        <div dir="ltr" class="font-mono text-xs text-slate-400"><span id="snapGregorian">--</span> | <span id="snapTime">--</span></div>
-      </div>
-    </div>
-
-    <!-- Main Totals Cards -->
-    <div class="grid grid-cols-2 gap-4">
-      <!-- Total Value Card -->
-      <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 flex flex-col justify-center shadow-inner">
-        <div class="space-y-1">
-          <div class="text-xs text-slate-400 font-bold">ارزش کل دارایی‌ها</div>
-          <div class="flex items-baseline gap-2">
-            <span class="text-3xl font-black text-white" id="snapTotalTomanVal">0</span>
-            <span class="text-sm font-bold text-slate-300">تومان</span>
-          </div>
-        </div>
-        <div class="text-left space-y-1 mt-2 pt-2 border-t border-slate-800/60">
-          <div class="text-[11px] text-slate-400 font-bold">معادل دلاری (تتر)</div>
-          <div class="text-xl font-black text-emerald-400" dir="ltr" id="snapTotalUSDT">$0.00</div>
-        </div>
-      </div>
-      
-      <!-- Initial Capital & PnL Card Snapshot -->
-      <div class="bg-slate-900/90 p-5 rounded-2xl border border-slate-800 flex flex-col justify-center shadow-inner">
-        <div class="space-y-1">
-          <div class="text-xs text-slate-400 font-bold">سرمایه اولیه وارد شده</div>
-          <div class="flex items-baseline gap-2">
-            <span class="text-3xl font-black text-blue-400" id="snapInitCapDisplay" dir="ltr">0</span>
-            <span class="text-sm font-bold text-slate-300">$</span>
-          </div>
-        </div>
-        <div class="text-left space-y-1 mt-2 pt-2 border-t border-slate-800/60 flex items-center justify-between">
-          <div class="text-[11px] text-slate-400 font-bold">سود / زیان:</div>
-          <div class="text-xl font-black" dir="ltr" id="snapPnlDisplay">$0.00</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Asset Breakdown Container -->
-    <div>
-      <div class="text-xs font-black text-slate-400 mb-3 px-1">ترکیب و جزئیات دارایی‌ها</div>
-      <div id="snapBreakdownList" class="space-y-3"></div>
-    </div>
-
-    <!-- Footer -->
-    <div class="pt-4 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400">
-      <span>نرخ محاسبه تتر: <strong id="snapUsdtRate" class="text-slate-200 font-bold">---</strong></span>
-      <span class="text-[11px] text-slate-500">استخراج شده توسط سیستم هوشمند دارایی</span>
-    </div>
-  </div>
-
+  <div id="exportSnapshotContainer" class="fixed -left-[9999px] top-0 w-[740px] p-8 bg-slate-950 text-slate-100 border border-slate-800 rounded-3xl space-y-6 num-tabular" style="direction: rtl;"><div class="flex items-center justify-between border-b border-slate-800 pb-5"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-gradient-to-tr from-brand-600 to-brand-400 text-white rounded-2xl flex items-center justify-center font-bold shadow-lg shadow-brand-500/20"><i data-lucide="wallet" class="w-6 h-6"></i></div><div><h2 class="text-xl font-black text-white leading-tight">گزارش وضعیت پرتفوی دارایی‌ها</h2><p class="text-xs text-slate-400 mt-1">محاسبه هوشمند بر پایه نرخ مستقیم بازار و تتر آنلاین</p></div></div><div class="text-left text-xs text-slate-400 space-y-1"><div><span class="text-slate-200 font-bold text-sm" id="snapJalali">--</span></div><div dir="ltr" class="font-mono text-xs text-slate-400"><span id="snapGregorian">--</span> | <span id="snapTime">--</span></div></div></div><div class="grid grid-cols-2 gap-4"><div class="bg-slate-900/95 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between"><div class="space-y-1"><div class="text-xs text-slate-400 font-bold">ارزش کل دارایی‌ها</div><div class="flex items-baseline gap-2 pt-1"><span class="text-3xl font-black text-white" id="snapTotalTomanVal">0</span><span class="text-sm font-bold text-brand-400">تومان</span></div></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-800/80"><span class="text-[11px] text-slate-400 font-bold">معادل دلاری (تتر):</span><span class="text-lg font-black text-emerald-400" dir="ltr" id="snapTotalUSDT">$0.00</span></div></div><div class="bg-slate-900/95 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between"><div class="space-y-1"><div class="text-xs text-slate-400 font-bold">سرمایه اولیه واردشده</div><div class="flex items-baseline gap-1.5 pt-1" dir="ltr"><span class="text-sm font-bold text-slate-400">$</span><span class="text-3xl font-black text-blue-400" id="snapInitCapDisplay">0</span></div></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-800/80"><span class="text-[11px] text-slate-400 font-bold">سود / زیان خالص:</span><span class="text-lg font-black" dir="ltr" id="snapPnlDisplay">$0.00</span></div></div></div><div><div class="text-xs font-black text-slate-400 mb-3 px-1">تفکیک دارایی‌ها</div><div id="snapBreakdownList" class="space-y-2.5"></div></div><div class="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400"><div class="flex items-center gap-4"><span>نرخ محاسبه تتر: <strong id="snapUsdtRate" class="text-slate-200 font-bold">---</strong></span><span>انس طلا: <strong id="snapGoldRate" class="text-slate-200 font-bold" dir="ltr">---</strong></span></div><span class="text-[11px] text-slate-500">داشبورد هوشمند دارایی‌ها</span></div></div>
   <script>
     const ASSET_DEFINITIONS = [
       { id: 'gold18', name: 'طلا ۱۸ عیار', unit: 'گرم', type: 'gold', purity: 0.75, icon: 'sparkles', color: '#f59e0b' },
@@ -388,734 +59,481 @@
       { id: 'toman', name: 'دارایی نقد', unit: 'تومان', type: 'toman', purity: 1.0, icon: 'banknote', color: '#3b82f6' },
       { id: 'bourse', name: 'بورس', unit: 'تومان', type: 'toman', purity: 1.0, icon: 'trending-up', color: '#8b5cf6' }
     ];
-
     let assetQuantities = { gold18: 0, silver999: 0, copper999: 0, usdt: 0, toman: 0, bourse: 0 };
     let livePricesUSD = { gold: 2400, silver: 28.5, copper: 14238.5 };
-    let liveUSDTPrice = { price: 232000, source: 'در حال استخراج...' };
-    let usdSources = {};
-    let myChart = null;
+    let liveUSDTPrice = { price: 232000, source: 'در حال استخراج...', isOnline: false };
+    let usdSources = { gold: 'رزرو دستی', silver: 'رزرو دستی', copper: 'رزرو دستی' };
+    let directPricesToman = { gold18: { price: null, source: null, isDirect: false }, silver999: { price: null, source: null, isDirect: false } };
+    let myChart = null; let toastTimeout = null;
+    const GRAMS_PER_TROY_OUNCE = 31.1034768; const LB_TO_KG = 2.20462262;
 
-    const GRAMS_PER_TROY_OUNCE = 31.1034768;
+    window.addEventListener('DOMContentLoaded', () => { loadStoredData(); initChart(); renderUIInputs(); recalculateAndRender(); updateAllPrices(); });
 
-    window.addEventListener('DOMContentLoaded', () => {
-      loadStoredData();
-      initChart();
-      renderUIInputs();
-      updateAllPrices();
-    });
+    async function fetchWithTimeout(url, timeoutMs = 4000) {
+      const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), timeoutMs);
+      try { const res = await fetch(url, { signal: controller.signal, cache: 'no-store' }); clearTimeout(timer); return res; }
+      catch (err) { clearTimeout(timer); throw err; }
+    }
 
-    // مدیریت تعویض تب‌ها
+    function showToast(message) {
+      const c = document.getElementById('toastContainer'); const m = document.getElementById('toastMessage');
+      if (!c || !m) return; m.innerText = message; c.classList.remove('translate-y-20', 'opacity-0');
+      if (toastTimeout) clearTimeout(toastTimeout); toastTimeout = setTimeout(() => c.classList.add('translate-y-20', 'opacity-0'), 2800);
+    }
+
     function switchTab(tabName) {
-      // لیست آیدی تب‌ها
-      const tabs = ['dashboard', 'manage', 'analysis'];
-      
-      tabs.forEach(t => {
-        // پنهان کردن محتوای همه تب‌ها
+      ['dashboard', 'manage', 'analysis'].forEach(t => {
         document.getElementById('tab-' + t).classList.add('hidden');
-        
-        // ریست کردن استایل دکمه‌ها
         const btn = document.getElementById('btn-tab-' + t);
-        btn.classList.remove('bg-brand-500', 'text-white', 'shadow-md', 'shadow-brand-500/20');
-        btn.classList.add('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-100', 'dark:hover:bg-slate-800/50');
+        btn.classList.remove('bg-gradient-to-r', 'from-brand-600', 'to-brand-500', 'text-white', 'shadow-md', 'shadow-brand-500/25');
+        btn.classList.add('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-200/50', 'dark:hover:bg-slate-800/60');
       });
-
-      // نمایش تب انتخاب شده
       document.getElementById('tab-' + tabName).classList.remove('hidden');
-
-      // فعال‌سازی استایل دکمه تب انتخاب شده
       const activeBtn = document.getElementById('btn-tab-' + tabName);
-      activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-100', 'dark:hover:bg-slate-800/50');
-      activeBtn.classList.add('bg-brand-500', 'text-white', 'shadow-md', 'shadow-brand-500/20');
-
-      // رفرش کردن چارت در صورت باز شدن تب تحلیل برای جلوگیری از باگ رندر
-      if(tabName === 'analysis' && myChart) {
-         myChart.resize();
-         myChart.update();
-      }
+      activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-200/50', 'dark:hover:bg-slate-800/60');
+      activeBtn.classList.add('bg-gradient-to-r', 'from-brand-600', 'to-brand-500', 'text-white', 'shadow-md', 'shadow-brand-500/25');
+      if (tabName === 'analysis' && myChart) setTimeout(() => { myChart.resize(); myChart.update(); }, 50);
     }
 
     function loadStoredData() {
-      const q = localStorage.getItem('app_qty_v10');
-      if (q) assetQuantities = { ...assetQuantities, ...JSON.parse(q) };
-      
-      const fbUsdt = localStorage.getItem('fb_usdt');
-      if (fbUsdt) document.getElementById('fallback_usdt').value = fbUsdt;
-      
-      const fbGold = localStorage.getItem('fb_gold');
-      if (fbGold) document.getElementById('fallback_gold').value = fbGold;
-      
-      const fbSilver = localStorage.getItem('fb_silver');
-      if (fbSilver) document.getElementById('fallback_silver').value = fbSilver;
-      
-      const fbCopper = localStorage.getItem('fb_copper');
-      if (fbCopper) document.getElementById('fallback_copper').value = fbCopper;
-
-      const fbCopperDiscount = localStorage.getItem('fb_copper_discount');
-      if (fbCopperDiscount) document.getElementById('copper_discount').value = fbCopperDiscount;
-
-      const fbInitCap = localStorage.getItem('app_initial_capital');
-      if (fbInitCap) document.getElementById('initial_capital').value = fbInitCap;
+      try { const q = localStorage.getItem('app_qty_v10'); if (q) assetQuantities = { ...assetQuantities, ...JSON.parse(q) }; } catch (e) {}
+      const map = { fb_usdt: 'fallback_usdt', fb_gold: 'fallback_gold', fb_silver: 'fallback_silver', fb_copper: 'fallback_copper', fb_copper_discount: 'copper_discount', app_initial_capital: 'initial_capital' };
+      Object.entries(map).forEach(([k, id]) => { const v = localStorage.getItem(k); if (v !== null) document.getElementById(id).value = v; });
+      liveUSDTPrice.price = parseFloat(document.getElementById('fallback_usdt').value) || 232000;
+      livePricesUSD.gold = parseFloat(document.getElementById('fallback_gold').value) || 2400;
+      livePricesUSD.silver = parseFloat(document.getElementById('fallback_silver').value) || 28.5;
+      livePricesUSD.copper = parseFloat(document.getElementById('fallback_copper').value) || 14238.5;
     }
 
     function saveAssets(e) {
       if (e) e.preventDefault();
-      ASSET_DEFINITIONS.forEach(a => {
-        const input = document.getElementById(`qty_${a.id}`);
-        if (input) assetQuantities[a.id] = parseFloat(input.value) || 0;
-      });
+      ASSET_DEFINITIONS.forEach(a => { const el = document.getElementById(`qty_${a.id}`); if (el) assetQuantities[a.id] = parseFloat(el.value) || 0; });
       localStorage.setItem('app_qty_v10', JSON.stringify(assetQuantities));
       localStorage.setItem('app_initial_capital', document.getElementById('initial_capital').value);
-      
-      // هدایت به تب داشبورد بعد از ذخیره برای نمایش نتیجه
-      switchTab('dashboard');
-      recalculateAndRender();
+      recalculateAndRender(); switchTab('dashboard'); showToast('موجودی دارایی‌ها با موفقیت ذخیره شد');
     }
 
-    function saveConfig() {
-      localStorage.setItem('fb_usdt', document.getElementById('fallback_usdt').value);
-      localStorage.setItem('fb_gold', document.getElementById('fallback_gold').value);
-      localStorage.setItem('fb_silver', document.getElementById('fallback_silver').value);
-      localStorage.setItem('fb_copper', document.getElementById('fallback_copper').value);
-      localStorage.setItem('fb_copper_discount', document.getElementById('copper_discount').value);
-      
-      const copperIndicator = document.getElementById('copperSourceIndicator');
-      if (copperIndicator) copperIndicator.classList.add('hidden');
-      
-      recalculateAndRender();
+    function saveConfig(changedField) {
+      const fbUsdtVal = document.getElementById('fallback_usdt').value; const fbGoldVal = document.getElementById('fallback_gold').value;
+      const fbSilverVal = document.getElementById('fallback_silver').value; const fbCopperVal = document.getElementById('fallback_copper').value;
+      const fbDiscountVal = document.getElementById('copper_discount').value;
+      localStorage.setItem('fb_usdt', fbUsdtVal); localStorage.setItem('fb_gold', fbGoldVal);
+      localStorage.setItem('fb_silver', fbSilverVal); localStorage.setItem('fb_copper', fbCopperVal); localStorage.setItem('fb_copper_discount', fbDiscountVal);
+      if (changedField === 'copper' || usdSources.copper === 'رزرو دستی') {
+        livePricesUSD.copper = parseFloat(fbCopperVal) || 14238.5; usdSources.copper = 'رزرو دستی';
+        document.getElementById('copperSourceIndicator')?.classList.add('hidden');
+        document.getElementById('fallback_copper')?.classList.remove('bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-300', 'dark:border-emerald-800');
+      }
+      if (changedField === 'gold') { livePricesUSD.gold = parseFloat(fbGoldVal) || 2400; usdSources.gold = 'رزرو دستی'; directPricesToman.gold18 = { price: null, source: null, isDirect: false }; }
+      if (changedField === 'silver') { livePricesUSD.silver = parseFloat(fbSilverVal) || 28.5; usdSources.silver = 'رزرو دستی'; directPricesToman.silver999 = { price: null, source: null, isDirect: false }; }
+      if (changedField === 'usdt' && !liveUSDTPrice.isOnline) {
+        liveUSDTPrice.price = parseFloat(fbUsdtVal) || 232000;
+        document.getElementById('usdtDisplayRate').innerText = Math.round(liveUSDTPrice.price).toLocaleString('fa-IR');
+      }
+      recalculateAndRender(); showToast('تنظیمات نرخ پشتیبان و کسورات اعمال شد');
+    }
+
+    function updateInputPreview(inputId, unit, isUSD = false) {
+      const input = document.getElementById(inputId); const preview = document.getElementById(`preview_${inputId}`);
+      if (!input || !preview) return; const val = parseFloat(input.value) || 0;
+      preview.innerText = isUSD ? `$${val.toLocaleString('en-US')}` : (val > 0 ? `${val.toLocaleString('fa-IR')} ${unit}` : `۰ ${unit}`);
     }
 
     function renderUIInputs() {
-      const container = document.getElementById('assetsInputsContainer');
-      container.innerHTML = '';
+      const container = document.getElementById('assetsInputsContainer'); container.innerHTML = '';
       ASSET_DEFINITIONS.forEach(a => {
-        const val = assetQuantities[a.id] || '';
+        const val = assetQuantities[a.id] || 0; const displayVal = val !== 0 ? val : '';
+        const formattedPreview = val > 0 ? `${val.toLocaleString('fa-IR')} ${a.unit}` : `۰ ${a.unit}`;
         const field = document.createElement('div');
-        field.innerHTML = `
-          <div class="flex items-center justify-between mb-1">
-            <label class="text-[11px] font-medium text-slate-600 dark:text-slate-300 flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full" style="background-color: ${a.color}"></span>
-              ${a.name}
-            </label>
-            <span class="text-[10px] text-slate-400">${a.unit}</span>
-          </div>
-          <div class="relative">
-            <input type="number" step="any" id="qty_${a.id}" value="${val}" placeholder="0" class="w-full pl-3 pr-9 py-2 bg-slate-100/70 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700/80 rounded-xl focus:ring-2 focus:ring-brand-500 focus:bg-white dark:focus:bg-slate-900 outline-none text-xs font-semibold transition">
-            <span class="absolute right-3 top-2.5 text-slate-400">
-              <i data-lucide="${a.icon}" class="w-3.5 h-3.5"></i>
-            </span>
-          </div>
-        `;
+        field.className = 'p-3 rounded-xl bg-slate-100/60 dark:bg-slate-900/50 border border-slate-200/70 dark:border-slate-800/80';
+        field.innerHTML = `<div class="flex items-center justify-between mb-1.5"><label for="qty_${a.id}" class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${a.color}"></span>${a.name}</label><span id="preview_qty_${a.id}" class="text-[10px] font-bold text-slate-400 num-tabular">${formattedPreview}</span></div><div class="relative"><input type="number" step="any" id="qty_${a.id}" value="${displayVal}" placeholder="0" oninput="updateInputPreview('qty_${a.id}', '${a.unit}')" class="w-full pl-3 pr-9 py-2 bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-xs font-bold num-tabular transition"><span class="absolute right-3 top-2.5 text-slate-400"><i data-lucide="${a.icon}" class="w-3.5 h-3.5"></i></span></div>`;
         container.appendChild(field);
       });
-      lucide.createIcons();
+      updateInputPreview('initial_capital', 'دلار', true); lucide.createIcons();
     }
 
-    // ========== توابع استخراج (بدون تغییر) ==========
-    async function fetchUSDTWithFailover() {
-      const endpoints = [
-        async () => {
-          const res = await fetch('https://raw.githubusercontent.com/itsyebekhe/nabz/main/market.json');
-          const data = await res.json();
-          let p = null;
-          if (Array.isArray(data)) {
-            let f = data.find(x => ['usd', 'usdt'].includes((x.symbol || '').toLowerCase()));
-            if (f) p = parseFloat(String(f.price || f.v || f.value).replace(/,/g, ''));
-          } else {
-            for (let k of ['usd', 'usdt']) {
-              if (data[k]) {
-                p = typeof data[k] === 'number' ? data[k] : parseFloat(String(data[k].price || data[k].v || data[k].value || data[k]).replace(/,/g, ''));
-                if (p) break;
+    function normalizeTomanPrice(rawPrice) {
+      let p = parseFloat(String(rawPrice).replace(/,/g, '')); if (!p || isNaN(p)) return null;
+      if (p >= 500000) p = p / 10; return (p > 40000 && p < 500000) ? p : null;
+    }
+
+    function normalizeDomesticMetalPrice(rawVal, theoreticalToman) {
+      if (rawVal === null || rawVal === undefined) return null;
+      let p = parseFloat(String(rawVal).replace(/,/g, '').trim());
+      if (!p || isNaN(p) || p <= 0 || !theoreticalToman || theoreticalToman <= 0) return null;
+      const minV = theoreticalToman * 0.72; const maxV = theoreticalToman * 1.35;
+      if (p >= minV && p <= maxV) return p;
+      if ((p / 10) >= minV && (p / 10) <= maxV) return p / 10;
+      if ((p / 1000) >= minV && (p / 1000) <= maxV) return p / 1000;
+      if ((p / 10000) >= minV && (p / 10000) <= maxV) return p / 10000;
+      return null;
+    }
+
+    function extractCandidatesFromData(data, keys, nameKeywords = []) {
+      const results = []; if (!data) return results;
+      const checkItem = (item) => {
+        if (!item || typeof item !== 'object') return;
+        const idStr = String(item.symbol || item.key || item.code || item.slug || item.id || '').toLowerCase();
+        const nameStr = String(item.name || item.title || item.name_fa || item.label || '');
+        const keyMatched = keys.some(k => idStr === k.toLowerCase());
+        const nameMatched = nameKeywords.some(kw => nameStr.includes(kw));
+        if (keyMatched || nameMatched) {
+          const raw = item.price ?? item.v ?? item.value ?? item.sell_price?.value ?? item.last ?? item.buy;
+          if (raw !== undefined && raw !== null && typeof raw !== 'object') results.push(raw);
+        }
+      };
+      if (Array.isArray(data)) { data.forEach(checkItem); }
+      else if (typeof data === 'object') {
+        for (const k of keys) {
+          if (data[k] !== undefined && data[k] !== null) {
+            const v = data[k];
+            if (typeof v === 'number' || typeof v === 'string') results.push(v);
+            else if (typeof v === 'object') { const raw = v.price ?? v.v ?? v.value ?? v.sell_price?.value; if (raw !== undefined) results.push(raw); }
+          }
+        }
+        Object.values(data).forEach(sub => {
+          if (Array.isArray(sub)) sub.forEach(checkItem);
+          else if (sub && typeof sub === 'object') {
+            checkItem(sub);
+            for (const k of keys) {
+              if (sub[k] !== undefined) {
+                const sv = sub[k];
+                if (typeof sv === 'number' || typeof sv === 'string') results.push(sv);
+                else if (sv && typeof sv === 'object') { const r = sv.price ?? sv.v ?? sv.value; if (r !== undefined) results.push(r); }
               }
             }
           }
-          if (p) {
-            if (p > 300000) p = p / 10;
-            if (p > 30000 && p < 300000) return { price: p, source: 'نبض بازار (GitHub)' };
-          }
+        });
+      }
+      return results;
+    }
+
+    async function fetchUSDTWithFailover(cachedResponses = {}) {
+      const endpoints = [
+        async () => {
+          const data = cachedResponses.nabz || await (await fetchWithTimeout('https://raw.githubusercontent.com/itsyebekhe/nabz/main/market.json')).json();
+          cachedResponses.nabz = data;
+          const cands = extractCandidatesFromData(data, ['usdt', 'usd', 'dollar', 'price_dollar_rl'], ['تتر', 'دلار آزاد']);
+          for (const c of cands) { const p = normalizeTomanPrice(c); if (p) return { price: p, source: 'نبض بازار (GitHub)', isOnline: true }; }
         },
         async () => {
-          const res = await fetch('https://kifpool-live.apidarkness.workers.dev/all');
-          const data = await res.json();
-          const usd = data?.data?.currencies?.find(c => ['usd', 'usdt'].includes(c.symbol.toLowerCase()));
-          if (usd?.price) {
-            let p = parseFloat(String(usd.price).replace(/,/g, ''));
-            if (p > 300000) p = p / 10;
-            if (p > 30000) return { price: p, source: 'کیف‌پول لایو' };
-          }
+          const data = cachedResponses.kifpool || await (await fetchWithTimeout('https://kifpool-live.apidarkness.workers.dev/all')).json();
+          cachedResponses.kifpool = data;
+          const usd = data?.data?.currencies?.find(c => ['usd', 'usdt'].includes((c.symbol || '').toLowerCase()));
+          const p = normalizeTomanPrice(usd?.price); if (p) return { price: p, source: 'کیف‌پول لایو', isOnline: true };
         },
         async () => {
-          const res = await fetch('https://alnchnd.apidarkness.workers.dev/currency');
-          const data = await res.json();
-          const usd = data?.currency_prices?.items?.find(i => ['usd', 'usdt'].includes(i.code.toLowerCase()));
-          if (usd?.sell_price?.value) {
-            let p = parseFloat(String(usd.sell_price.value).replace(/,/g, ''));
-            if (p > 300000) p = p / 10;
-            if (p > 30000) return { price: p, source: 'آلان‌چند' };
-          }
+          const data = cachedResponses.alnchnd || await (await fetchWithTimeout('https://alnchnd.apidarkness.workers.dev/currency')).json();
+          cachedResponses.alnchnd = data;
+          const usd = data?.currency_prices?.items?.find(i => ['usd', 'usdt'].includes((i.code || '').toLowerCase()));
+          const p = normalizeTomanPrice(usd?.sell_price?.value); if (p) return { price: p, source: 'آلان‌چند', isOnline: true };
         },
         async () => {
-          const res = await fetch('https://tgju.apidarkness.workers.dev/currency');
-          const data = await res.json();
-          const usd = data?.data?.find(i => i.key === 'price_dollar_rl' || i.name.includes('دلار'));
-          if (usd?.price) {
-            let p = parseFloat(String(usd.price).replace(/,/g, ''));
-            if (p > 300000) p = p / 10;
-            if (p > 30000) return { price: p, source: 'TGJU' };
-          }
+          const data = cachedResponses.tgjuCurr || await (await fetchWithTimeout('https://tgju.apidarkness.workers.dev/currency')).json();
+          cachedResponses.tgjuCurr = data;
+          const usd = data?.data?.find(i => i.key === 'price_dollar_rl' || (i.name && i.name.includes('دلار')));
+          const p = normalizeTomanPrice(usd?.price); if (p) return { price: p, source: 'TGJU', isOnline: true };
         },
         async () => {
-          const res = await fetch('https://api.wallex.ir/v1/markets');
-          const data = await res.json();
-          if (data?.result?.symbols?.USDTTMN?.stats?.lastPrice) {
-            return { price: parseFloat(data.result.symbols.USDTTMN.stats.lastPrice), source: 'والکس' };
-          }
+          const data = await (await fetchWithTimeout('https://api.wallex.ir/v1/markets')).json();
+          const p = normalizeTomanPrice(data?.result?.symbols?.USDTTMN?.stats?.lastPrice); if (p) return { price: p, source: 'والکس', isOnline: true };
         },
         async () => {
-          const res = await fetch('https://api.exir.io/v2/ticker?symbol=usdt-irt');
-          const data = await res.json();
-          if (data?.last) return { price: parseFloat(data.last), source: 'اکسیر' };
+          const data = await (await fetchWithTimeout('https://api.exir.io/v2/ticker?symbol=usdt-irt')).json();
+          const p = normalizeTomanPrice(data?.last); if (p) return { price: p, source: 'اکسیر', isOnline: true };
         },
         async () => {
-          const res = await fetch('https://api.nobitex.ir/v3/orderbook/USDTIRT');
-          const data = await res.json();
-          if (data?.lastTradePrice) {
-            let p = parseFloat(data.lastTradePrice);
-            if (p > 200000) p = p / 10;
-            return { price: p, source: 'نوبیتکس' };
-          }
+          const data = await (await fetchWithTimeout('https://api.nobitex.ir/v3/orderbook/USDTIRT')).json();
+          const p = normalizeTomanPrice(data?.lastTradePrice); if (p) return { price: p, source: 'نوبیتکس', isOnline: true };
         },
         async () => {
-          const res = await fetch('https://publicapi.ramzinex.com/1/pair/11');
-          const data = await res.json();
-          if (data?.data?.buy) {
-            let p = parseFloat(data.data.buy);
-            if (p > 200000) p = p / 10;
-            return { price: p, source: 'رمزینکس' };
-          }
+          const data = await (await fetchWithTimeout('https://publicapi.ramzinex.com/1/pair/11')).json();
+          const p = normalizeTomanPrice(data?.data?.buy); if (p) return { price: p, source: 'رمزینکس', isOnline: true };
         },
         async () => {
-          const res = await fetch('https://api.bitpin.ir/v1/mth/markets/');
-          const data = await res.json();
-          const usdt = (data.results || data).find(m => m.code === 'USDT_IRT' || m.currency1_code === 'USDT');
-          if (usdt?.price) {
-            let p = parseFloat(usdt.price);
-            if (p > 200000) p = p / 10;
-            return { price: p, source: 'بیت‌پین' };
-          }
+          const data = await (await fetchWithTimeout('https://api.bitpin.ir/v1/mth/markets/')).json();
+          const list = data?.results || data;
+          if (Array.isArray(list)) { const usdt = list.find(m => m.code === 'USDT_IRT' || m.currency1_code === 'USDT'); const p = normalizeTomanPrice(usdt?.price); if (p) return { price: p, source: 'بیت‌پین', isOnline: true }; }
         },
         async () => {
-          const res = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.nobitex.ir/v3/orderbook/USDTIRT'));
-          const json = await res.json();
-          const data = JSON.parse(json.contents);
-          if (data?.lastTradePrice) {
-            let p = parseFloat(data.lastTradePrice);
-            if (p > 200000) p = p / 10;
-            return { price: p, source: 'نوبیتکس (پراکسی)' };
-          }
+          const res = await fetchWithTimeout('https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.nobitex.ir/v3/orderbook/USDTIRT'));
+          const json = await res.json(); const data = JSON.parse(json.contents);
+          const p = normalizeTomanPrice(data?.lastTradePrice); if (p) return { price: p, source: 'نوبیتکس (پراکسی)', isOnline: true };
         }
       ];
-
-      for (const fn of endpoints) {
-        try {
-          const result = await fn();
-          if (result && result.price && result.price > 30000 && result.price < 300000) {
-            return result;
-          }
-        } catch (e) {}
-      }
-
+      for (const fn of endpoints) { try { const r = await fn(); if (r && r.price) return r; } catch (e) {} }
       const fb = parseFloat(document.getElementById('fallback_usdt').value) || 232000;
-      return { price: fb, source: 'پشتیبان رزرو' };
+      return { price: fb, source: 'پشتیبان رزرو', isOnline: false };
     }
 
     async function fetchLiveCopperPrice() {
       const targetUrl = 'https://query1.finance.yahoo.com/v8/finance/chart/HG=F?interval=1d&range=1d';
-      
       const endpoints = [
-        async () => {
-          const res = await fetch('https://metals.apidarkness.workers.dev');
-          const data = await res.json();
-          const copper = data?.metals?.find(i => i.name_en?.toLowerCase() === 'copper' || i.name_fa === 'مس');
-          if (copper?.price) return parseFloat(String(copper.price).replace(/,/g, ''));
-        },
-        async () => {
-          const res = await fetch('https://tgju.apidarkness.workers.dev/basemetal');
-          const data = await res.json();
-          const copper = data?.data?.find(i => i.key === 'copper' || i.name === 'مس');
-          if (copper?.price) return parseFloat(String(copper.price).replace(/,/g, ''));
-        },
-        async () => {
-          const res = await fetch('https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl));
-          const data = await res.json();
-          return data?.chart?.result?.[0]?.meta?.regularMarketPrice;
-        },
-        async () => {
-          const res = await fetch('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(targetUrl));
-          const data = await res.json();
-          return data?.chart?.result?.[0]?.meta?.regularMarketPrice;
-        },
-        async () => {
-          const res = await fetch('https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl));
-          const json = await res.json();
-          const data = JSON.parse(json.contents);
-          return data?.chart?.result?.[0]?.meta?.regularMarketPrice;
-        }
+        async () => { const d = await (await fetchWithTimeout('https://metals.apidarkness.workers.dev')).json(); const c = d?.metals?.find(i => i.name_en?.toLowerCase() === 'copper' || i.name_fa === 'مس'); if (c?.price) return { price: parseFloat(String(c.price).replace(/,/g, '')), src: 'فلزات جهانی' }; },
+        async () => { const d = await (await fetchWithTimeout('https://tgju.apidarkness.workers.dev/basemetal')).json(); const c = d?.data?.find(i => i.key === 'copper' || i.name === 'مس'); if (c?.price) return { price: parseFloat(String(c.price).replace(/,/g, '')), src: 'TGJU BaseMetals' }; },
+        async () => { const d = await (await fetchWithTimeout('https://api.allorigins.win/raw?url=' + encodeURIComponent(targetUrl))).json(); const p = d?.chart?.result?.[0]?.meta?.regularMarketPrice; if (p) return { price: parseFloat(p), src: 'COMEX (آنلاین)' }; },
+        async () => { const d = await (await fetchWithTimeout('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(targetUrl))).json(); const p = d?.chart?.result?.[0]?.meta?.regularMarketPrice; if (p) return { price: parseFloat(p), src: 'COMEX (آنلاین)' }; },
+        async () => { const j = await (await fetchWithTimeout('https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl))).json(); const d = JSON.parse(j.contents); const p = d?.chart?.result?.[0]?.meta?.regularMarketPrice; if (p) return { price: parseFloat(p), src: 'COMEX (آنلاین)' }; }
       ];
-
       for (const fn of endpoints) {
-        try {
-          const price = await fn();
-          if (price && typeof price === 'number' && price > 1 && price < 20) {
-            return parseFloat(price.toFixed(4)); 
-          }
-        } catch (e) {}
+        try { const res = await fn(); if (res && typeof res.price === 'number' && !isNaN(res.price)) { const p = res.price; if ((p > 1 && p < 30) || (p >= 100 && p < 50000)) return { price: parseFloat(p.toFixed(4)), source: res.src }; } } catch (e) {}
       }
       return null;
     }
 
-    async function fetchGlobalUSDPrices() {
+    async function fetchGlobalUSDPrices(cachedResponses = {}) {
       usdSources = { gold: 'رزرو دستی', silver: 'رزرو دستی', copper: 'رزرو دستی' };
       livePricesUSD.gold = parseFloat(document.getElementById('fallback_gold').value) || 2400;
       livePricesUSD.silver = parseFloat(document.getElementById('fallback_silver').value) || 28.5;
-      
-      const copperIndicator = document.getElementById('copperSourceIndicator');
-      const copperInput = document.getElementById('fallback_copper');
-      
+      const copperIndicator = document.getElementById('copperSourceIndicator'); const copperInput = document.getElementById('fallback_copper');
       const liveCopper = await fetchLiveCopperPrice();
       if (liveCopper) {
-        livePricesUSD.copper = liveCopper;
-        usdSources.copper = 'COMEX (آنلاین)';
-        if (copperIndicator && copperInput) {
-          copperIndicator.classList.remove('hidden');
-          copperInput.value = liveCopper;
-          copperInput.classList.add('bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-200', 'dark:border-emerald-800');
-        }
+        livePricesUSD.copper = liveCopper.price; usdSources.copper = liveCopper.source;
+        if (copperIndicator && copperInput) { copperIndicator.classList.remove('hidden'); copperInput.value = liveCopper.price; copperInput.classList.add('bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-300', 'dark:border-emerald-800'); }
       } else {
         livePricesUSD.copper = parseFloat(copperInput.value) || 14238.5;
         if (copperIndicator) copperIndicator.classList.add('hidden');
-        if (copperInput) copperInput.classList.remove('bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-200', 'dark:border-emerald-800');
+        if (copperInput) copperInput.classList.remove('bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-300', 'dark:border-emerald-800');
       }
 
-      let gotGoldFromNabz = false;
-      let gotSilverFromNabz = false;
-
+      let gotGoldOunce = false; let gotSilverOunce = false;
       try {
-        const nabzRes = await fetch('https://raw.githubusercontent.com/itsyebekhe/nabz/main/market.json');
-        if (nabzRes.ok) {
-           const nabzData = await nabzRes.json();
-           
-           const findVal = (keys) => {
-             let val = null;
-             if(Array.isArray(nabzData)) {
-               let found = nabzData.find(x => keys.includes((x.symbol||'').toLowerCase()));
-               if (found) val = found.price || found.v || found.value;
-             } else {
-               for(let k of keys) {
-                 if(nabzData[k]) {
-                   val = typeof nabzData[k] === 'number' ? nabzData[k] : nabzData[k].price || nabzData[k].v || nabzData[k].value || nabzData[k];
-                   break;
-                 }
-               }
-             }
-             if (val) return parseFloat(String(val).replace(/,/g, ''));
-             return null;
-           };
-
-           const goldPrice = findVal(['xau', 'usd_xau', 'gold', 'ons', 'ons_gold']);
-           if (goldPrice && goldPrice > 1000 && goldPrice < 50000) {
-              livePricesUSD.gold = goldPrice;
-              usdSources.gold = 'نبض بازار (GitHub)';
-              gotGoldFromNabz = true;
-           }
-
-           const silverPrice = findVal(['xag', 'usd_xag', 'silver', 'ons_silver']);
-           if (silverPrice && silverPrice > 10 && silverPrice < 200) {
-              livePricesUSD.silver = silverPrice;
-              usdSources.silver = 'نبض بازار (GitHub)';
-              gotSilverFromNabz = true;
-           }
-        }
+        const nabzData = cachedResponses.nabz || await (await fetchWithTimeout('https://raw.githubusercontent.com/itsyebekhe/nabz/main/market.json')).json();
+        cachedResponses.nabz = nabzData;
+        const gCands = extractCandidatesFromData(nabzData, ['xau', 'usd_xau', 'ons', 'ons_gold', 'gold_ounce', 'gold'], ['انس طلا', 'اونس طلا']);
+        for (const c of gCands) { const p = parseFloat(String(c).replace(/,/g, '')); if (p > 1500 && p < 10000) { livePricesUSD.gold = p; usdSources.gold = 'نبض بازار (GitHub)'; gotGoldOunce = true; break; } }
+        const sCands = extractCandidatesFromData(nabzData, ['xag', 'usd_xag', 'ons_silver', 'silver_ounce', 'silver'], ['انس نقره', 'اونس نقره']);
+        for (const c of sCands) { const p = parseFloat(String(c).replace(/,/g, '')); if (p > 12 && p < 200) { livePricesUSD.silver = p; usdSources.silver = 'نبض بازار (GitHub)'; gotSilverOunce = true; break; } }
       } catch (e) {}
 
-      if (!gotGoldFromNabz || !gotSilverFromNabz) {
-         try {
-            const tgjuRes = await fetch('https://tgju.apidarkness.workers.dev/gold-global');
-            if (tgjuRes.ok) {
-               const tgjuData = await tgjuRes.json();
-               if (!gotGoldFromNabz) {
-                  const g = tgjuData?.data?.find(i => i.key === 'ons' || i.name.includes('طلا'));
-                  if (g?.price) {
-                     livePricesUSD.gold = parseFloat(String(g.price).replace(/,/g, ''));
-                     usdSources.gold = 'TGJU (Global)';
-                     gotGoldFromNabz = true;
-                  }
-               }
-               if (!gotSilverFromNabz) {
-                  const s = tgjuData?.data?.find(i => i.key === 'silver' || i.name.includes('نقره'));
-                  if (s?.price) {
-                     livePricesUSD.silver = parseFloat(String(s.price).replace(/,/g, ''));
-                     usdSources.silver = 'TGJU (Global)';
-                     gotSilverFromNabz = true;
-                  }
-               }
-            }
-         } catch(e) {}
+      if (!gotGoldOunce || !gotSilverOunce) {
+        try {
+          const tgjuData = await (await fetchWithTimeout('https://tgju.apidarkness.workers.dev/gold-global')).json();
+          if (!gotGoldOunce) { const g = tgjuData?.data?.find(i => i.key === 'ons' || (i.name && i.name.includes('طلا'))); const p = parseFloat(String(g?.price).replace(/,/g, '')); if (p > 1500 && p < 10000) { livePricesUSD.gold = p; usdSources.gold = 'TGJU (Global)'; gotGoldOunce = true; } }
+          if (!gotSilverOunce) { const s = tgjuData?.data?.find(i => i.key === 'silver' || (i.name && i.name.includes('نقره'))); const p = parseFloat(String(s?.price).replace(/,/g, '')); if (p > 12 && p < 200) { livePricesUSD.silver = p; usdSources.silver = 'TGJU (Global)'; gotSilverOunce = true; } }
+        } catch (e) {}
       }
 
-      try {
-        const [gRes, sRes] = await Promise.all([
-          !gotGoldFromNabz ? fetch('https://api.gold-api.com/price/XAU') : Promise.resolve(null),
-          !gotSilverFromNabz ? fetch('https://api.gold-api.com/price/XAG') : Promise.resolve(null)
-        ]);
-        if (gRes && gRes.ok) {
-          const gData = await gRes.json();
-          if (gData?.price) { livePricesUSD.gold = gData.price; usdSources.gold = 'Gold-API'; }
-        }
-        if (sRes && sRes.ok) {
-          const sData = await sRes.json();
-          if (sData?.price) { livePricesUSD.silver = sData.price; usdSources.silver = 'Gold-API'; }
-        }
-      } catch (e) {}
+      if (!gotGoldOunce || !gotSilverOunce) {
+        try {
+          const [gRes, sRes] = await Promise.all([
+            !gotGoldOunce ? fetchWithTimeout('https://api.gold-api.com/price/XAU') : Promise.resolve(null),
+            !gotSilverOunce ? fetchWithTimeout('https://api.gold-api.com/price/XAG') : Promise.resolve(null)
+          ]);
+          if (gRes && gRes.ok) { const gData = await gRes.json(); if (gData?.price > 1500) { livePricesUSD.gold = parseFloat(gData.price); usdSources.gold = 'Gold-API'; } }
+          if (sRes && sRes.ok) { const sData = await sRes.json(); if (sData?.price > 12) { livePricesUSD.silver = parseFloat(sData.price); usdSources.silver = 'Gold-API'; } }
+        } catch (e) {}
+      }
+    }
+
+    async function fetchDirectDomesticMetals(theoreticalGold18, theoreticalSilver999, cachedResponses = {}) {
+      directPricesToman = { gold18: { price: null, source: null, isDirect: false }, silver999: { price: null, source: null, isDirect: false } };
+      const goldKeys = ['geram18', 'gold18', '18ayar', 'ir_gold_18k', 'tala18', 'geram_18', 'gold_18', 'ayar18'];
+      const goldNames = ['طلای 18', 'طلای ۱۸', 'گرم 18', 'گرم ۱۸', '18 عیار', '۱۸ عیار'];
+      const silverKeys = ['silver_999', 'silver999', 'geram_silver', 'silver_gram', 'ir_silver', 'noghreh', 'silver'];
+      const silverNames = ['گرم نقره', 'نقره 999', 'نقره ۹۹۹', 'نقره خام'];
+
+      const sources = [
+        { name: 'نبض بازار', getter: async () => cachedResponses.nabz || await (await fetchWithTimeout('https://raw.githubusercontent.com/itsyebekhe/nabz/main/market.json')).json() },
+        { name: 'TGJU داخلی', getter: async () => await (await fetchWithTimeout('https://tgju.apidarkness.workers.dev/gold')).json() },
+        { name: 'آلان‌چند', getter: async () => await (await fetchWithTimeout('https://alnchnd.apidarkness.workers.dev/gold')).json() },
+        { name: 'کیف‌پول لایو', getter: async () => cachedResponses.kifpool || await (await fetchWithTimeout('https://kifpool-live.apidarkness.workers.dev/all')).json() }
+      ];
+
+      for (const src of sources) {
+        if (directPricesToman.gold18.isDirect && directPricesToman.silver999.isDirect) break;
+        try {
+          const data = await src.getter();
+          if (!directPricesToman.gold18.isDirect) {
+            const gCands = extractCandidatesFromData(data, goldKeys, goldNames);
+            for (const raw of gCands) { const validP = normalizeDomesticMetalPrice(raw, theoreticalGold18); if (validP) { directPricesToman.gold18 = { price: validP, source: src.name, isDirect: true }; break; } }
+          }
+          if (!directPricesToman.silver999.isDirect) {
+            const sCands = extractCandidatesFromData(data, silverKeys, silverNames);
+            for (const raw of sCands) { const validS = normalizeDomesticMetalPrice(raw, theoreticalSilver999); if (validS) { directPricesToman.silver999 = { price: validS, source: src.name, isDirect: true }; break; } }
+          }
+        } catch (e) {}
+      }
     }
 
     async function updateAllPrices() {
-      const icon = document.getElementById('refreshIcon');
-      if (icon) icon.classList.add('animate-spin');
+      const icon = document.getElementById('refreshIcon'); const btn = document.getElementById('refreshBtn');
+      if (icon) icon.classList.add('animate-spin'); if (btn) btn.disabled = true;
+      const cachedResponses = {};
+      const [usdtRes] = await Promise.all([fetchUSDTWithFailover(cachedResponses), fetchGlobalUSDPrices(cachedResponses)]);
+      liveUSDTPrice = usdtRes;
+      const theoGold18 = (livePricesUSD.gold / GRAMS_PER_TROY_OUNCE) * 0.75 * liveUSDTPrice.price;
+      const theoSilver999 = (livePricesUSD.silver / GRAMS_PER_TROY_OUNCE) * 0.999 * liveUSDTPrice.price;
+      await fetchDirectDomesticMetals(theoGold18, theoSilver999, cachedResponses);
 
-      liveUSDTPrice = await fetchUSDTWithFailover();
       document.getElementById('usdtDisplayRate').innerText = Math.round(liveUSDTPrice.price).toLocaleString('fa-IR');
       document.getElementById('usdtSourceBadge').innerText = liveUSDTPrice.source;
+      const pulsePing = document.getElementById('pulsePing'); const pulseDot = document.getElementById('pulseDot');
+      if (liveUSDTPrice.isOnline) { pulsePing.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75'; pulseDot.className = 'relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500'; }
+      else { pulsePing.className = 'hidden'; pulseDot.className = 'relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500'; }
 
-      await fetchGlobalUSDPrices();
-
-      if (icon) icon.classList.remove('animate-spin');
-      document.getElementById('lastUpdateText').innerText = `آخرین دریافت: ${new Date().toLocaleTimeString('fa-IR')}`;
+      if (icon) icon.classList.remove('animate-spin'); if (btn) btn.disabled = false;
+      document.getElementById('lastUpdateText').innerHTML = `<i data-lucide="clock" class="w-3 h-3"></i><span>آخرین دریافت: ${new Date().toLocaleTimeString('fa-IR')}</span>`;
       recalculateAndRender();
     }
 
-    function recalculateAndRender() {
+    function calculatePortfolioMetrics() {
       const initCap = parseFloat(document.getElementById('initial_capital').value) || 0;
-      document.getElementById('initialCapitalDisplay').innerText = initCap.toLocaleString('en-US');
-
       const usdtRate = liveUSDTPrice.price;
-      let grandTotalToman = 0;
+      const discountPercent = parseFloat(document.getElementById('copper_discount')?.value) || 0;
+      let grandTotalToman = 0; let activeCount = 0;
 
-      const cardsGrid = document.getElementById('pricesCardsGrid');
-      const tableBody = document.getElementById('breakdownTableBody');
-      const legendContainer = document.getElementById('chartLegendContainer');
-
-      cardsGrid.innerHTML = '';
-      tableBody.innerHTML = '';
-      legendContainer.innerHTML = '';
-
-      const chartLabels = [];
-      const chartData = [];
-      const chartColors = [];
-
-      ASSET_DEFINITIONS.forEach(asset => {
-        let pricePerUnitUSD = 0;
-        let pricePerUnitToman = 0;
-        let sourceText = '';
-
+      const items = ASSET_DEFINITIONS.map(asset => {
+        let pricePerUnitUSD = 0; let pricePerUnitToman = 0; let sourceText = ''; let isFallback = false;
         if (asset.type === 'gold') {
-          pricePerUnitUSD = (livePricesUSD.gold / GRAMS_PER_TROY_OUNCE) * asset.purity;
-          pricePerUnitToman = pricePerUnitUSD * usdtRate;
-          sourceText = `${usdSources.gold} × تتر`;
-        } 
-        else if (asset.type === 'silver') {
-          pricePerUnitUSD = (livePricesUSD.silver / GRAMS_PER_TROY_OUNCE) * asset.purity;
-          pricePerUnitToman = pricePerUnitUSD * usdtRate;
-          sourceText = `${usdSources.silver} × تتر`;
-        } 
-        else if (asset.type === 'copper') {
-          let copperInput = livePricesUSD.copper;
-          let pricePerKgUsdt = 0;
-          const LB_TO_KG = 2.20462262;
-
-          if (copperInput >= 1000) {
-            pricePerKgUsdt = copperInput / 1000;
-          } else if (copperInput >= 100 && copperInput < 1000) {
-            pricePerKgUsdt = (copperInput / 100) * LB_TO_KG;
+          const theoToman = (livePricesUSD.gold / GRAMS_PER_TROY_OUNCE) * asset.purity * usdtRate;
+          if (directPricesToman.gold18.isDirect && directPricesToman.gold18.price > 0) {
+            pricePerUnitToman = directPricesToman.gold18.price;
+            pricePerUnitUSD = usdtRate > 0 ? (pricePerUnitToman / usdtRate) : 0;
+            const bubble = theoToman > 0 ? (((pricePerUnitToman - theoToman) / theoToman) * 100).toFixed(1) : '0.0';
+            sourceText = `${directPricesToman.gold18.source} (مستقیم | حباب ${bubble > 0 ? '+' + bubble : bubble}%)`;
           } else {
-            pricePerKgUsdt = copperInput * LB_TO_KG;
+            pricePerUnitUSD = (livePricesUSD.gold / GRAMS_PER_TROY_OUNCE) * asset.purity;
+            pricePerUnitToman = pricePerUnitUSD * usdtRate;
+            sourceText = `${usdSources.gold} × تتر (رزرو جهانی)`;
+            isFallback = usdSources.gold === 'رزرو دستی';
           }
-
-          const discountStr = document.getElementById('copper_discount')?.value;
-          const discountPercent = parseFloat(discountStr) || 0;
-          
-          if (discountPercent > 0) {
-            pricePerKgUsdt = pricePerKgUsdt * (1 - (discountPercent / 100));
+        } else if (asset.type === 'silver') {
+          const theoToman = (livePricesUSD.silver / GRAMS_PER_TROY_OUNCE) * asset.purity * usdtRate;
+          if (directPricesToman.silver999.isDirect && directPricesToman.silver999.price > 0) {
+            pricePerUnitToman = directPricesToman.silver999.price;
+            pricePerUnitUSD = usdtRate > 0 ? (pricePerUnitToman / usdtRate) : 0;
+            const bubble = theoToman > 0 ? (((pricePerUnitToman - theoToman) / theoToman) * 100).toFixed(1) : '0.0';
+            sourceText = `${directPricesToman.silver999.source} (مستقیم | حباب ${bubble > 0 ? '+' + bubble : bubble}%)`;
+          } else {
+            pricePerUnitUSD = (livePricesUSD.silver / GRAMS_PER_TROY_OUNCE) * asset.purity;
+            pricePerUnitToman = pricePerUnitUSD * usdtRate;
+            sourceText = `${usdSources.silver} × تتر (رزرو جهانی)`;
+            isFallback = usdSources.silver === 'رزرو دستی';
           }
-
-          pricePerUnitUSD = pricePerKgUsdt / 1000;
-          pricePerUnitToman = Math.round(pricePerUnitUSD * usdtRate);
+        } else if (asset.type === 'copper') {
+          let cIn = livePricesUSD.copper;
+          let kgUsd = cIn >= 1000 ? (cIn / 1000) : (cIn >= 100 ? (cIn / 100) * LB_TO_KG : cIn * LB_TO_KG);
+          if (discountPercent > 0) kgUsd = kgUsd * (1 - (discountPercent / 100));
+          pricePerUnitUSD = kgUsd / 1000; pricePerUnitToman = pricePerUnitUSD * usdtRate;
           sourceText = `${usdSources.copper} × تتر` + (discountPercent > 0 ? ` (-${discountPercent}%)` : '');
-        } 
-        else if (asset.type === 'usd') {
-          pricePerUnitUSD = 1.0;
-          pricePerUnitToman = usdtRate;
-          sourceText = liveUSDTPrice.source;
+          isFallback = usdSources.copper === 'رزرو دستی';
+        } else if (asset.type === 'usd') {
+          pricePerUnitUSD = 1.0; pricePerUnitToman = usdtRate; sourceText = liveUSDTPrice.source; isFallback = !liveUSDTPrice.isOnline;
+        } else if (asset.type === 'toman') {
+          pricePerUnitUSD = usdtRate > 0 ? (1.0 / usdtRate) : 0; pricePerUnitToman = 1.0; sourceText = 'ارزش ثابت ریالی';
         }
-        else if (asset.type === 'toman') {
-          pricePerUnitUSD = usdtRate > 0 ? (1.0 / usdtRate) : 0;
-          pricePerUnitToman = 1.0;
-          sourceText = 'ارزش ثابت';
-        }
-
-        const qty = assetQuantities[asset.id] || 0;
-        const totalValToman = qty * pricePerUnitToman;
-        grandTotalToman += totalValToman;
-
-        const card = document.createElement('div');
-        card.className = 'glass-panel p-4 rounded-2xl card-hover flex flex-col justify-between h-full border-t-4';
-        card.style.borderTopColor = asset.color;
-        card.innerHTML = `
-          <div>
-            <div class="flex items-center justify-between mb-2">
-              <span class="text-xs font-bold text-slate-600 dark:text-slate-300">${asset.name}</span>
-              <div class="p-1.5 rounded-lg text-xs" style="background-color: ${asset.color}15; color: ${asset.color}">
-                <i data-lucide="${asset.icon}" class="w-4 h-4"></i>
-              </div>
-            </div>
-            <div class="mt-1">
-              <div class="text-base font-black text-slate-900 dark:text-white">${Math.round(pricePerUnitToman).toLocaleString('fa-IR')} <span class="text-[10px] text-slate-400 font-normal">تومان</span></div>
-              <div class="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 mt-0.5" dir="ltr">${asset.type === 'toman' ? '~ $' : '$'}${pricePerUnitUSD < 1 ? pricePerUnitUSD.toFixed(4) : pricePerUnitUSD.toLocaleString('en-US', {maximumFractionDigits: 1})}</div>
-            </div>
-          </div>
-          <div class="mt-3 pt-2 border-t border-slate-200/50 dark:border-slate-800/50 flex items-center justify-between text-[10px] text-slate-400">
-            <span>واحد: ${asset.unit}</span>
-            <span class="truncate max-w-[80px]" title="${sourceText}">${sourceText}</span>
-          </div>
-        `;
-        cardsGrid.appendChild(card);
-
-        const tr = document.createElement('tr');
-        tr.className = 'hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition';
-        tr.innerHTML = `
-          <td class="py-2.5 font-bold flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full" style="background-color: ${asset.color}"></span>
-            ${asset.name}
-          </td>
-          <td class="py-2.5 text-slate-600 dark:text-slate-300 font-medium">${qty.toLocaleString('fa-IR')} ${asset.unit}</td>
-          <td class="py-2.5 font-mono text-slate-500" dir="ltr">$${pricePerUnitUSD < 1 ? pricePerUnitUSD.toFixed(4) : pricePerUnitUSD.toLocaleString('en-US', {maximumFractionDigits:1})}</td>
-          <td class="py-2.5 font-semibold text-slate-700 dark:text-slate-200">${Math.round(pricePerUnitToman).toLocaleString('fa-IR')}</td>
-          <td class="py-2.5 font-black text-slate-900 dark:text-white">${Math.round(totalValToman).toLocaleString('fa-IR')}</td>
-        `;
-        tableBody.appendChild(tr);
-
-        if (totalValToman > 0) {
-          chartLabels.push(asset.name);
-          chartData.push(totalValToman);
-          chartColors.push(asset.color);
-        }
+        const qty = assetQuantities[asset.id] || 0; const totalValToman = qty * pricePerUnitToman; const totalValUSD = usdtRate > 0 ? (totalValToman / usdtRate) : 0;
+        if (totalValToman > 0) activeCount++; grandTotalToman += totalValToman;
+        return { ...asset, qty, pricePerUnitUSD, pricePerUnitToman, totalValToman, totalValUSD, sourceText, isFallback };
       });
 
       const grandTotalUSDT = usdtRate > 0 ? (grandTotalToman / usdtRate) : 0;
-      
-      const pnlUSD = grandTotalUSDT - initCap;
-      const pnlDisplay = document.getElementById('pnlDisplay');
-      const pnlBadge = document.getElementById('pnlBadge');
+      const pnlUSD = grandTotalUSDT - initCap; const pnlPercent = initCap > 0 ? ((pnlUSD / initCap) * 100) : 0;
+      return { initCap, usdtRate, grandTotalToman, grandTotalUSDT, pnlUSD, pnlPercent, activeCount, items };
+    }
 
-      pnlDisplay.innerText = Math.abs(pnlUSD).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-      
-      if (initCap === 0) {
-         pnlDisplay.innerText = "0.00";
-         pnlDisplay.className = "text-xl font-black text-slate-700 dark:text-slate-300";
-         pnlBadge.innerText = "بدون سرمایه";
-         pnlBadge.className = "text-[10px] px-1.5 py-0.5 rounded font-bold bg-slate-100 dark:bg-slate-800 text-slate-500";
-      } else if (pnlUSD > 0) {
-         pnlDisplay.className = "text-xl font-black text-emerald-600 dark:text-emerald-400";
-         pnlBadge.innerText = "+" + ((pnlUSD / initCap) * 100).toFixed(1) + "%";
-         pnlBadge.className = "text-[10px] px-1.5 py-0.5 rounded font-bold bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400";
-      } else if (pnlUSD < 0) {
-         pnlDisplay.className = "text-xl font-black text-red-600 dark:text-red-400";
-         pnlBadge.innerText = ((pnlUSD / initCap) * 100).toFixed(1) + "%";
-         pnlBadge.className = "text-[10px] px-1.5 py-0.5 rounded font-bold bg-red-100 dark:bg-red-900/30 text-red-600 dark:text-red-400";
-      } else {
-         pnlDisplay.className = "text-xl font-black text-slate-700 dark:text-slate-300";
-         pnlBadge.innerText = "0.0%";
-         pnlBadge.className = "text-[10px] px-1.5 py-0.5 rounded font-bold bg-slate-100 dark:bg-slate-800 text-slate-500";
-      }
+    function recalculateAndRender() {
+      const m = calculatePortfolioMetrics();
+      document.getElementById('spotGoldDisplay').innerText = `$${livePricesUSD.gold.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
+      document.getElementById('spotGoldSource').innerText = directPricesToman.gold18.isDirect ? `مستقیم (${directPricesToman.gold18.source})` : usdSources.gold;
+      document.getElementById('spotSilverDisplay').innerText = `$${livePricesUSD.silver.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
+      document.getElementById('spotSilverSource').innerText = directPricesToman.silver999.isDirect ? `مستقیم (${directPricesToman.silver999.source})` : usdSources.silver;
+      let cUnit = livePricesUSD.copper >= 1000 ? '$/Ton' : (livePricesUSD.copper >= 100 ? '¢/lb' : '$/lb');
+      document.getElementById('spotCopperDisplay').innerText = `${livePricesUSD.copper.toLocaleString('en-US', { maximumFractionDigits: 4 })} (${cUnit})`;
+      document.getElementById('spotCopperSource').innerText = usdSources.copper;
 
-      document.getElementById('totalValueDisplay').innerText = Math.round(grandTotalToman).toLocaleString('fa-IR');
-      document.getElementById('totalValueUSDTDisplay').innerText = `$${grandTotalUSDT.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+      document.getElementById('initialCapitalDisplay').innerText = m.initCap.toLocaleString('en-US');
+      document.getElementById('activeAssetsCountBadge').innerText = `${m.activeCount.toLocaleString('fa-IR')} دارایی فعال`;
+      document.getElementById('totalValueDisplay').innerText = Math.round(m.grandTotalToman).toLocaleString('fa-IR');
+      document.getElementById('totalValueUSDTDisplay').innerText = `$${m.grandTotalUSDT.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+      document.getElementById('chartCenterUSDT').innerText = `$${m.grandTotalUSDT.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-      ASSET_DEFINITIONS.forEach((asset, idx) => {
-        const val = chartData[chartLabels.indexOf(asset.name)] || 0;
-        if (val === 0) return;
-        const percent = grandTotalToman > 0 ? ((val / grandTotalToman) * 100).toFixed(1) : 0;
+      const pnlDisplay = document.getElementById('pnlDisplay'); const pnlSign = document.getElementById('pnlSign'); const pnlBadge = document.getElementById('pnlBadge');
+      pnlDisplay.innerText = Math.abs(m.pnlUSD).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      if (m.initCap === 0) { pnlSign.innerText = '$'; pnlDisplay.innerText = '0.00'; pnlDisplay.className = 'text-xl font-black text-slate-700 dark:text-slate-300'; pnlBadge.innerText = 'بدون سرمایه اولیه'; pnlBadge.className = 'text-[10px] px-2 py-0.5 rounded-md font-bold bg-slate-200/70 dark:bg-slate-800 text-slate-500'; }
+      else if (m.pnlUSD > 0) { pnlSign.innerText = '+$'; pnlSign.className = 'text-xs font-bold text-emerald-500'; pnlDisplay.className = 'text-xl font-black text-emerald-600 dark:text-emerald-400'; pnlBadge.innerText = `+${m.pnlPercent.toFixed(1)}%`; pnlBadge.className = 'text-[10px] px-2 py-0.5 rounded-md font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'; }
+      else if (m.pnlUSD < 0) { pnlSign.innerText = '-$'; pnlSign.className = 'text-xs font-bold text-red-500'; pnlDisplay.className = 'text-xl font-black text-red-600 dark:text-red-400'; pnlBadge.innerText = `${m.pnlPercent.toFixed(1)}%`; pnlBadge.className = 'text-[10px] px-2 py-0.5 rounded-md font-bold bg-red-500/15 text-red-600 dark:text-red-400'; }
+      else { pnlSign.innerText = '$'; pnlDisplay.className = 'text-xl font-black text-slate-700 dark:text-slate-300'; pnlBadge.innerText = '0.0%'; pnlBadge.className = 'text-[10px] px-2 py-0.5 rounded-md font-bold bg-slate-200/70 dark:bg-slate-800 text-slate-500'; }
 
-        const leg = document.createElement('div');
-        leg.className = 'p-2 rounded-xl bg-slate-100/60 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-700/50 flex items-center justify-between text-xs';
-        leg.innerHTML = `
-          <div class="flex items-center gap-2">
-            <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${asset.color}"></span>
-            <span class="font-medium text-slate-700 dark:text-slate-300">${asset.name}</span>
-          </div>
-          <div class="text-left">
-            <span class="font-bold text-slate-900 dark:text-slate-100">${Math.round(val).toLocaleString('fa-IR')}</span>
-            <span class="text-[10px] text-slate-400 mr-1">(${percent}%)</span>
-          </div>
-        `;
-        legendContainer.appendChild(leg);
+      const cardsGrid = document.getElementById('pricesCardsGrid'); const tableBody = document.getElementById('breakdownTableBody'); const legendContainer = document.getElementById('chartLegendContainer');
+      cardsGrid.innerHTML = ''; tableBody.innerHTML = ''; legendContainer.innerHTML = '';
+      const chartLabels = []; const chartData = []; const chartColors = [];
+
+      m.items.forEach(item => {
+        const sharePercent = m.grandTotalToman > 0 ? ((item.totalValToman / m.grandTotalToman) * 100) : 0;
+        const usdFormatted = item.pricePerUnitUSD < 1 ? item.pricePerUnitUSD.toFixed(4) : item.pricePerUnitUSD.toLocaleString('en-US', { maximumFractionDigits: 2 });
+        const card = document.createElement('div');
+        card.className = 'glass-panel p-4 rounded-2xl card-hover flex flex-col justify-between h-full border-t-4 num-tabular'; card.style.borderTopColor = item.color;
+        card.innerHTML = `<div><div class="flex items-center justify-between mb-2"><span class="text-xs font-bold text-slate-700 dark:text-slate-200">${item.name}</span><div class="p-1.5 rounded-lg" style="background-color: ${item.color}18; color: ${item.color}"><i data-lucide="${item.icon}" class="w-4 h-4"></i></div></div><div class="mt-1"><div class="text-base font-black text-slate-900 dark:text-white">${Math.round(item.pricePerUnitToman).toLocaleString('fa-IR')} <span class="text-[10px] text-slate-400 font-normal">تومان</span></div><div class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5" dir="ltr">${item.type === 'toman' ? '~ $' : '$'}${usdFormatted}</div></div></div><div class="mt-3 pt-2.5 border-t border-slate-200/60 dark:border-slate-800/70 space-y-1 text-[10px]"><div class="flex items-center justify-between text-slate-500 dark:text-slate-400"><span>موجودی:</span><strong class="font-bold text-slate-700 dark:text-slate-200">${item.qty.toLocaleString('fa-IR')} ${item.unit}</strong></div><div class="flex items-center justify-between text-slate-400"><span>منبع:</span><span class="truncate max-w-[115px] ${item.isFallback ? 'text-amber-500 font-semibold' : 'text-emerald-600 dark:text-emerald-400 font-medium'}" title="${item.sourceText}">${item.sourceText}</span></div></div>`;
+        cardsGrid.appendChild(card);
+
+        const tr = document.createElement('tr'); tr.className = 'hover:bg-slate-200/40 dark:hover:bg-slate-800/40 transition';
+        tr.innerHTML = `<td class="py-3 font-bold flex items-center gap-2 text-slate-800 dark:text-slate-100 whitespace-nowrap"><span class="w-2.5 h-2.5 rounded-full shrink-0" style="background-color: ${item.color}"></span><span>${item.name}</span></td><td class="py-3 text-slate-600 dark:text-slate-300 font-semibold whitespace-nowrap">${item.qty.toLocaleString('fa-IR')} <span class="text-[10px] text-slate-400">${item.unit}</span></td><td class="py-3 font-mono text-slate-500 dark:text-slate-400 whitespace-nowrap" dir="ltr">$${usdFormatted}</td><td class="py-3 font-bold text-slate-700 dark:text-slate-200 whitespace-nowrap">${Math.round(item.pricePerUnitToman).toLocaleString('fa-IR')}</td><td class="py-3 font-bold text-emerald-600 dark:text-emerald-400 whitespace-nowrap" dir="ltr">$${item.totalValUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td><td class="py-3 font-black text-slate-900 dark:text-white whitespace-nowrap">${Math.round(item.totalValToman).toLocaleString('fa-IR')}</td><td class="py-3 text-left font-bold text-slate-500 dark:text-slate-400 whitespace-nowrap" dir="ltr">${sharePercent.toFixed(1)}%</td>`;
+        tableBody.appendChild(tr);
+
+        if (item.totalValToman > 0) {
+          chartLabels.push(item.name); chartData.push(Math.round(item.totalValToman)); chartColors.push(item.color);
+          const leg = document.createElement('div'); leg.className = 'p-3 rounded-xl bg-slate-100/80 dark:bg-slate-900/60 border border-slate-200/70 dark:border-slate-800/80 space-y-2 num-tabular';
+          leg.innerHTML = `<div class="flex items-center justify-between text-xs"><div class="flex items-center gap-2"><span class="w-3 h-3 rounded-full shrink-0" style="background-color: ${item.color}"></span><span class="font-bold text-slate-800 dark:text-slate-200">${item.name}</span><span class="text-[10px] text-slate-400">(${item.qty.toLocaleString('fa-IR')} ${item.unit})</span></div><div class="flex items-center gap-2"><span class="font-black text-slate-900 dark:text-slate-100">${Math.round(item.totalValToman).toLocaleString('fa-IR')} <span class="text-[10px] font-normal text-slate-400">تومان</span></span><span class="text-[11px] font-bold px-1.5 py-0.5 rounded bg-slate-200/70 dark:bg-slate-800 text-slate-600 dark:text-slate-300" dir="ltr">${sharePercent.toFixed(1)}%</span></div></div><div class="w-full h-1.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden"><div class="h-full rounded-full transition-all duration-500" style="width: ${sharePercent}%; background-color: ${item.color}"></div></div>`;
+          legendContainer.appendChild(leg);
+        }
       });
 
-      lucide.createIcons();
-      updateChart(chartLabels, chartData, chartColors);
+      document.getElementById('analysisEmptyState').classList.toggle('hidden', m.grandTotalToman > 0);
+      document.getElementById('analysisChartContent').classList.toggle('hidden', m.grandTotalToman <= 0);
+      lucide.createIcons(); updateChart(chartLabels, chartData, chartColors);
     }
 
     function initChart() {
-      Chart.register(ChartDataLabels);
-      const ctx = document.getElementById('portfolioChart').getContext('2d');
+      Chart.register(ChartDataLabels); const ctx = document.getElementById('portfolioChart').getContext('2d');
       myChart = new Chart(ctx, {
-        type: 'doughnut',
-        data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderWidth: 0 }] },
-        options: { 
-          responsive: true, 
-          maintainAspectRatio: false,
-          layout: {
-            padding: { top: 45, bottom: 45, left: 60, right: 60 } 
-          },
-          plugins: { 
+        type: 'doughnut', data: { labels: [], datasets: [{ data: [], backgroundColor: [], borderWidth: 2, borderColor: 'transparent' }] },
+        options: {
+          responsive: true, maintainAspectRatio: false, layout: { padding: { top: 38, bottom: 38, left: 55, right: 55 } },
+          plugins: {
             legend: { display: false },
-            tooltip: {
-              backgroundColor: 'rgba(15, 23, 42, 0.9)',
-              titleFont: { family: 'Vazirmatn', size: 13 },
-              bodyFont: { family: 'Vazirmatn', size: 13, weight: 'bold' },
-              padding: 10,
-              cornerRadius: 8,
-              rtl: true,
-              callbacks: {
-                label: function(context) {
-                  return ' ' + Math.round(context.raw).toLocaleString('fa-IR') + ' تومان';
-                }
-              }
-            },
-            datalabels: {
-              anchor: 'end',
-              align: 'end',
-              offset: 8,
-              color: (context) => context.chart.data.datasets[0].backgroundColor[context.dataIndex],
-              font: { family: 'Vazirmatn', size: 12, weight: '900' },
-              textStrokeColor: () => document.documentElement.classList.contains('dark') ? 'rgba(15, 23, 42, 0.85)' : 'rgba(255, 255, 255, 0.85)',
-              textStrokeWidth: 4,
-              formatter: (value, context) => {
-                let dataArr = context.chart.data.datasets[0].data;
-                let total = dataArr.reduce((a, b) => a + b, 0);
-                let percentage = total > 0 ? (value * 100 / total).toFixed(1) : 0;
-                if (percentage < 3) return ''; 
-                return context.chart.data.labels[context.dataIndex] + '\n' + percentage + '%';
-              },
-              textAlign: 'center'
-            }
-          }, 
-          cutout: '60%' 
+            tooltip: { backgroundColor: 'rgba(15, 23, 42, 0.95)', titleFont: { family: 'Vazirmatn', size: 12 }, bodyFont: { family: 'Vazirmatn', size: 12, weight: 'bold' }, padding: 10, cornerRadius: 10, rtl: true, callbacks: { label: (ctx) => ' ' + Math.round(ctx.raw).toLocaleString('fa-IR') + ' تومان' } },
+            datalabels: { anchor: 'end', align: 'end', offset: 6, color: (ctx) => ctx.chart.data.datasets[0].backgroundColor[ctx.dataIndex], font: { family: 'Vazirmatn', size: 11, weight: '900' }, textStrokeColor: () => document.documentElement.classList.contains('dark') ? 'rgba(2, 6, 23, 0.9)' : 'rgba(255, 255, 255, 0.95)', textStrokeWidth: 4, formatter: (val, ctx) => { let arr = ctx.chart.data.datasets[0].data; let tot = arr.reduce((a, b) => a + b, 0); let pct = tot > 0 ? (val * 100 / tot).toFixed(1) : 0; return pct < 3.5 ? '' : ctx.chart.data.labels[ctx.dataIndex] + '\n' + pct + '%'; }, textAlign: 'center' }
+          }, cutout: '66%'
         }
       });
     }
 
-    function updateChart(labels, data, colors) {
-      if (!myChart) return;
-      myChart.data.labels = labels;
-      myChart.data.datasets[0].data = data;
-      myChart.data.datasets[0].backgroundColor = colors;
-      myChart.update();
-    }
+    function updateChart(labels, data, colors) { if (!myChart) return; myChart.data.labels = labels; myChart.data.datasets[0].data = data; myChart.data.datasets[0].backgroundColor = colors; myChart.update(); }
+    function toggleTheme() { const isDark = document.documentElement.classList.toggle('dark'); document.getElementById('themeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon'); lucide.createIcons(); if (myChart) myChart.update(); }
 
-    function toggleTheme() {
-      const isDark = document.documentElement.classList.toggle('dark');
-      document.getElementById('themeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-      lucide.createIcons();
-      if(myChart) myChart.update(); 
-    }
-
-    // خروجی تصویر (بدون تغییر)
     async function exportSummaryAsImage() {
-      const now = new Date();
-      const jalaliStr = now.toLocaleDateString('fa-IR-u-ca-persian', { year: 'numeric', month: 'long', day: 'numeric' });
-      const gregorianStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-      const timeStr = now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
-
-      document.getElementById('snapJalali').innerText = jalaliStr;
-      document.getElementById('snapGregorian').innerText = gregorianStr;
-      document.getElementById('snapTime').innerText = timeStr;
-
-      const initCap = parseFloat(document.getElementById('initial_capital').value) || 0;
-      document.getElementById('snapInitCapDisplay').innerText = initCap.toLocaleString('en-US');
-
-      const usdtRate = liveUSDTPrice.price;
-      let grandTotalToman = 0;
-      const snapList = document.getElementById('snapBreakdownList');
-      snapList.innerHTML = '';
-
-      ASSET_DEFINITIONS.forEach(asset => {
-        let pricePerUnitUSD = 0;
-        let pricePerUnitToman = 0;
-
-        if (asset.type === 'gold') pricePerUnitUSD = (livePricesUSD.gold / GRAMS_PER_TROY_OUNCE) * asset.purity;
-        else if (asset.type === 'silver') pricePerUnitUSD = (livePricesUSD.silver / GRAMS_PER_TROY_OUNCE) * asset.purity;
-        else if (asset.type === 'copper') {
-          let copperInput = livePricesUSD.copper;
-          let pricePerKgUsdt = 0;
-          const LB_TO_KG = 2.20462262;
-          if (copperInput >= 1000) pricePerKgUsdt = copperInput / 1000;
-          else if (copperInput >= 100 && copperInput < 1000) pricePerKgUsdt = (copperInput / 100) * LB_TO_KG;
-          else pricePerKgUsdt = copperInput * LB_TO_KG;
-
-          const discountStr = document.getElementById('copper_discount')?.value;
-          const discountPercent = parseFloat(discountStr) || 0;
-          if (discountPercent > 0) pricePerKgUsdt = pricePerKgUsdt * (1 - (discountPercent / 100));
-          pricePerUnitUSD = pricePerKgUsdt / 1000;
-        } else if (asset.type === 'usd') pricePerUnitUSD = 1.0;
-        else if (asset.type === 'toman') pricePerUnitUSD = usdtRate > 0 ? (1.0 / usdtRate) : 0;
-
-        pricePerUnitToman = asset.type === 'toman' ? 1.0 : pricePerUnitUSD * usdtRate;
-        const qty = assetQuantities[asset.id] || 0;
-        const totalVal = qty * pricePerUnitToman;
-        
-        grandTotalToman += totalVal;
-
-        const row = document.createElement('div');
-        row.className = 'flex items-center justify-between p-4 bg-slate-900/90 rounded-2xl border border-slate-800 text-sm';
-        row.innerHTML = `
-          <div class="flex items-center gap-3">
-            <span class="w-3.5 h-3.5 rounded-full shrink-0" style="background-color: ${asset.color}"></span>
-            <span class="text-slate-100 font-bold text-sm">${asset.name}</span>
-            <span class="text-xs text-slate-400 font-medium">(${qty.toLocaleString('fa-IR')} ${asset.unit})</span>
-          </div>
-          <div class="flex items-baseline gap-1.5 font-bold text-white text-base">
-            <span>${Math.round(totalVal).toLocaleString('fa-IR')}</span>
-            <span class="text-xs text-slate-400 font-normal">تومان</span>
-          </div>
-        `;
-        snapList.appendChild(row);
-      });
-
-      const grandTotalUSDT = usdtRate > 0 ? (grandTotalToman / usdtRate) : 0;
-      const pnlUSD = grandTotalUSDT - initCap;
-      const snapPnlDisplay = document.getElementById('snapPnlDisplay');
-      
-      if (initCap === 0) {
-         snapPnlDisplay.innerText = "$0.00";
-         snapPnlDisplay.className = "text-xl font-black text-slate-400";
-      } else if (pnlUSD >= 0) {
-         snapPnlDisplay.innerText = "+$" + pnlUSD.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-         snapPnlDisplay.className = "text-xl font-black text-emerald-400";
-      } else {
-         snapPnlDisplay.innerText = "-$" + Math.abs(pnlUSD).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-         snapPnlDisplay.className = "text-xl font-black text-red-400";
-      }
-
-      document.getElementById('snapTotalTomanVal').innerText = Math.round(grandTotalToman).toLocaleString('fa-IR');
-      document.getElementById('snapTotalUSDT').innerText = `$${grandTotalUSDT.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
-      document.getElementById('snapUsdtRate').innerText = `${Math.round(usdtRate).toLocaleString('fa-IR')} تومان`;
-
-      const snapContainer = document.getElementById('exportSnapshotContainer');
-      const canvas = await html2canvas(snapContainer, { scale: 2, backgroundColor: '#020617', useCORS: true, logging: false });
-      const link = document.createElement('a');
-      link.download = `portfolio-summary-${now.toISOString().slice(0,10)}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
+      const exportBtn = document.getElementById('exportBtn'); const exportBtnText = document.getElementById('exportBtnText');
+      if (exportBtn) exportBtn.disabled = true; if (exportBtnText) exportBtnText.innerText = 'در حال ساخت...';
+      try {
+        const now = new Date();
+        document.getElementById('snapJalali').innerText = now.toLocaleDateString('fa-IR-u-ca-persian', { year: 'numeric', month: 'long', day: 'numeric' });
+        document.getElementById('snapGregorian').innerText = now.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        document.getElementById('snapTime').innerText = now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+        const m = calculatePortfolioMetrics();
+        document.getElementById('snapInitCapDisplay').innerText = m.initCap.toLocaleString('en-US');
+        document.getElementById('snapTotalTomanVal').innerText = Math.round(m.grandTotalToman).toLocaleString('fa-IR');
+        document.getElementById('snapTotalUSDT').innerText = `$${m.grandTotalUSDT.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+        document.getElementById('snapUsdtRate').innerText = `${Math.round(m.usdtRate).toLocaleString('fa-IR')} تومان`;
+        document.getElementById('snapGoldRate').innerText = `$${livePricesUSD.gold.toLocaleString('en-US', { maximumFractionDigits: 2 })}`;
+        const snapPnl = document.getElementById('snapPnlDisplay');
+        if (m.initCap === 0) { snapPnl.innerText = '$0.00'; snapPnl.className = 'text-lg font-black text-slate-400'; }
+        else if (m.pnlUSD >= 0) { snapPnl.innerText = `+$${m.pnlUSD.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (+${m.pnlPercent.toFixed(1)}%)`; snapPnl.className = 'text-lg font-black text-emerald-400'; }
+        else { snapPnl.innerText = `-$${Math.abs(m.pnlUSD).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} (${m.pnlPercent.toFixed(1)}%)`; snapPnl.className = 'text-lg font-black text-red-400'; }
+        const snapList = document.getElementById('snapBreakdownList'); snapList.innerHTML = '';
+        m.items.forEach(item => {
+          const sharePct = m.grandTotalToman > 0 ? ((item.totalValToman / m.grandTotalToman) * 100).toFixed(1) : '0.0';
+          const row = document.createElement('div'); row.className = 'flex items-center justify-between p-4 bg-slate-900/95 rounded-2xl border border-slate-800 text-sm';
+          row.innerHTML = `<div class="flex items-center gap-3"><span class="w-3.5 h-3.5 rounded-full shrink-0" style="background-color: ${item.color}"></span><span class="text-slate-100 font-bold text-sm">${item.name}</span><span class="text-xs text-slate-400 font-medium">(${item.qty.toLocaleString('fa-IR')} ${item.unit})</span></div><div class="flex items-center gap-3"><span class="text-xs font-bold text-slate-500" dir="ltr">${sharePct}%</span><div class="flex items-baseline gap-1.5 font-black text-white text-base"><span>${Math.round(item.totalValToman).toLocaleString('fa-IR')}</span><span class="text-xs text-slate-400 font-normal">تومان</span></div></div>`;
+          snapList.appendChild(row);
+        });
+        lucide.createIcons();
+        const canvas = await html2canvas(document.getElementById('exportSnapshotContainer'), { scale: 2, backgroundColor: '#020617', useCORS: true, logging: false });
+        const link = document.createElement('a'); link.download = `portfolio-summary-${now.toISOString().slice(0, 10)}.png`; link.href = canvas.toDataURL('image/png'); link.click();
+        showToast('تصویر گزارش با کیفیت بالا دانلود شد');
+      } catch (err) { showToast('خطا در تولید تصویر گزارش'); }
+      finally { if (exportBtn) exportBtn.disabled = false; if (exportBtnText) exportBtnText.innerText = 'خروجی تصویر خلاصه'; }
     }
   </script>
 </body>
