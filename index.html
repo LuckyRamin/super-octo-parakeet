@@ -15,6 +15,8 @@
     .bg-grid-pattern { background-size: 32px 32px; background-image: linear-gradient(to right, rgba(148, 163, 184, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(148, 163, 184, 0.05) 1px, transparent 1px); }
     .glass-panel { background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(226, 232, 240, 0.9); }
     .dark .glass-panel { background: rgba(15, 23, 42, 0.72); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid rgba(51, 65, 85, 0.55); }
+    .glass-dock { background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(203, 213, 225, 0.9); box-shadow: 0 20px 40px -12px rgba(15, 23, 42, 0.18); }
+    .dark .glass-dock { background: rgba(15, 23, 42, 0.88); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border: 1px solid rgba(56, 189, 248, 0.22); box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.7), 0 0 25px -5px rgba(2, 132, 199, 0.2); }
     .card-hover { transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1); }
     .card-hover:hover { transform: translateY(-3px); box-shadow: 0 14px 28px -10px rgba(0, 0, 0, 0.2); }
     .dark .card-hover:hover { border-color: rgba(56, 189, 248, 0.35); box-shadow: 0 14px 30px -12px rgba(2, 132, 199, 0.15); }
@@ -25,12 +27,29 @@
   </style>
   <script>tailwind.config = { darkMode: 'class', theme: { extend: { colors: { brand: { 50: '#f0f9ff', 100: '#e0f2fe', 400: '#38bdf8', 500: '#0284c7', 600: '#0369a1', 700: '#075985', 950: '#082f49' } } } } };</script>
 </head>
-<body class="bg-slate-100 dark:bg-slate-950 bg-grid-pattern text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300 pb-16 relative overflow-x-hidden">
+<body class="bg-slate-100 dark:bg-slate-950 bg-grid-pattern text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300 pb-28 relative overflow-x-hidden">
   <div class="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 w-[650px] h-[220px] bg-brand-500/10 dark:bg-brand-500/15 blur-[110px] rounded-full -z-10"></div>
-  <div id="toastContainer" class="fixed bottom-5 left-5 z-50 transform translate-y-20 opacity-0 pointer-events-none transition-all duration-300"><div class="glass-panel px-4 py-3 rounded-2xl shadow-xl flex items-center gap-2.5 border border-emerald-500/30 bg-slate-900/95 text-white text-xs font-bold"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0"></i><span id="toastMessage">اطلاعات با موفقیت ذخیره شد</span></div></div>
-  <header class="sticky top-0 z-40 glass-panel border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-gradient-to-tr from-brand-600 to-brand-400 text-white rounded-xl shadow-lg shadow-brand-500/25 flex items-center justify-center shrink-0"><i data-lucide="wallet" class="w-5 h-5"></i></div><div><div class="flex items-center gap-2"><h1 class="text-sm sm:text-base font-black text-slate-900 dark:text-white leading-tight">داشبورد هوشمند دارایی‌ها</h1><span class="hidden md:inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20">Pro</span></div><p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">نرخ مستقیم بازار داخل + رزرو خودکار جهانی و تتر</p></div></div><div class="flex items-center gap-2"><button id="exportBtn" onclick="exportSummaryAsImage()" class="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-xl transition border border-emerald-500/30 active:scale-95"><i data-lucide="camera" class="w-4 h-4"></i><span class="hidden sm:inline" id="exportBtnText">خروجی تصویر خلاصه</span></button><button onclick="updateAllPrices()" id="refreshBtn" class="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-brand-500/10 hover:bg-brand-500/20 text-brand-700 dark:text-brand-400 rounded-xl transition border border-brand-500/30 active:scale-95"><i data-lucide="refresh-cw" id="refreshIcon" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">به‌روزرسانی آنلاین</span></button><button onclick="toggleTheme()" title="تغییر تم" class="p-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-200/60 dark:bg-slate-800/70 rounded-xl border border-slate-300/60 dark:border-slate-700 transition active:scale-95"><i data-lucide="sun" id="themeIcon" class="w-4 h-4"></i></button></div></div></header>
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-    <div class="glass-panel rounded-2xl p-1.5 flex gap-1.5 overflow-x-auto mb-6 shadow-sm"><button id="btn-tab-dashboard" onclick="switchTab('dashboard')" class="whitespace-nowrap flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-md shadow-brand-500/25"><i data-lucide="layout-dashboard" class="w-4 h-4"></i><span>داشبورد خلاصه</span></button><button id="btn-tab-manage" onclick="switchTab('manage')" class="whitespace-nowrap flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/60"><i data-lucide="sliders-horizontal" class="w-4 h-4"></i><span>مدیریت موجودی و تنظیمات</span></button><button id="btn-tab-analysis" onclick="switchTab('analysis')" class="whitespace-nowrap flex-1 py-2.5 px-4 rounded-xl text-xs sm:text-sm font-bold flex items-center justify-center gap-2 transition-all text-slate-600 dark:text-slate-400 hover:bg-slate-200/50 dark:hover:bg-slate-800/60"><i data-lucide="pie-chart" class="w-4 h-4"></i><span>ترکیب و جزئیات</span></button></div>
+  <!-- Toast Notification (Placed above the floating bottom dock) -->
+  <div id="toastContainer" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 transform translate-y-12 opacity-0 pointer-events-none transition-all duration-300"><div class="glass-panel px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2.5 border border-emerald-500/40 bg-slate-900/95 text-white text-xs font-bold whitespace-nowrap"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0"></i><span id="toastMessage">اطلاعات با موفقیت ذخیره شد</span></div></div>
+  <!-- Header Bar -->
+  <header class="sticky top-0 z-40 glass-panel border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-gradient-to-tr from-brand-600 to-brand-400 text-white rounded-xl shadow-lg shadow-brand-500/25 flex items-center justify-center shrink-0"><i data-lucide="wallet" class="w-5 h-5"></i></div><div><div class="flex items-center gap-2"><h1 class="text-sm sm:text-base font-black text-slate-900 dark:text-white leading-tight">داشبورد هوشمند دارایی‌ها</h1><span id="headerProfileBadge" class="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20">پروفایل اصلی</span></div><p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">نرخ مستقیم بازار داخل + رزرو خودکار جهانی و تتر</p></div></div><div class="flex items-center gap-2"><button id="exportBtn" onclick="exportSummaryAsImage()" class="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-xl transition border border-emerald-500/30 active:scale-95"><i data-lucide="camera" class="w-4 h-4"></i><span class="hidden sm:inline" id="exportBtnText">خروجی تصویر خلاصه</span></button><button onclick="updateAllPrices()" id="refreshBtn" class="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-brand-500/10 hover:bg-brand-500/20 text-brand-700 dark:text-brand-400 rounded-xl transition border border-brand-500/30 active:scale-95"><i data-lucide="refresh-cw" id="refreshIcon" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">به‌روزرسانی آنلاین</span></button><button onclick="toggleTheme()" title="تغییر تم" class="p-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-200/60 dark:bg-slate-800/70 rounded-xl border border-slate-300/60 dark:border-slate-700 transition active:scale-95"><i data-lucide="sun" id="themeIcon" class="w-4 h-4"></i></button></div></div></header>
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+    <!-- نوار ابزار مدیریت چند پروفایلی و بکاپ JSON -->
+    <div class="glass-panel rounded-2xl p-2.5 px-3.5 mb-6 flex flex-wrap items-center justify-between gap-3 shadow-sm border-r-4 border-r-indigo-500">
+      <div class="flex flex-wrap items-center gap-2">
+        <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 pl-1"><i data-lucide="users" class="w-4 h-4 text-indigo-500"></i><span>سبد دارایی:</span></div>
+        <select id="profileSelect" onchange="switchProfile(this.value)" class="bg-slate-100 dark:bg-slate-800/90 border border-slate-300/80 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs font-bold rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-indigo-500 transition cursor-pointer min-w-[145px]"></select>
+        <button onclick="createNewProfile()" title="افزودن پروفایل جدید" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25 transition active:scale-95"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span>جدید</span></button>
+        <button onclick="renameCurrentProfile()" title="تغییر نام پروفایل فعلی" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-slate-200/70 hover:bg-slate-300/70 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300/60 dark:border-slate-700 transition active:scale-95"><i data-lucide="pencil" class="w-3 h-3"></i><span class="hidden sm:inline">ویرایش نام</span></button>
+        <button onclick="deleteCurrentProfile()" title="حذف پروفایل فعلی" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/25 transition active:scale-95"><i data-lucide="trash-2" class="w-3 h-3"></i><span class="hidden sm:inline">حذف</span></button>
+      </div>
+      <div class="flex items-center gap-2 border-t sm:border-t-0 pt-2 sm:pt-0 border-slate-200/60 dark:border-slate-800 w-full sm:w-auto justify-end">
+        <button onclick="exportJSONBackup()" title="دانلود فایل پشتیبان از تمام پروفایل‌ها" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-amber-500/10 hover:bg-amber-500/20 text-amber-700 dark:text-amber-400 border border-amber-500/30 transition active:scale-95"><i data-lucide="download" class="w-3.5 h-3.5"></i><span>خروجی بکاپ (JSON)</span></button>
+        <button onclick="document.getElementById('importJsonInput').click()" title="بازگردانی اطلاعات از فایل JSON" class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold bg-slate-200/70 hover:bg-slate-300/70 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300/60 dark:border-slate-700 transition active:scale-95"><i data-lucide="upload" class="w-3.5 h-3.5"></i><span>بازگردانی</span></button>
+        <input type="file" id="importJsonInput" accept=".json,application/json" class="hidden" onchange="importJSONBackup(event)">
+      </div>
+    </div>
+    <!-- تب ۱: داشبورد خلاصه -->
     <div id="tab-dashboard" class="tab-pane fade-in space-y-6">
       <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-stretch">
         <div class="glass-panel p-5 sm:p-6 rounded-2xl card-hover flex flex-col justify-between md:col-span-6 border-r-4 border-r-brand-500 relative overflow-hidden"><div class="pointer-events-none absolute -left-10 -top-10 w-40 h-40 bg-brand-500/10 rounded-full blur-2xl"></div><div><div class="flex items-center justify-between"><span class="text-xs font-bold text-slate-500 dark:text-slate-400 flex items-center gap-1.5"><i data-lucide="layers" class="w-3.5 h-3.5 text-brand-500"></i>ارزش کل پرتفوی دارایی‌ها</span><span id="activeAssetsCountBadge" class="text-[10px] bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20 px-2.5 py-0.5 rounded-full font-bold">۰ دارایی فعال</span></div><div class="mt-3 space-y-1.5"><div class="flex items-baseline gap-2"><h2 id="totalValueDisplay" class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white num-tabular tracking-tight">۰</h2><span class="text-xs sm:text-sm font-bold text-brand-600 dark:text-brand-400">تومان</span></div><div class="inline-flex items-center gap-1.5 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-lg text-emerald-700 dark:text-emerald-400 text-xs sm:text-sm font-black num-tabular" dir="ltr"><span id="totalValueUSDTDisplay">$0.00</span><span class="text-[10px] font-bold text-emerald-600/80 dark:text-emerald-400/70">USDT</span></div></div></div><div class="mt-4 pt-3 border-t border-slate-200/70 dark:border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400"><span id="lastUpdateText" class="flex items-center gap-1"><i data-lucide="clock" class="w-3 h-3"></i><span>آخرین دریافت: --</span></span><span class="flex items-center gap-1 text-slate-500 dark:text-slate-400 font-medium"><i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-500"></i>اولویت نرخ مستقیم داخلی</span></div></div>
@@ -40,17 +59,42 @@
       <div class="glass-panel px-4 py-3 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs"><div class="flex items-center gap-2 font-bold text-slate-500 dark:text-slate-400"><i data-lucide="globe-2" class="w-4 h-4 text-brand-500"></i><span>نرخ‌های پایه جهانی (پشتیبان محاسبه):</span></div><div class="flex flex-wrap items-center gap-4 sm:gap-6 num-tabular"><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500"></span><span class="text-slate-500 dark:text-slate-400">انس طلا:</span><strong id="spotGoldDisplay" class="font-black text-slate-800 dark:text-slate-100" dir="ltr">$0</strong><span id="spotGoldSource" class="text-[10px] text-slate-400 bg-slate-200/60 dark:bg-slate-800 px-1.5 py-0.5 rounded">--</span></div><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-slate-400"></span><span class="text-slate-500 dark:text-slate-400">انس نقره:</span><strong id="spotSilverDisplay" class="font-black text-slate-800 dark:text-slate-100" dir="ltr">$0</strong><span id="spotSilverSource" class="text-[10px] text-slate-400 bg-slate-200/60 dark:bg-slate-800 px-1.5 py-0.5 rounded">--</span></div><div class="flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-600"></span><span class="text-slate-500 dark:text-slate-400">مس جهانی:</span><strong id="spotCopperDisplay" class="font-black text-slate-800 dark:text-slate-100" dir="ltr">$0</strong><span id="spotCopperSource" class="text-[10px] text-slate-400 bg-slate-200/60 dark:bg-slate-800 px-1.5 py-0.5 rounded">--</span></div></div></div>
       <div><div class="flex items-center justify-between mb-3 px-1"><h3 class="text-xs font-extrabold text-slate-500 dark:text-slate-400 flex items-center gap-1.5"><i data-lucide="coins" class="w-4 h-4 text-brand-500"></i>نرخ واحد و موجودی هر کلاس دارایی</h3><button onclick="switchTab('manage')" class="text-[11px] font-bold text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1"><span>ویرایش موجودی‌ها</span><i data-lucide="arrow-left" class="w-3 h-3"></i></button></div><div id="pricesCardsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 items-stretch"></div></div>
     </div>
+    <!-- تب ۲: مدیریت موجودی و تنظیمات -->
     <div id="tab-manage" class="tab-pane hidden fade-in"><div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-      <div class="glass-panel p-5 sm:p-6 rounded-2xl shadow-sm lg:col-span-7"><div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-200/80 dark:border-slate-800/80"><div><h3 class="font-black text-sm flex items-center gap-2 text-slate-800 dark:text-slate-100"><i data-lucide="sliders" class="w-4 h-4 text-brand-500"></i>ثبت و ویرایش موجودی دارایی‌ها</h3><p class="text-[11px] text-slate-400 mt-0.5">مقادیر واردشده در حافظه مرورگر شما ذخیره می‌شوند</p></div><span class="text-[10px] font-bold bg-brand-500/10 text-brand-600 dark:text-brand-400 px-2.5 py-1 rounded-lg">۶ کلاس دارایی</span></div><form id="assetForm" onsubmit="saveAssets(event)"><div id="assetsInputsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div><div class="mt-5 pt-4 border-t border-slate-200/80 dark:border-slate-800/80"><div class="flex items-center justify-between mb-1.5"><label for="initial_capital" class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5"><i data-lucide="piggy-bank" class="w-4 h-4 text-blue-500"></i>سرمایه اولیه واردشده (بر حسب دلار)</label><span id="preview_initial_capital" class="text-[10px] font-bold text-blue-600 dark:text-blue-400 num-tabular" dir="ltr">$0</span></div><div class="relative"><input type="number" step="any" id="initial_capital" value="0" placeholder="0" oninput="updateInputPreview('initial_capital', 'دلار', true)" class="w-full pl-3 pr-9 py-2.5 bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/60 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold num-tabular transition"><span class="absolute right-3 top-2.5 text-blue-500"><i data-lucide="dollar-sign" class="w-4 h-4"></i></span></div></div><button type="submit" class="w-full mt-5 py-3 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-brand-500/25 transition-all flex items-center justify-center gap-2 active:scale-[0.99]"><i data-lucide="save" class="w-4 h-4"></i>ذخیره موجودی و مشاهده داشبورد</button></form></div>
-      <div class="glass-panel p-5 sm:p-6 rounded-2xl shadow-sm lg:col-span-5"><div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80"><div><h3 class="font-black text-sm flex items-center gap-2 text-slate-800 dark:text-slate-100"><i data-lucide="settings-2" class="w-4 h-4 text-amber-500"></i>تنظیمات نرخ رزرو و کسورات مس</h3><p class="text-[11px] text-slate-400 mt-0.5">در صورت عدم دسترسی به نرخ مستقیم، فرمول جهانی و سپس این اعداد اعمال می‌شوند</p></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs"><div><label for="fallback_usdt" class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5">تتر رزرو (تومان)</label><input type="number" step="any" id="fallback_usdt" value="232000" onchange="saveConfig('usdt')" class="w-full p-2.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-xs font-bold num-tabular"></div><div><label for="fallback_gold" class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5">انس طلا ($ پشتیبان)</label><input type="number" step="any" id="fallback_gold" value="2400" onchange="saveConfig('gold')" class="w-full p-2.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-xs font-bold num-tabular"></div><div><label for="fallback_silver" class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5">انس نقره ($ پشتیبان)</label><input type="number" step="any" id="fallback_silver" value="28.5" onchange="saveConfig('silver')" class="w-full p-2.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-xs font-bold num-tabular"></div><div><label for="fallback_copper" class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5 flex items-center justify-between"><span>قیمت مس ($ تن/پوند)</span><span id="copperSourceIndicator" class="text-[9px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded hidden">آنلاین</span></label><input type="number" step="any" id="fallback_copper" value="14238.5" onchange="saveConfig('copper')" class="w-full p-2.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-xs font-bold num-tabular transition-colors duration-300"></div><div class="sm:col-span-2 mt-1 pt-4 border-t border-slate-200/80 dark:border-slate-800/80"><label for="copper_discount" class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5 flex items-center gap-1.5"><i data-lucide="percent" class="w-3.5 h-3.5 text-brand-500"></i>کسر دستی از قیمت جهانی مس (درصد %)</label><input type="number" step="any" id="copper_discount" value="0" onchange="saveConfig('discount')" class="w-full p-2.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-xs font-black text-brand-600 dark:text-brand-400 num-tabular"><div class="mt-2.5 p-3 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200/70 dark:border-slate-800 text-[10px] text-slate-500 dark:text-slate-400 space-y-1 leading-relaxed"><div class="font-bold text-slate-700 dark:text-slate-300">منطق هوشمند قیمت‌گذاری طلا و نقره:</div><div>• <strong>اولویت ۱:</strong> دریافت مستقیم نرخ ۱ گرم طلای ۱۸ عیار و نقره ۹۹۹ از بازار داخل (نبض، TGJU، آلان‌چند، کیف‌پول).</div><div>• <strong>اولویت ۲ (رزرو خودکار):</strong> محاسبه از طریق فرمول <code>(انس جهانی ÷ 31.1034768) × عیار × تتر</code>.</div></div></div></div></div>
+      <div class="glass-panel p-5 sm:p-6 rounded-2xl shadow-sm lg:col-span-7"><div class="flex items-center justify-between mb-5 pb-3 border-b border-slate-200/80 dark:border-slate-800/80"><div><h3 class="font-black text-sm flex items-center gap-2 text-slate-800 dark:text-slate-100"><i data-lucide="sliders" class="w-4 h-4 text-brand-500"></i>ثبت و ویرایش موجودی دارایی‌ها</h3><p class="text-[11px] text-slate-400 mt-0.5">مقادیر واردشده در پروفایل فعال فعلی ذخیره می‌شوند</p></div><span id="manageProfileBadge" class="text-[10px] font-bold bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20 px-2.5 py-1 rounded-lg">پروفایل اصلی</span></div><form id="assetForm" onsubmit="saveAssets(event)"><div id="assetsInputsContainer" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div><div class="mt-5 pt-4 border-t border-slate-200/80 dark:border-slate-800/80"><div class="flex items-center justify-between mb-1.5"><label for="initial_capital" class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5"><i data-lucide="piggy-bank" class="w-4 h-4 text-blue-500"></i>سرمایه اولیه واردشده (بر حسب دلار)</label><span id="preview_initial_capital" class="text-[10px] font-bold text-blue-600 dark:text-blue-400 num-tabular" dir="ltr">$0</span></div><div class="relative"><input type="number" step="any" id="initial_capital" value="0" placeholder="0" oninput="updateInputPreview('initial_capital', 'دلار', true)" class="w-full pl-3 pr-9 py-2.5 bg-blue-50/60 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800/60 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-xs font-bold num-tabular transition"><span class="absolute right-3 top-2.5 text-blue-500"><i data-lucide="dollar-sign" class="w-4 h-4"></i></span></div></div><button type="submit" class="w-full mt-5 py-3 bg-gradient-to-r from-brand-600 to-brand-500 hover:from-brand-700 hover:to-brand-600 text-white rounded-xl text-xs font-bold shadow-lg shadow-brand-500/25 transition-all flex items-center justify-center gap-2 active:scale-[0.99]"><i data-lucide="save" class="w-4 h-4"></i>ذخیره موجودی در پروفایل فعلی</button></form></div>
+      <div class="glass-panel p-5 sm:p-6 rounded-2xl shadow-sm lg:col-span-5"><div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80"><div><h3 class="font-black text-sm flex items-center gap-2 text-slate-800 dark:text-slate-100"><i data-lucide="settings-2" class="w-4 h-4 text-amber-500"></i>تنظیمات نرخ رزرو و کسورات مس</h3><p class="text-[11px] text-slate-400 mt-0.5">در صورت عدم دسترسی به نرخ مستقیم، فرمول جهانی و سپس این اعداد اعمال می‌شوند</p></div></div><div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs"><div><label for="fallback_usdt" class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5">تتر رزرو (تومان)</label><input type="number" step="any" id="fallback_usdt" value="232000" onchange="saveConfig('usdt')" class="w-full p-2.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-xs font-bold num-tabular"></div><div><label for="fallback_gold" class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5">انس طلا ($ پشتیبان)</label><input type="number" step="any" id="fallback_gold" value="2400" onchange="saveConfig('gold')" class="w-full p-2.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-xs font-bold num-tabular"></div><div><label for="fallback_silver" class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5">انس نقره ($ پشتیبان)</label><input type="number" step="any" id="fallback_silver" value="28.5" onchange="saveConfig('silver')" class="w-full p-2.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-xs font-bold num-tabular"></div><div><label for="fallback_copper" class="block text-[11px] font-bold text-slate-600 dark:text-slate-300 mb-1.5 flex items-center justify-between"><span>قیمت مس ($ تن/پوند)</span><span id="copperSourceIndicator" class="text-[9px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded hidden">آنلاین</span></label><input type="number" step="any" id="fallback_copper" value="14238.5" onchange="saveConfig('copper')" class="w-full p-2.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-xs font-bold num-tabular transition-colors duration-300"></div><div class="sm:col-span-2 mt-1 pt-4 border-t border-slate-200/80 dark:border-slate-800/80"><label for="copper_discount" class="block text-xs font-bold text-slate-700 dark:text-slate-200 mb-1.5 flex items-center gap-1.5"><i data-lucide="percent" class="w-3.5 h-3.5 text-brand-500"></i>کسر دستی از قیمت جهانی مس (درصد %)</label><input type="number" step="any" id="copper_discount" value="0" onchange="saveConfig('discount')" class="w-full p-2.5 bg-slate-100/80 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-brand-500 text-xs font-black text-brand-600 dark:text-brand-400 num-tabular"><div class="mt-2.5 p-3 rounded-xl bg-slate-100 dark:bg-slate-900/90 border border-slate-200/70 dark:border-slate-800 text-[10px] text-slate-500 dark:text-slate-400 space-y-1 leading-relaxed"><div class="font-bold text-slate-700 dark:text-slate-300">منطق هوشمند قیمت‌گذاری و پروفایل‌ها:</div><div>• هر پروفایل دارای موجودی، سرمایه اولیه و درصد کسر مس مستقل است.</div><div>• با دکمه «خروجی بکاپ (JSON)» می‌توانید از تمام پروفایل‌های خود نسخه پشتیبان بگیرید.</div></div></div></div></div>
     </div></div>
+    <!-- تب ۳: ترکیب و تحلیل -->
     <div id="tab-analysis" class="tab-pane hidden fade-in space-y-6">
-      <div class="glass-panel p-5 sm:p-6 rounded-2xl shadow-sm"><div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80"><h3 class="font-black text-sm flex items-center gap-2"><i data-lucide="pie-chart" class="w-4 h-4 text-brand-500"></i>ترکیب و وزن دارایی‌های پرتفوی</h3><span class="text-[11px] text-slate-400">بر اساس ارزش تومانی</span></div><div id="analysisEmptyState" class="hidden py-12 text-center space-y-3"><div class="w-12 h-12 rounded-2xl bg-slate-200/70 dark:bg-slate-800 flex items-center justify-center mx-auto text-slate-400"><i data-lucide="pie-chart" class="w-6 h-6"></i></div><div class="text-sm font-bold text-slate-700 dark:text-slate-300">هنوز موجودی فعالی ثبت نشده است</div><p class="text-xs text-slate-400 max-w-sm mx-auto">برای مشاهده نمودار پراکندگی و سهم هر دارایی، ابتدا مقادیر دارایی‌های خود را وارد کنید.</p><button onclick="switchTab('manage')" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-500 text-white text-xs font-bold shadow-md shadow-brand-500/20 hover:bg-brand-600 transition"><i data-lucide="plus-circle" class="w-4 h-4"></i><span>ثبت موجودی دارایی‌ها</span></button></div><div id="analysisChartContent" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center"><div class="lg:col-span-6 relative h-80 flex items-center justify-center"><canvas id="portfolioChart"></canvas><div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center"><span class="text-[10px] font-bold text-slate-400">ارزش کل دلاری</span><span id="chartCenterUSDT" class="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400 num-tabular mt-0.5" dir="ltr">$0.00</span></div></div><div id="chartLegendContainer" class="lg:col-span-6 space-y-2.5 max-h-80 overflow-y-auto pl-1"></div></div></div>
+      <div class="glass-panel p-5 sm:p-6 rounded-2xl shadow-sm"><div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80"><h3 class="font-black text-sm flex items-center gap-2"><i data-lucide="pie-chart" class="w-4 h-4 text-brand-500"></i>ترکیب و وزن دارایی‌های پرتفوی</h3><span class="text-[11px] text-slate-400">بر اساس ارزش تومانی</span></div><div id="analysisEmptyState" class="hidden py-12 text-center space-y-3"><div class="w-12 h-12 rounded-2xl bg-slate-200/70 dark:bg-slate-800 flex items-center justify-center mx-auto text-slate-400"><i data-lucide="pie-chart" class="w-6 h-6"></i></div><div class="text-sm font-bold text-slate-700 dark:text-slate-300">در این پروفایل هنوز موجودی فعالی ثبت نشده است</div><p class="text-xs text-slate-400 max-w-sm mx-auto">برای مشاهده نمودار پراکندگی و سهم هر دارایی، ابتدا مقادیر دارایی‌های این پروفایل را وارد کنید.</p><button onclick="switchTab('manage')" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-500 text-white text-xs font-bold shadow-md shadow-brand-500/20 hover:bg-brand-600 transition"><i data-lucide="plus-circle" class="w-4 h-4"></i><span>ثبت موجودی دارایی‌ها</span></button></div><div id="analysisChartContent" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center"><div class="lg:col-span-6 relative h-80 flex items-center justify-center"><canvas id="portfolioChart"></canvas><div class="pointer-events-none absolute inset-0 flex flex-col items-center justify-center text-center"><span class="text-[10px] font-bold text-slate-400">ارزش کل دلاری</span><span id="chartCenterUSDT" class="text-base sm:text-lg font-black text-emerald-600 dark:text-emerald-400 num-tabular mt-0.5" dir="ltr">$0.00</span></div></div><div id="chartLegendContainer" class="lg:col-span-6 space-y-2.5 max-h-80 overflow-y-auto pl-1"></div></div></div>
       <div class="glass-panel p-5 sm:p-6 rounded-2xl shadow-sm"><div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80"><h3 class="font-black text-sm flex items-center gap-2"><i data-lucide="list-tree" class="w-4 h-4 text-brand-500"></i>جدول تفکیکی محاسبات ریالی و دلاری</h3></div><div class="overflow-x-auto"><table class="w-full text-right text-xs num-tabular"><thead><tr class="text-slate-400 border-b border-slate-200/70 dark:border-slate-800/80 text-[11px]"><th class="pb-3 font-bold">کلاس دارایی</th><th class="pb-3 font-bold">موجودی ثبت‌شده</th><th class="pb-3 font-bold">نرخ واحد (USD)</th><th class="pb-3 font-bold">نرخ واحد (تومان)</th><th class="pb-3 font-bold">معادل دلاری کل</th><th class="pb-3 font-bold">ارزش کل (تومان)</th><th class="pb-3 font-bold text-left">سهم</th></tr></thead><tbody id="breakdownTableBody" class="divide-y divide-slate-200/50 dark:divide-slate-800/60"></tbody></table></div></div>
     </div>
   </main>
-  <div id="exportSnapshotContainer" class="fixed -left-[9999px] top-0 w-[740px] p-8 bg-slate-950 text-slate-100 border border-slate-800 rounded-3xl space-y-6 num-tabular" style="direction: rtl;"><div class="flex items-center justify-between border-b border-slate-800 pb-5"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-gradient-to-tr from-brand-600 to-brand-400 text-white rounded-2xl flex items-center justify-center font-bold shadow-lg shadow-brand-500/20"><i data-lucide="wallet" class="w-6 h-6"></i></div><div><h2 class="text-xl font-black text-white leading-tight">گزارش وضعیت پرتفوی دارایی‌ها</h2><p class="text-xs text-slate-400 mt-1">محاسبه هوشمند بر پایه نرخ مستقیم بازار و تتر آنلاین</p></div></div><div class="text-left text-xs text-slate-400 space-y-1"><div><span class="text-slate-200 font-bold text-sm" id="snapJalali">--</span></div><div dir="ltr" class="font-mono text-xs text-slate-400"><span id="snapGregorian">--</span> | <span id="snapTime">--</span></div></div></div><div class="grid grid-cols-2 gap-4"><div class="bg-slate-900/95 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between"><div class="space-y-1"><div class="text-xs text-slate-400 font-bold">ارزش کل دارایی‌ها</div><div class="flex items-baseline gap-2 pt-1"><span class="text-3xl font-black text-white" id="snapTotalTomanVal">0</span><span class="text-sm font-bold text-brand-400">تومان</span></div></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-800/80"><span class="text-[11px] text-slate-400 font-bold">معادل دلاری (تتر):</span><span class="text-lg font-black text-emerald-400" dir="ltr" id="snapTotalUSDT">$0.00</span></div></div><div class="bg-slate-900/95 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between"><div class="space-y-1"><div class="text-xs text-slate-400 font-bold">سرمایه اولیه واردشده</div><div class="flex items-baseline gap-1.5 pt-1" dir="ltr"><span class="text-sm font-bold text-slate-400">$</span><span class="text-3xl font-black text-blue-400" id="snapInitCapDisplay">0</span></div></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-800/80"><span class="text-[11px] text-slate-400 font-bold">سود / زیان خالص:</span><span class="text-lg font-black" dir="ltr" id="snapPnlDisplay">$0.00</span></div></div></div><div><div class="text-xs font-black text-slate-400 mb-3 px-1">تفکیک دارایی‌ها</div><div id="snapBreakdownList" class="space-y-2.5"></div></div><div class="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400"><div class="flex items-center gap-4"><span>نرخ محاسبه تتر: <strong id="snapUsdtRate" class="text-slate-200 font-bold">---</strong></span><span>انس طلا: <strong id="snapGoldRate" class="text-slate-200 font-bold" dir="ltr">---</strong></span></div><span class="text-[11px] text-slate-500">داشبورد هوشمند دارایی‌ها</span></div></div>
+
+  <!-- منوی شناور پایینی (Floating Bottom Glass Dock) - بدون اسکرول افقی در هیچ سایزی -->
+  <nav aria-label="منوی جابجایی صفحات" class="fixed bottom-4 inset-x-0 z-40 flex justify-center px-3 sm:px-4 pointer-events-none">
+    <div class="pointer-events-auto w-full max-w-md glass-dock p-1.5 rounded-2xl grid grid-cols-3 gap-1.5">
+      <button id="btn-tab-dashboard" onclick="switchTab('dashboard')" class=" py-2 sm:py-2.5 px-2 rounded-xl text-[11px] sm:text-xs font-extrabold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-lg shadow-brand-500/30 active:scale-95">
+        <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i>
+        <span>داشبورد</span>
+      </button>
+      <button id="btn-tab-manage" onclick="switchTab('manage')" class="py-2 sm:py-2.5 px-2 rounded-xl text-[11px] sm:text-xs font-extrabold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/70 active:scale-95">
+        <i data-lucide="sliders-horizontal" class="w-4 h-4 shrink-0"></i>
+        <span>موجودی و نرخ</span>
+      </button>
+      <button id="btn-tab-analysis" onclick="switchTab('analysis')" class="py-2 sm:py-2.5 px-2 rounded-xl text-[11px] sm:text-xs font-extrabold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/70 active:scale-95">
+        <i data-lucide="pie-chart" class="w-4 h-4 shrink-0"></i>
+        <span>ترکیب و تحلیل</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- قالب مخفی خروجی تصویر -->
+  <div id="exportSnapshotContainer" class="fixed -left-[9999px] top-0 w-[740px] p-8 bg-slate-950 text-slate-100 border border-slate-800 rounded-3xl space-y-6 num-tabular" style="direction: rtl;"><div class="flex items-center justify-between border-b border-slate-800 pb-5"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-gradient-to-tr from-brand-600 to-brand-400 text-white rounded-2xl flex items-center justify-center font-bold shadow-lg shadow-brand-500/20"><i data-lucide="wallet" class="w-6 h-6"></i></div><div><div class="flex items-center gap-2"><h2 class="text-xl font-black text-white leading-tight">گزارش وضعیت پرتفوی دارایی‌ها</h2><span id="snapProfileBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">پروفایل اصلی</span></div><p class="text-xs text-slate-400 mt-1">محاسبه هوشمند بر پایه نرخ مستقیم بازار و تتر آنلاین</p></div></div><div class="text-left text-xs text-slate-400 space-y-1"><div><span class="text-slate-200 font-bold text-sm" id="snapJalali">--</span></div><div dir="ltr" class="font-mono text-xs text-slate-400"><span id="snapGregorian">--</span> | <span id="snapTime">--</span></div></div></div><div class="grid grid-cols-2 gap-4"><div class="bg-slate-900/95 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between"><div class="space-y-1"><div class="text-xs text-slate-400 font-bold">ارزش کل دارایی‌ها</div><div class="flex items-baseline gap-2 pt-1"><span class="text-3xl font-black text-white" id="snapTotalTomanVal">0</span><span class="text-sm font-bold text-brand-400">تومان</span></div></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-800/80"><span class="text-[11px] text-slate-400 font-bold">معادل دلاری (تتر):</span><span class="text-lg font-black text-emerald-400" dir="ltr" id="snapTotalUSDT">$0.00</span></div></div><div class="bg-slate-900/95 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between"><div class="space-y-1"><div class="text-xs text-slate-400 font-bold">سرمایه اولیه واردشده</div><div class="flex items-baseline gap-1.5 pt-1" dir="ltr"><span class="text-sm font-bold text-slate-400">$</span><span class="text-3xl font-black text-blue-400" id="snapInitCapDisplay">0</span></div></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-800/80"><span class="text-[11px] text-slate-400 font-bold">سود / زیان خالص:</span><span class="text-lg font-black" dir="ltr" id="snapPnlDisplay">$0.00</span></div></div></div><div><div class="text-xs font-black text-slate-400 mb-3 px-1">تفکیک دارایی‌ها</div><div id="snapBreakdownList" class="space-y-2.5"></div></div><div class="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400"><div class="flex items-center gap-4"><span>نرخ محاسبه تتر: <strong id="snapUsdtRate" class="text-slate-200 font-bold">---</strong></span><span>انس طلا: <strong id="snapGoldRate" class="text-slate-200 font-bold" dir="ltr">---</strong></span></div><span class="text-[11px] text-slate-500">داشبورد هوشمند دارایی‌ها</span></div></div>
+
   <script>
+    const APP_PREFIX = 'PORTFOLIO_PRO';
+    const PROFILE_KEYS = ['app_qty_v10', 'app_initial_capital', 'fb_usdt', 'fb_gold', 'fb_silver', 'fb_copper', 'fb_copper_discount'];
     const ASSET_DEFINITIONS = [
       { id: 'gold18', name: 'طلا ۱۸ عیار', unit: 'گرم', type: 'gold', purity: 0.75, icon: 'sparkles', color: '#f59e0b' },
       { id: 'silver999', name: 'نقره ۹۹۹', unit: 'گرم', type: 'silver', purity: 0.999, icon: 'disc', color: '#94a3b8' },
@@ -59,6 +103,7 @@
       { id: 'toman', name: 'دارایی نقد', unit: 'تومان', type: 'toman', purity: 1.0, icon: 'banknote', color: '#3b82f6' },
       { id: 'bourse', name: 'بورس', unit: 'تومان', type: 'toman', purity: 1.0, icon: 'trending-up', color: '#8b5cf6' }
     ];
+    let profilesList = []; let activeProfileId = 'default';
     let assetQuantities = { gold18: 0, silver999: 0, copper999: 0, usdt: 0, toman: 0, bourse: 0 };
     let livePricesUSD = { gold: 2400, silver: 28.5, copper: 14238.5 };
     let liveUSDTPrice = { price: 232000, source: 'در حال استخراج...', isOnline: false };
@@ -67,7 +112,148 @@
     let myChart = null; let toastTimeout = null;
     const GRAMS_PER_TROY_OUNCE = 31.1034768; const LB_TO_KG = 2.20462262;
 
-    window.addEventListener('DOMContentLoaded', () => { loadStoredData(); initChart(); renderUIInputs(); recalculateAndRender(); updateAllPrices(); });
+    const ProfileStorage = {
+      listKey: `${APP_PREFIX}_profiles_list`,
+      activeKey: `${APP_PREFIX}_active_profile`,
+      migratedKey: `${APP_PREFIX}_migrated_v1`,
+      buildKey(profileId, key) { return `${APP_PREFIX}_${profileId}_${key}`; },
+      getItem(key) { return localStorage.getItem(this.buildKey(activeProfileId, key)); },
+      setItem(key, val) { localStorage.setItem(this.buildKey(activeProfileId, key), val); },
+      init() {
+        try {
+          const rawList = localStorage.getItem(this.listKey);
+          profilesList = rawList ? JSON.parse(rawList) : [];
+          if (!Array.isArray(profilesList) || profilesList.length === 0) {
+            profilesList = [{ id: 'default', name: 'پروفایل اصلی (پیش‌فرض)' }];
+            localStorage.setItem(this.listKey, JSON.stringify(profilesList));
+          }
+          const savedActive = localStorage.getItem(this.activeKey);
+          activeProfileId = profilesList.some(p => p.id === savedActive) ? savedActive : profilesList[0].id;
+          localStorage.setItem(this.activeKey, activeProfileId);
+          if (!localStorage.getItem(this.migratedKey)) {
+            PROFILE_KEYS.forEach(k => {
+              const oldVal = localStorage.getItem(k);
+              const targetKey = this.buildKey('default', k);
+              if (oldVal !== null && localStorage.getItem(targetKey) === null) localStorage.setItem(targetKey, oldVal);
+            });
+            localStorage.setItem(this.migratedKey, 'true');
+          }
+        } catch (e) {
+          profilesList = [{ id: 'default', name: 'پروفایل اصلی (پیش‌فرض)' }]; activeProfileId = 'default';
+        }
+      },
+      saveList() { localStorage.setItem(this.listKey, JSON.stringify(profilesList)); },
+      getActiveName() { return (profilesList.find(p => p.id === activeProfileId)?.name) || 'پروفایل اصلی'; }
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+      ProfileStorage.init(); renderProfileBar(); loadStoredData(); initChart(); renderUIInputs(); recalculateAndRender(); updateAllPrices();
+    });
+
+    function renderProfileBar() {
+      const sel = document.getElementById('profileSelect'); if (!sel) return;
+      sel.innerHTML = '';
+      profilesList.forEach(p => {
+        const opt = document.createElement('option'); opt.value = p.id; opt.textContent = p.name;
+        if (p.id === activeProfileId) opt.selected = true;
+        sel.appendChild(opt);
+      });
+      const activeName = ProfileStorage.getActiveName();
+      ['headerProfileBadge', 'manageProfileBadge', 'snapProfileBadge'].forEach(id => { const el = document.getElementById(id); if (el) el.innerText = activeName; });
+    }
+
+    function switchProfile(newProfileId) {
+      if (!profilesList.some(p => p.id === newProfileId)) return;
+      activeProfileId = newProfileId;
+      localStorage.setItem(ProfileStorage.activeKey, activeProfileId);
+      renderProfileBar(); loadStoredData(); renderUIInputs(); recalculateAndRender();
+      showToast(`پروفایل «${ProfileStorage.getActiveName()}» بارگذاری شد`);
+    }
+
+    function createNewProfile() {
+      const rawName = prompt('نام پروفایل (سبد دارایی) جدید را وارد کنید:');
+      if (rawName === null) return;
+      const name = rawName.trim();
+      if (!name) { showToast('نام پروفایل نمی‌تواند خالی باشد'); return; }
+      if (profilesList.some(p => p.name === name)) { showToast('این نام قبلاً ثبت شده است'); return; }
+      const newId = 'p_' + Date.now();
+      ['fb_usdt', 'fb_gold', 'fb_silver', 'fb_copper'].forEach(k => {
+        const cur = ProfileStorage.getItem(k);
+        if (cur !== null) localStorage.setItem(ProfileStorage.buildKey(newId, k), cur);
+      });
+      localStorage.setItem(ProfileStorage.buildKey(newId, 'app_qty_v10'), JSON.stringify({ gold18: 0, silver999: 0, copper999: 0, usdt: 0, toman: 0, bourse: 0 }));
+      localStorage.setItem(ProfileStorage.buildKey(newId, 'app_initial_capital'), '0');
+      localStorage.setItem(ProfileStorage.buildKey(newId, 'fb_copper_discount'), '0');
+      profilesList.push({ id: newId, name });
+      ProfileStorage.saveList();
+      switchProfile(newId);
+    }
+
+    function renameCurrentProfile() {
+      const current = profilesList.find(p => p.id === activeProfileId); if (!current) return;
+      const rawName = prompt('نام جدید پروفایل را وارد کنید:', current.name);
+      if (rawName === null) return;
+      const name = rawName.trim();
+      if (!name) { showToast('نام پروفایل نمی‌تواند خالی باشد'); return; }
+      if (profilesList.some(p => p.id !== activeProfileId && p.name === name)) { showToast('این نام تکراری است'); return; }
+      current.name = name; ProfileStorage.saveList(); renderProfileBar();
+      showToast('نام پروفایل با موفقیت ویرایش شد');
+    }
+
+    function deleteCurrentProfile() {
+      if (profilesList.length <= 1) { showToast('امکان حذف تنها پروفایل باقی‌مانده وجود ندارد'); return; }
+      const current = profilesList.find(p => p.id === activeProfileId);
+      if (!confirm(`آیا از حذف کامل پروفایل «${current?.name || ''}» و موجودی‌های ثبت‌شده در آن اطمینان دارید؟`)) return;
+      PROFILE_KEYS.forEach(k => localStorage.removeItem(ProfileStorage.buildKey(activeProfileId, k)));
+      profilesList = profilesList.filter(p => p.id !== activeProfileId);
+      ProfileStorage.saveList();
+      switchProfile(profilesList[0].id);
+      showToast('پروفایل انتخاب‌شده حذف گردید');
+    }
+
+    function exportJSONBackup() {
+      const backupObj = { app: APP_PREFIX, version: 1, exportedAt: new Date().toISOString(), activeProfileId, profilesList, profilesData: {} };
+      profilesList.forEach(p => {
+        backupObj.profilesData[p.id] = {};
+        PROFILE_KEYS.forEach(k => {
+          const val = localStorage.getItem(ProfileStorage.buildKey(p.id, k));
+          if (val !== null) backupObj.profilesData[p.id][k] = val;
+        });
+      });
+      const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = `portfolio-backup-${new Date().toISOString().slice(0, 10)}.json`; a.click();
+      URL.revokeObjectURL(url);
+      showToast('فایل پشتیبان (JSON) از تمام پروفایل‌ها دانلود شد');
+    }
+
+    function importJSONBackup(event) {
+      const file = event.target.files?.[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (!parsed || !Array.isArray(parsed.profilesList) || parsed.profilesList.length === 0 || typeof parsed.profilesData !== 'object') {
+            alert('ساختار فایل JSON معتبر نیست.'); return;
+          }
+          if (!confirm(`آیا مایلید ${parsed.profilesList.length} پروفایل موجود در فایل پشتیبان جایگزین اطلاعات فعلی شوند؟`)) return;
+          profilesList.forEach(p => PROFILE_KEYS.forEach(k => localStorage.removeItem(ProfileStorage.buildKey(p.id, k))));
+          profilesList = parsed.profilesList;
+          activeProfileId = profilesList.some(p => p.id === parsed.activeProfileId) ? parsed.activeProfileId : profilesList[0].id;
+          ProfileStorage.saveList();
+          localStorage.setItem(ProfileStorage.activeKey, activeProfileId);
+          profilesList.forEach(p => {
+            const pData = parsed.profilesData[p.id] || {};
+            PROFILE_KEYS.forEach(k => { if (pData[k] !== undefined && pData[k] !== null) localStorage.setItem(ProfileStorage.buildKey(p.id, k), String(pData[k])); });
+          });
+          renderProfileBar(); loadStoredData(); renderUIInputs(); recalculateAndRender();
+          showToast('اطلاعات تمام پروفایل‌ها با موفقیت بازیابی شد');
+        } catch (err) { alert('خطا در خواندن فایل JSON پشتیبان.'); }
+        finally { event.target.value = ''; }
+      };
+      reader.readAsText(file);
+    }
 
     async function fetchWithTimeout(url, timeoutMs = 4000) {
       const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -77,48 +263,54 @@
 
     function showToast(message) {
       const c = document.getElementById('toastContainer'); const m = document.getElementById('toastMessage');
-      if (!c || !m) return; m.innerText = message; c.classList.remove('translate-y-20', 'opacity-0');
-      if (toastTimeout) clearTimeout(toastTimeout); toastTimeout = setTimeout(() => c.classList.add('translate-y-20', 'opacity-0'), 2800);
+      if (!c || !m) return; m.innerText = message; c.classList.remove('translate-y-12', 'opacity-0');
+      if (toastTimeout) clearTimeout(toastTimeout); toastTimeout = setTimeout(() => c.classList.add('translate-y-12', 'opacity-0'), 2800);
     }
 
     function switchTab(tabName) {
       ['dashboard', 'manage', 'analysis'].forEach(t => {
         document.getElementById('tab-' + t).classList.add('hidden');
         const btn = document.getElementById('btn-tab-' + t);
-        btn.classList.remove('bg-gradient-to-r', 'from-brand-600', 'to-brand-500', 'text-white', 'shadow-md', 'shadow-brand-500/25');
-        btn.classList.add('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-200/50', 'dark:hover:bg-slate-800/60');
+        btn.classList.remove('bg-gradient-to-r', 'from-brand-600', 'to-brand-500', 'text-white', 'shadow-lg', 'shadow-brand-500/30');
+        btn.classList.add('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-200/60', 'dark:hover:bg-slate-800/70');
       });
       document.getElementById('tab-' + tabName).classList.remove('hidden');
       const activeBtn = document.getElementById('btn-tab-' + tabName);
-      activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-200/50', 'dark:hover:bg-slate-800/60');
-      activeBtn.classList.add('bg-gradient-to-r', 'from-brand-600', 'to-brand-500', 'text-white', 'shadow-md', 'shadow-brand-500/25');
+      activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-200/60', 'dark:hover:bg-slate-800/70');
+      activeBtn.classList.add('bg-gradient-to-r', 'from-brand-600', 'to-brand-500', 'text-white', 'shadow-lg', 'shadow-brand-500/30');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       if (tabName === 'analysis' && myChart) setTimeout(() => { myChart.resize(); myChart.update(); }, 50);
     }
 
     function loadStoredData() {
-      try { const q = localStorage.getItem('app_qty_v10'); if (q) assetQuantities = { ...assetQuantities, ...JSON.parse(q) }; } catch (e) {}
-      const map = { fb_usdt: 'fallback_usdt', fb_gold: 'fallback_gold', fb_silver: 'fallback_silver', fb_copper: 'fallback_copper', fb_copper_discount: 'copper_discount', app_initial_capital: 'initial_capital' };
-      Object.entries(map).forEach(([k, id]) => { const v = localStorage.getItem(k); if (v !== null) document.getElementById(id).value = v; });
-      liveUSDTPrice.price = parseFloat(document.getElementById('fallback_usdt').value) || 232000;
-      livePricesUSD.gold = parseFloat(document.getElementById('fallback_gold').value) || 2400;
-      livePricesUSD.silver = parseFloat(document.getElementById('fallback_silver').value) || 28.5;
-      livePricesUSD.copper = parseFloat(document.getElementById('fallback_copper').value) || 14238.5;
+      assetQuantities = { gold18: 0, silver999: 0, copper999: 0, usdt: 0, toman: 0, bourse: 0 };
+      try { const q = ProfileStorage.getItem('app_qty_v10'); if (q) assetQuantities = { ...assetQuantities, ...JSON.parse(q) }; } catch (e) {}
+      const defaults = { fb_usdt: ['fallback_usdt', '232000'], fb_gold: ['fallback_gold', '2400'], fb_silver: ['fallback_silver', '28.5'], fb_copper: ['fallback_copper', '14238.5'], fb_copper_discount: ['copper_discount', '0'], app_initial_capital: ['initial_capital', '0'] };
+      Object.entries(defaults).forEach(([k, [id, defVal]]) => {
+        const v = ProfileStorage.getItem(k);
+        const el = document.getElementById(id);
+        if (el) el.value = (v !== null && v !== '') ? v : defVal;
+      });
+      if (!liveUSDTPrice.isOnline) liveUSDTPrice.price = parseFloat(document.getElementById('fallback_usdt').value) || 232000;
+      if (usdSources.gold === 'رزرو دستی') livePricesUSD.gold = parseFloat(document.getElementById('fallback_gold').value) || 2400;
+      if (usdSources.silver === 'رزرو دستی') livePricesUSD.silver = parseFloat(document.getElementById('fallback_silver').value) || 28.5;
+      if (usdSources.copper === 'رزرو دستی') livePricesUSD.copper = parseFloat(document.getElementById('fallback_copper').value) || 14238.5;
     }
 
     function saveAssets(e) {
       if (e) e.preventDefault();
       ASSET_DEFINITIONS.forEach(a => { const el = document.getElementById(`qty_${a.id}`); if (el) assetQuantities[a.id] = parseFloat(el.value) || 0; });
-      localStorage.setItem('app_qty_v10', JSON.stringify(assetQuantities));
-      localStorage.setItem('app_initial_capital', document.getElementById('initial_capital').value);
-      recalculateAndRender(); switchTab('dashboard'); showToast('موجودی دارایی‌ها با موفقیت ذخیره شد');
+      ProfileStorage.setItem('app_qty_v10', JSON.stringify(assetQuantities));
+      ProfileStorage.setItem('app_initial_capital', document.getElementById('initial_capital').value);
+      recalculateAndRender(); switchTab('dashboard'); showToast(`موجودی «${ProfileStorage.getActiveName()}» ذخیره شد`);
     }
 
     function saveConfig(changedField) {
       const fbUsdtVal = document.getElementById('fallback_usdt').value; const fbGoldVal = document.getElementById('fallback_gold').value;
       const fbSilverVal = document.getElementById('fallback_silver').value; const fbCopperVal = document.getElementById('fallback_copper').value;
       const fbDiscountVal = document.getElementById('copper_discount').value;
-      localStorage.setItem('fb_usdt', fbUsdtVal); localStorage.setItem('fb_gold', fbGoldVal);
-      localStorage.setItem('fb_silver', fbSilverVal); localStorage.setItem('fb_copper', fbCopperVal); localStorage.setItem('fb_copper_discount', fbDiscountVal);
+      ProfileStorage.setItem('fb_usdt', fbUsdtVal); ProfileStorage.setItem('fb_gold', fbGoldVal);
+      ProfileStorage.setItem('fb_silver', fbSilverVal); ProfileStorage.setItem('fb_copper', fbCopperVal); ProfileStorage.setItem('fb_copper_discount', fbDiscountVal);
       if (changedField === 'copper' || usdSources.copper === 'رزرو دستی') {
         livePricesUSD.copper = parseFloat(fbCopperVal) || 14238.5; usdSources.copper = 'رزرو دستی';
         document.getElementById('copperSourceIndicator')?.classList.add('hidden');
@@ -130,7 +322,7 @@
         liveUSDTPrice.price = parseFloat(fbUsdtVal) || 232000;
         document.getElementById('usdtDisplayRate').innerText = Math.round(liveUSDTPrice.price).toLocaleString('fa-IR');
       }
-      recalculateAndRender(); showToast('تنظیمات نرخ پشتیبان و کسورات اعمال شد');
+      recalculateAndRender(); showToast('تنظیمات نرخ پشتیبان و کسورات ذخیره شد');
     }
 
     function updateInputPreview(inputId, unit, isUSD = false) {
@@ -511,6 +703,7 @@
         document.getElementById('snapJalali').innerText = now.toLocaleDateString('fa-IR-u-ca-persian', { year: 'numeric', month: 'long', day: 'numeric' });
         document.getElementById('snapGregorian').innerText = now.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
         document.getElementById('snapTime').innerText = now.toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('snapProfileBadge').innerText = ProfileStorage.getActiveName();
         const m = calculatePortfolioMetrics();
         document.getElementById('snapInitCapDisplay').innerText = m.initCap.toLocaleString('en-US');
         document.getElementById('snapTotalTomanVal').innerText = Math.round(m.grandTotalToman).toLocaleString('fa-IR');
@@ -530,7 +723,7 @@
         });
         lucide.createIcons();
         const canvas = await html2canvas(document.getElementById('exportSnapshotContainer'), { scale: 2, backgroundColor: '#020617', useCORS: true, logging: false });
-        const link = document.createElement('a'); link.download = `portfolio-summary-${now.toISOString().slice(0, 10)}.png`; link.href = canvas.toDataURL('image/png'); link.click();
+        const link = document.createElement('a'); link.download = `portfolio-${ProfileStorage.getActiveName()}-${now.toISOString().slice(0, 10)}.png`; link.href = canvas.toDataURL('image/png'); link.click();
         showToast('تصویر گزارش با کیفیت بالا دانلود شد');
       } catch (err) { showToast('خطا در تولید تصویر گزارش'); }
       finally { if (exportBtn) exportBtn.disabled = false; if (exportBtnText) exportBtnText.innerText = 'خروجی تصویر خلاصه'; }
