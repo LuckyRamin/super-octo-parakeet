@@ -4,10 +4,10 @@
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="theme-color" content="#020617"><meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="پرتفوی من">
-  <title>داشبورد هوشمند مدیریت دارایی</title>
+  <title>داشبورد هوشمند دارایی‌ها</title>
   <link rel="manifest" href="./manifest.json">
-  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
-  <link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png">
+  <link rel="icon" type="image/png" href="https://wsrv.nl/?url=cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4b9.png&w=192&h=192&output=png">
+  <link rel="apple-touch-icon" href="https://wsrv.nl/?url=cdn.jsdelivr.net/gh/twitter/twemoji@14.0.2/assets/72x72/1f4b9.png&w=192&h=192&output=png">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -35,22 +35,8 @@
 <body class="bg-slate-100 dark:bg-slate-950 bg-grid-pattern text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300 pb-28 relative overflow-x-hidden">
   <div class="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 w-[650px] h-[220px] bg-brand-500/10 dark:bg-brand-500/15 blur-[110px] rounded-full -z-10"></div>
   <div id="toastContainer" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 transform translate-y-12 opacity-0 pointer-events-none transition-all duration-300"><div class="glass-panel px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2.5 border border-emerald-500/40 bg-slate-900/95 text-white text-xs font-bold whitespace-nowrap"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0"></i><span id="toastMessage">اطلاعات با موفقیت ذخیره شد</span></div></div>
-  <!-- مودال عیب‌یاب زنده نصب WebAPK -->
-  <div id="installGuideModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm fade-in">
-    <div class="glass-panel max-w-md w-full p-5 rounded-3xl shadow-2xl border border-slate-700 space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-        <div class="flex items-center gap-2 text-sm font-black text-slate-900 dark:text-white"><i data-lucide="cpu" class="w-5 h-5 text-brand-500"></i><span>عیب‌یاب هوشمند نصب برنامه (WebAPK)</span></div>
-        <button onclick="closeInstallModal()" class="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400"><i data-lucide="x" class="w-4 h-4"></i></button>
-      </div>
-      <div id="installModalBody" class="text-xs space-y-2.5 leading-relaxed text-slate-600 dark:text-slate-300"></div>
-      <div class="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2">
-        <button onclick="downloadGithubIcons()" class="w-full py-2 px-3 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30 text-xs font-bold flex items-center justify-center gap-2 transition"><i data-lucide="download" class="w-4 h-4"></i><span>دانلود فایل فیزیکی ۲ آیکون PNG (پیشنهادی برای گیت‌هاب)</span></button>
-        <button onclick="closeInstallModal()" class="w-full py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold transition">بستن پنجره</button>
-      </div>
-    </div>
-  </div>
   <!-- Header Bar -->
-  <header class="sticky top-0 z-40 glass-panel border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm"><div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2"><div class="flex items-center gap-2.5"><div class="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-tr from-brand-600 to-brand-400 text-white rounded-xl shadow-lg shadow-brand-500/25 flex items-center justify-center shrink-0"><i data-lucide="wallet" class="w-5 h-5"></i></div><div><div class="flex items-center gap-2"><h1 class="text-xs sm:text-base font-black text-slate-900 dark:text-white leading-tight">داشبورد هوشمند دارایی‌ها</h1><span id="headerProfileBadge" class="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20">پروفایل اصلی</span></div><p class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">نرخ مستقیم بازار داخل + رزرو جهانی و تتر</p></div></div><div class="flex items-center gap-1.5 sm:gap-2"><button id="pwaInstallBtn" onclick="triggerPWAInstall()" title="نصب اپلیکیشن (WebAPK)" class="flex items-center gap-1 px-2.5 py-2 text-xs font-bold bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-xl transition border border-indigo-500/30 active:scale-95"><i data-lucide="smartphone" class="w-4 h-4"></i><span class="hidden lg:inline">نصب اپ</span></button><button id="exportBtn" onclick="exportSummaryAsImage()" title="خروجی تصویر خلاصه" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-xl transition border border-emerald-500/30 active:scale-95"><i data-lucide="camera" class="w-4 h-4"></i><span class="hidden sm:inline" id="exportBtnText">خروجی تصویر</span></button><button onclick="updateAllPrices()" id="refreshBtn" title="به‌روزرسانی آنلاین نرخ‌ها" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 text-xs font-bold bg-brand-500/10 hover:bg-brand-500/20 text-brand-700 dark:text-brand-400 rounded-xl transition border border-brand-500/30 active:scale-95"><i data-lucide="refresh-cw" id="refreshIcon" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">به‌روزرسانی</span></button><button onclick="toggleTheme()" title="تغییر تم" class="p-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-200/60 dark:bg-slate-800/70 rounded-xl border border-slate-300/60 dark:border-slate-700 transition active:scale-95"><i data-lucide="sun" id="themeIcon" class="w-4 h-4"></i></button></div></div></header>
+  <header class="sticky top-0 z-40 glass-panel border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm"><div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2"><div class="flex items-center gap-2.5"><div class="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-tr from-brand-600 to-brand-400 text-white rounded-xl shadow-lg shadow-brand-500/25 flex items-center justify-center shrink-0"><i data-lucide="wallet" class="w-5 h-5"></i></div><div><div class="flex items-center gap-2"><h1 class="text-xs sm:text-base font-black text-slate-900 dark:text-white leading-tight">داشبورد هوشمند دارایی‌ها</h1><span id="headerProfileBadge" class="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20">پروفایل اصلی</span></div><p class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">نرخ مستقیم بازار داخل + رزرو جهانی و تتر</p></div></div><div class="flex items-center gap-1.5 sm:gap-2"><button id="pwaInstallBtn" onclick="triggerPWAInstall()" title="نصب اپلیکیشن" class="hidden items-center gap-1 px-2.5 py-2 text-xs font-bold bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-600 dark:text-indigo-400 rounded-xl transition border border-indigo-500/30 active:scale-95 animate-pulse"><i data-lucide="download" class="w-4 h-4"></i><span>نصب اپ</span></button><button id="exportBtn" onclick="exportSummaryAsImage()" title="خروجی تصویر خلاصه" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-xl transition border border-emerald-500/30 active:scale-95"><i data-lucide="camera" class="w-4 h-4"></i><span class="hidden sm:inline" id="exportBtnText">خروجی تصویر</span></button><button onclick="updateAllPrices()" id="refreshBtn" title="به‌روزرسانی آنلاین نرخ‌ها" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 text-xs font-bold bg-brand-500/10 hover:bg-brand-500/20 text-brand-700 dark:text-brand-400 rounded-xl transition border border-brand-500/30 active:scale-95"><i data-lucide="refresh-cw" id="refreshIcon" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">به‌روزرسانی</span></button><button onclick="toggleTheme()" title="تغییر تم" class="p-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-200/60 dark:bg-slate-800/70 rounded-xl border border-slate-300/60 dark:border-slate-700 transition active:scale-95"><i data-lucide="sun" id="themeIcon" class="w-4 h-4"></i></button></div></div></header>
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
     <!-- نوار ابزار مدیریت چند پروفایلی و بکاپ JSON -->
     <div class="glass-panel rounded-2xl p-2.5 px-3.5 mb-6 flex flex-wrap items-center justify-between gap-3 shadow-sm border-r-4 border-r-indigo-500">
@@ -99,66 +85,35 @@
   <!-- قالب مخفی خروجی تصویر -->
   <div id="exportSnapshotContainer" class="fixed -left-[9999px] top-0 w-[740px] p-8 bg-slate-950 text-slate-100 border border-slate-800 rounded-3xl space-y-6 num-tabular" style="direction: rtl;"><div class="flex items-center justify-between border-b border-slate-800 pb-5"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-gradient-to-tr from-brand-600 to-brand-400 text-white rounded-2xl flex items-center justify-center font-bold shadow-lg shadow-brand-500/20"><i data-lucide="wallet" class="w-6 h-6"></i></div><div><div class="flex items-center gap-2"><h2 class="text-xl font-black text-white leading-tight">گزارش وضعیت پرتفوی دارایی‌ها</h2><span id="snapProfileBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">پروفایل اصلی</span></div><p class="text-xs text-slate-400 mt-1">محاسبه هوشمند بر پایه نرخ مستقیم بازار و تتر آنلاین</p></div></div><div class="text-left text-xs text-slate-400 space-y-1"><div><span class="text-slate-200 font-bold text-sm" id="snapJalali">--</span></div><div dir="ltr" class="font-mono text-xs text-slate-400"><span id="snapGregorian">--</span> | <span id="snapTime">--</span></div></div></div><div class="grid grid-cols-2 gap-4"><div class="bg-slate-900/95 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between"><div class="space-y-1"><div class="text-xs text-slate-400 font-bold">ارزش کل دارایی‌ها</div><div class="flex items-baseline gap-2 pt-1"><span class="text-3xl font-black text-white" id="snapTotalTomanVal">0</span><span class="text-sm font-bold text-brand-400">تومان</span></div></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-800/80"><span class="text-[11px] text-slate-400 font-bold">معادل دلاری (تتر):</span><span class="text-lg font-black text-emerald-400" dir="ltr" id="snapTotalUSDT">$0.00</span></div></div><div class="bg-slate-900/95 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between"><div class="space-y-1"><div class="text-xs text-slate-400 font-bold">سرمایه اولیه واردشده</div><div class="flex items-baseline gap-1.5 pt-1" dir="ltr"><span class="text-sm font-bold text-slate-400">$</span><span class="text-3xl font-black text-blue-400" id="snapInitCapDisplay">0</span></div></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-800/80"><span class="text-[11px] text-slate-400 font-bold">سود / زیان خالص:</span><span class="text-lg font-black" dir="ltr" id="snapPnlDisplay">$0.00</span></div></div></div><div><div class="text-xs font-black text-slate-400 mb-3 px-1">تفکیک دارایی‌ها</div><div id="snapBreakdownList" class="space-y-2.5"></div></div><div class="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400"><div class="flex items-center gap-4"><span>نرخ محاسبه تتر: <strong id="snapUsdtRate" class="text-slate-200 font-bold">---</strong></span><span>انس طلا: <strong id="snapGoldRate" class="text-slate-200 font-bold" dir="ltr">---</strong></span></div><span class="text-[11px] text-slate-500">داشبورد هوشمند دارایی‌ها</span></div></div>
   <script>
-    if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
-      window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {}); });
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
     }
+
     let deferredInstallPrompt = null;
     window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault(); deferredInstallPrompt = e;
-      const btn = document.getElementById('pwaInstallBtn'); if (btn) btn.classList.add('ring-2', 'ring-emerald-500', 'animate-pulse');
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      const btn = document.getElementById('pwaInstallBtn');
+      if (btn) { btn.classList.remove('hidden'); btn.classList.add('flex'); }
     });
-    window.addEventListener('appinstalled', () => { deferredInstallPrompt = null; document.getElementById('pwaInstallBtn')?.classList.add('hidden'); showToast('برنامه با موفقیت نصب شد'); });
-    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
-      document.addEventListener('DOMContentLoaded', () => document.getElementById('pwaInstallBtn')?.classList.add('hidden'));
-    }
-
-    function generateIconBlob(size) {
-      const c = document.createElement('canvas'); c.width = size; c.height = size; const ctx = c.getContext('2d');
-      const bg = ctx.createLinearGradient(0, 0, size, size); bg.addColorStop(0, '#0284c7'); bg.addColorStop(1, '#020617');
-      ctx.fillStyle = bg; ctx.fillRect(0, 0, size, size);
-      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = size * 0.06; ctx.strokeRect(size * 0.2, size * 0.26, size * 0.6, size * 0.48);
-      ctx.fillStyle = '#10b981'; ctx.beginPath(); ctx.arc(size * 0.64, size * 0.5, size * 0.065, 0, Math.PI * 2); ctx.fill();
-      return c.toDataURL('image/png');
-    }
-
-    function downloadGithubIcons() {
-      [192, 512].forEach((sz, idx) => { setTimeout(() => { const a = document.createElement('a'); a.href = generateIconBlob(sz); a.download = `icon-${sz}.png`; a.click(); }, idx * 350); });
-      showToast('فایل‌های icon-192.png و icon-512.png دانلود شدند');
-    }
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      const btn = document.getElementById('pwaInstallBtn');
+      if (btn) { btn.classList.add('hidden'); btn.classList.remove('flex'); }
+      showToast('برنامه با موفقیت نصب شد');
+    });
 
     async function triggerPWAInstall() {
-      if (deferredInstallPrompt) {
-        deferredInstallPrompt.prompt();
-        const { outcome } = await deferredInstallPrompt.userChoice;
-        if (outcome === 'accepted') { deferredInstallPrompt = null; document.getElementById('pwaInstallBtn')?.classList.add('hidden'); }
-        return;
+      if (!deferredInstallPrompt) return;
+      deferredInstallPrompt.prompt();
+      const { outcome } = await deferredInstallPrompt.userChoice;
+      if (outcome === 'accepted') {
+        deferredInstallPrompt = null;
+        document.getElementById('pwaInstallBtn')?.classList.add('hidden');
       }
-      const modal = document.getElementById('installGuideModal'); const body = document.getElementById('installModalBody');
-      body.innerHTML = `<div class="text-center py-4 text-slate-400">در حال بررسی پیش‌نیازهای WebAPK روی سرور گیت‌هاب شما...</div>`;
-      modal.classList.remove('hidden'); modal.classList.add('flex');
-
-      const isHttps = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
-      let manifestOk = false; let swOk = !!(navigator.serviceWorker && navigator.serviceWorker.controller); let iconsOk = false;
-      try { const r = await fetch('./manifest.json', { cache: 'no-store' }); if (r.ok) { const j = await r.json(); manifestOk = !!j.name; } } catch (e) {}
-      try { const r1 = await fetch('./icon-192.png'); const r2 = await fetch('./icon-512.png'); iconsOk = r1.ok && r2.ok && (r1.headers.get('content-type') || '').includes('image'); } catch (e) {}
-
-      const badge = (ok, yesTxt, noTxt) => ok ? `<span class="text-emerald-500 font-bold">✅ ${yesTxt}</span>` : `<span class="text-red-500 font-bold">❌ ${noTxt}</span>`;
-      body.innerHTML = `
-        <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
-          <div class="flex justify-between"><span>۱. پروتکل امن (HTTPS):</span>${badge(isHttps, 'فعال', 'فایل لوکال است')}</div>
-          <div class="flex justify-between"><span>۲. فایل manifest.json:</span>${badge(manifestOk, 'سالم و فعال', 'خطای 404 در گیت‌هاب')}</div>
-          <div class="flex justify-between"><span>۳. سرویس‌ورکر (sw.js):</span>${badge(swOk, 'فعال در مرورگر', 'نیاز به یک‌بار رفرش صفحه')}</div>
-          <div class="flex justify-between"><span>۴. آیکون‌های 192 و 512:</span>${badge(iconsOk, 'سالم (200 OK)', 'یافت نشد (نیاز به رفرش/آپلود)')}</div>
-        </div>
-        <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] space-y-1.5">
-          <div class="font-bold text-amber-600 dark:text-amber-400">چرا کروم شورتکات می‌سازد؟</div>
-          <div>• اگر هر ۴ مورد بالا <strong>سبز (✅)</strong> هستند اما هنوز شورتکات می‌سازد: اول شورتکات قبلی را از صفحه گوشی پاک کنید، و دوم مطمئن شوید در VPN گوشی، <strong>Google Play Services</strong> هم به اینترنت بدون فیلتر وصل است (چون کروم برای ساخت فایل APK به سرور گوگل‌پلی وصل می‌شود).</div>
-          ${!swOk ? `<button onclick="location.reload()" class="w-full mt-2 py-1.5 bg-amber-500 text-slate-950 font-black rounded-lg">رفرش صفحه برای فعال‌سازی sw.js</button>` : ''}
-        </div>
-      `;
-      lucide.createIcons();
     }
-    function closeInstallModal() { const m = document.getElementById('installGuideModal'); m.classList.add('hidden'); m.classList.remove('flex'); }
 
     const APP_PREFIX = 'PORTFOLIO_PRO';
     const PROFILE_KEYS = ['app_qty_v10', 'app_initial_capital', 'fb_usdt', 'fb_gold', 'fb_silver', 'fb_copper', 'fb_copper_discount'];
