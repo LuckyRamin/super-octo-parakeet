@@ -34,18 +34,17 @@
 </head>
 <body class="bg-slate-100 dark:bg-slate-950 bg-grid-pattern text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300 pb-28 relative overflow-x-hidden">
   <div class="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 w-[650px] h-[220px] bg-brand-500/10 dark:bg-brand-500/15 blur-[110px] rounded-full -z-10"></div>
-  <!-- Toast Notification -->
   <div id="toastContainer" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 transform translate-y-12 opacity-0 pointer-events-none transition-all duration-300"><div class="glass-panel px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2.5 border border-emerald-500/40 bg-slate-900/95 text-white text-xs font-bold whitespace-nowrap"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0"></i><span id="toastMessage">اطلاعات با موفقیت ذخیره شد</span></div></div>
-  <!-- مودال نصب WebAPK و دانلود آیکون‌ها -->
-  <div id="installGuideModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm fade-in">
+  <!-- مودال عیب‌یاب زنده نصب WebAPK -->
+  <div id="installGuideModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/80 backdrop-blur-sm fade-in">
     <div class="glass-panel max-w-md w-full p-5 rounded-3xl shadow-2xl border border-slate-700 space-y-4">
       <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
-        <div class="flex items-center gap-2 text-sm font-black text-slate-900 dark:text-white"><i data-lucide="smartphone" class="w-5 h-5 text-brand-500"></i><span>نصب WebAPK و فایل‌های گیت‌هاب</span></div>
+        <div class="flex items-center gap-2 text-sm font-black text-slate-900 dark:text-white"><i data-lucide="cpu" class="w-5 h-5 text-brand-500"></i><span>عیب‌یاب هوشمند نصب برنامه (WebAPK)</span></div>
         <button onclick="closeInstallModal()" class="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400"><i data-lucide="x" class="w-4 h-4"></i></button>
       </div>
-      <div id="installModalBody" class="text-xs space-y-3 leading-relaxed text-slate-600 dark:text-slate-300"></div>
+      <div id="installModalBody" class="text-xs space-y-2.5 leading-relaxed text-slate-600 dark:text-slate-300"></div>
       <div class="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2">
-        <button onclick="downloadGithubIcons()" class="w-full py-2.5 px-3 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30 text-xs font-bold flex items-center justify-center gap-2 transition"><i data-lucide="download" class="w-4 h-4"></i><span>دانلود خودکار ۲ آیکون PNG برای گیت‌هاب</span></button>
+        <button onclick="downloadGithubIcons()" class="w-full py-2 px-3 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30 text-xs font-bold flex items-center justify-center gap-2 transition"><i data-lucide="download" class="w-4 h-4"></i><span>دانلود فایل فیزیکی ۲ آیکون PNG (پیشنهادی برای گیت‌هاب)</span></button>
         <button onclick="closeInstallModal()" class="w-full py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold transition">بستن پنجره</button>
       </div>
     </div>
@@ -89,7 +88,7 @@
       <div class="glass-panel p-5 sm:p-6 rounded-2xl shadow-sm"><div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80"><h3 class="font-black text-sm flex items-center gap-2"><i data-lucide="list-tree" class="w-4 h-4 text-brand-500"></i>جدول تفکیکی محاسبات ریالی و دلاری</h3></div><div class="overflow-x-auto"><table class="w-full text-right text-xs num-tabular"><thead><tr class="text-slate-400 border-b border-slate-200/70 dark:border-slate-800/80 text-[11px]"><th class="pb-3 font-bold">کلاس دارایی</th><th class="pb-3 font-bold">موجودی ثبت‌شده</th><th class="pb-3 font-bold">نرخ واحد (USD)</th><th class="pb-3 font-bold">نرخ واحد (تومان)</th><th class="pb-3 font-bold">معادل دلاری کل</th><th class="pb-3 font-bold">ارزش کل (تومان)</th><th class="pb-3 font-bold text-left">سهم</th></tr></thead><tbody id="breakdownTableBody" class="divide-y divide-slate-200/50 dark:divide-slate-800/60"></tbody></table></div></div>
     </div>
   </main>
-  <!-- منوی شناور پایینی (Floating Bottom Glass Dock) -->
+  <!-- منوی شناور پایینی -->
   <nav aria-label="منوی جابجایی صفحات" class="fixed bottom-4 inset-x-0 z-40 flex justify-center px-3 sm:px-4 pointer-events-none">
     <div class="pointer-events-auto w-full max-w-md glass-dock p-1.5 rounded-2xl grid grid-cols-3 gap-1.5">
       <button id="btn-tab-dashboard" onclick="switchTab('dashboard')" class="py-2 sm:py-2.5 px-2 rounded-xl text-[11px] sm:text-xs font-extrabold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-lg shadow-brand-500/30 active:scale-95"><i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i><span>داشبورد</span></button>
@@ -100,52 +99,30 @@
   <!-- قالب مخفی خروجی تصویر -->
   <div id="exportSnapshotContainer" class="fixed -left-[9999px] top-0 w-[740px] p-8 bg-slate-950 text-slate-100 border border-slate-800 rounded-3xl space-y-6 num-tabular" style="direction: rtl;"><div class="flex items-center justify-between border-b border-slate-800 pb-5"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-gradient-to-tr from-brand-600 to-brand-400 text-white rounded-2xl flex items-center justify-center font-bold shadow-lg shadow-brand-500/20"><i data-lucide="wallet" class="w-6 h-6"></i></div><div><div class="flex items-center gap-2"><h2 class="text-xl font-black text-white leading-tight">گزارش وضعیت پرتفوی دارایی‌ها</h2><span id="snapProfileBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">پروفایل اصلی</span></div><p class="text-xs text-slate-400 mt-1">محاسبه هوشمند بر پایه نرخ مستقیم بازار و تتر آنلاین</p></div></div><div class="text-left text-xs text-slate-400 space-y-1"><div><span class="text-slate-200 font-bold text-sm" id="snapJalali">--</span></div><div dir="ltr" class="font-mono text-xs text-slate-400"><span id="snapGregorian">--</span> | <span id="snapTime">--</span></div></div></div><div class="grid grid-cols-2 gap-4"><div class="bg-slate-900/95 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between"><div class="space-y-1"><div class="text-xs text-slate-400 font-bold">ارزش کل دارایی‌ها</div><div class="flex items-baseline gap-2 pt-1"><span class="text-3xl font-black text-white" id="snapTotalTomanVal">0</span><span class="text-sm font-bold text-brand-400">تومان</span></div></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-800/80"><span class="text-[11px] text-slate-400 font-bold">معادل دلاری (تتر):</span><span class="text-lg font-black text-emerald-400" dir="ltr" id="snapTotalUSDT">$0.00</span></div></div><div class="bg-slate-900/95 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between"><div class="space-y-1"><div class="text-xs text-slate-400 font-bold">سرمایه اولیه واردشده</div><div class="flex items-baseline gap-1.5 pt-1" dir="ltr"><span class="text-sm font-bold text-slate-400">$</span><span class="text-3xl font-black text-blue-400" id="snapInitCapDisplay">0</span></div></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-800/80"><span class="text-[11px] text-slate-400 font-bold">سود / زیان خالص:</span><span class="text-lg font-black" dir="ltr" id="snapPnlDisplay">$0.00</span></div></div></div><div><div class="text-xs font-black text-slate-400 mb-3 px-1">تفکیک دارایی‌ها</div><div id="snapBreakdownList" class="space-y-2.5"></div></div><div class="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400"><div class="flex items-center gap-4"><span>نرخ محاسبه تتر: <strong id="snapUsdtRate" class="text-slate-200 font-bold">---</strong></span><span>انس طلا: <strong id="snapGoldRate" class="text-slate-200 font-bold" dir="ltr">---</strong></span></div><span class="text-[11px] text-slate-500">داشبورد هوشمند دارایی‌ها</span></div></div>
   <script>
-    // ثبت Service Worker واقعی برای فعال‌سازی WebAPK در کروم اندروید
     if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
-      });
+      window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {}); });
     }
-
     let deferredInstallPrompt = null;
     window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredInstallPrompt = e;
-      const btn = document.getElementById('pwaInstallBtn');
-      if (btn) btn.classList.add('ring-2', 'ring-indigo-500', 'animate-pulse');
+      e.preventDefault(); deferredInstallPrompt = e;
+      const btn = document.getElementById('pwaInstallBtn'); if (btn) btn.classList.add('ring-2', 'ring-emerald-500', 'animate-pulse');
     });
-    window.addEventListener('appinstalled', () => {
-      deferredInstallPrompt = null;
-      document.getElementById('pwaInstallBtn')?.classList.add('hidden');
-      showToast('اپلیکیشن با موفقیت نصب شد');
-    });
+    window.addEventListener('appinstalled', () => { deferredInstallPrompt = null; document.getElementById('pwaInstallBtn')?.classList.add('hidden'); showToast('برنامه با موفقیت نصب شد'); });
     if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
       document.addEventListener('DOMContentLoaded', () => document.getElementById('pwaInstallBtn')?.classList.add('hidden'));
     }
 
-    // تابع تولید و دانلود خودکار آیکون‌های استاندارد 192 و 512 برای آپلود در گیت‌هاب
     function generateIconBlob(size) {
       const c = document.createElement('canvas'); c.width = size; c.height = size; const ctx = c.getContext('2d');
       const bg = ctx.createLinearGradient(0, 0, size, size); bg.addColorStop(0, '#0284c7'); bg.addColorStop(1, '#020617');
-      ctx.fillStyle = bg; ctx.beginPath();
-      if (ctx.roundRect) ctx.roundRect(0, 0, size, size, size * 0.22); else ctx.rect(0, 0, size, size);
-      ctx.fill();
-      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = size * 0.06;
-      if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(size * 0.2, size * 0.26, size * 0.6, size * 0.48, size * 0.08); ctx.stroke(); }
-      else ctx.strokeRect(size * 0.2, size * 0.26, size * 0.6, size * 0.48);
+      ctx.fillStyle = bg; ctx.fillRect(0, 0, size, size);
+      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = size * 0.06; ctx.strokeRect(size * 0.2, size * 0.26, size * 0.6, size * 0.48);
       ctx.fillStyle = '#10b981'; ctx.beginPath(); ctx.arc(size * 0.64, size * 0.5, size * 0.065, 0, Math.PI * 2); ctx.fill();
       return c.toDataURL('image/png');
     }
 
     function downloadGithubIcons() {
-      [192, 512].forEach((sz, idx) => {
-        setTimeout(() => {
-          const a = document.createElement('a');
-          a.href = generateIconBlob(sz);
-          a.download = `icon-${sz}.png`;
-          a.click();
-        }, idx * 350);
-      });
+      [192, 512].forEach((sz, idx) => { setTimeout(() => { const a = document.createElement('a'); a.href = generateIconBlob(sz); a.download = `icon-${sz}.png`; a.click(); }, idx * 350); });
       showToast('فایل‌های icon-192.png و icon-512.png دانلود شدند');
     }
 
@@ -157,15 +134,28 @@
         return;
       }
       const modal = document.getElementById('installGuideModal'); const body = document.getElementById('installModalBody');
+      body.innerHTML = `<div class="text-center py-4 text-slate-400">در حال بررسی پیش‌نیازهای WebAPK روی سرور گیت‌هاب شما...</div>`;
+      modal.classList.remove('hidden'); modal.classList.add('flex');
+
+      const isHttps = window.location.protocol === 'https:' || window.location.hostname === 'localhost';
+      let manifestOk = false; let swOk = !!(navigator.serviceWorker && navigator.serviceWorker.controller); let iconsOk = false;
+      try { const r = await fetch('./manifest.json', { cache: 'no-store' }); if (r.ok) { const j = await r.json(); manifestOk = !!j.name; } } catch (e) {}
+      try { const r1 = await fetch('./icon-192.png'); const r2 = await fetch('./icon-512.png'); iconsOk = r1.ok && r2.ok && (r1.headers.get('content-type') || '').includes('image'); } catch (e) {}
+
+      const badge = (ok, yesTxt, noTxt) => ok ? `<span class="text-emerald-500 font-bold">✅ ${yesTxt}</span>` : `<span class="text-red-500 font-bold">❌ ${noTxt}</span>`;
       body.innerHTML = `
         <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
-          <div class="font-bold text-brand-500">چک‌لیست نصب کامل (WebAPK) در گیت‌هاب:</div>
-          <div>۱. فایل‌های <code>index.html</code>، <code>manifest.json</code> و <code>sw.js</code> را در گیت‌هاب خود قرار دهید.</div>
-          <div>۲. با دکمه پایین همین کادر، دو آیکون <code>icon-192.png</code> و <code>icon-512.png</code> را دانلود کرده و کنار فایل‌ها در گیت‌هاب آپلود کنید.</div>
-          <div>۳. پس از باز کردن لینک گیت‌هاب در کروم گوشی، گزینه <strong>Install App (نصب برنامه)</strong> فعال می‌شود.</div>
+          <div class="flex justify-between"><span>۱. پروتکل امن (HTTPS):</span>${badge(isHttps, 'فعال', 'فایل لوکال است')}</div>
+          <div class="flex justify-between"><span>۲. فایل manifest.json:</span>${badge(manifestOk, 'سالم و فعال', 'خطای 404 در گیت‌هاب')}</div>
+          <div class="flex justify-between"><span>۳. سرویس‌ورکر (sw.js):</span>${badge(swOk, 'فعال در مرورگر', 'نیاز به یک‌بار رفرش صفحه')}</div>
+          <div class="flex justify-between"><span>۴. آیکون‌های 192 و 512:</span>${badge(iconsOk, 'سالم (200 OK)', 'یافت نشد (نیاز به رفرش/آپلود)')}</div>
+        </div>
+        <div class="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-[11px] space-y-1.5">
+          <div class="font-bold text-amber-600 dark:text-amber-400">چرا کروم شورتکات می‌سازد؟</div>
+          <div>• اگر هر ۴ مورد بالا <strong>سبز (✅)</strong> هستند اما هنوز شورتکات می‌سازد: اول شورتکات قبلی را از صفحه گوشی پاک کنید، و دوم مطمئن شوید در VPN گوشی، <strong>Google Play Services</strong> هم به اینترنت بدون فیلتر وصل است (چون کروم برای ساخت فایل APK به سرور گوگل‌پلی وصل می‌شود).</div>
+          ${!swOk ? `<button onclick="location.reload()" class="w-full mt-2 py-1.5 bg-amber-500 text-slate-950 font-black rounded-lg">رفرش صفحه برای فعال‌سازی sw.js</button>` : ''}
         </div>
       `;
-      modal.classList.remove('hidden'); modal.classList.add('flex');
       lucide.createIcons();
     }
     function closeInstallModal() { const m = document.getElementById('installGuideModal'); m.classList.add('hidden'); m.classList.remove('flex'); }
