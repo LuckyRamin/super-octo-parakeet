@@ -1,17 +1,13 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl" class="dark">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#020617" id="metaThemeColor">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="دارایی‌ها">
-  <title>داشبورد هوشمند دارایی‌ها</title>
-  <link id="dynamicFavicon" rel="icon" type="image/png">
-  <link id="dynamicAppleIcon" rel="apple-touch-icon">
-  <link id="dynamicManifest" rel="manifest">
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="theme-color" content="#020617"><meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="پرتفوی من">
+  <title>داشبورد هوشمند مدیریت دارایی</title>
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="./icon-192.png">
+  <link rel="apple-touch-icon" sizes="192x192" href="./icon-192.png">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -33,26 +29,35 @@
     input[type=number] { -moz-appearance: textfield; }
     ::-webkit-scrollbar { width: 6px; height: 6px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; } .dark ::-webkit-scrollbar-thumb { background: #334155; }
     .fade-in { animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1); } @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-    .safe-bottom-dock { bottom: max(1rem, env(safe-area-inset-bottom)); }
   </style>
   <script>tailwind.config = { darkMode: 'class', theme: { extend: { colors: { brand: { 50: '#f0f9ff', 100: '#e0f2fe', 400: '#38bdf8', 500: '#0284c7', 600: '#0369a1', 700: '#075985', 950: '#082f49' } } } } };</script>
 </head>
-<body class="bg-slate-100 dark:bg-slate-950 bg-grid-pattern text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300 pb-28 relative overflow-x-hidden select-none sm:select-auto">
+<body class="bg-slate-100 dark:bg-slate-950 bg-grid-pattern text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300 pb-28 relative overflow-x-hidden">
   <div class="pointer-events-none fixed top-0 left-1/2 -translate-x-1/2 w-[650px] h-[220px] bg-brand-500/10 dark:bg-brand-500/15 blur-[110px] rounded-full -z-10"></div>
-  <!-- هشدار باز کردن فایل به صورت لوکال در موبایل -->
-  <div id="localFileWarning" class="hidden bg-amber-500/15 border-b border-amber-500/30 text-amber-700 dark:text-amber-300 text-[11px] font-bold px-4 py-2 text-center">
-    توجه: فایل را به صورت لوکال (file/content) باز کرده‌اید. برای فعال شدن «نصب در صفحه اصلی گوشی» و حفظ دائمی دیتا، فایل را روی GitHub Pages باز کنید.
-  </div>
   <!-- Toast Notification -->
   <div id="toastContainer" class="fixed bottom-24 left-1/2 -translate-x-1/2 z-50 transform translate-y-12 opacity-0 pointer-events-none transition-all duration-300"><div class="glass-panel px-4 py-2.5 rounded-2xl shadow-2xl flex items-center gap-2.5 border border-emerald-500/40 bg-slate-900/95 text-white text-xs font-bold whitespace-nowrap"><i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400 shrink-0"></i><span id="toastMessage">اطلاعات با موفقیت ذخیره شد</span></div></div>
+  <!-- مودال نصب WebAPK و دانلود آیکون‌ها -->
+  <div id="installGuideModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-slate-950/75 backdrop-blur-sm fade-in">
+    <div class="glass-panel max-w-md w-full p-5 rounded-3xl shadow-2xl border border-slate-700 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+        <div class="flex items-center gap-2 text-sm font-black text-slate-900 dark:text-white"><i data-lucide="smartphone" class="w-5 h-5 text-brand-500"></i><span>نصب WebAPK و فایل‌های گیت‌هاب</span></div>
+        <button onclick="closeInstallModal()" class="p-1 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400"><i data-lucide="x" class="w-4 h-4"></i></button>
+      </div>
+      <div id="installModalBody" class="text-xs space-y-3 leading-relaxed text-slate-600 dark:text-slate-300"></div>
+      <div class="pt-2 border-t border-slate-200 dark:border-slate-800 space-y-2">
+        <button onclick="downloadGithubIcons()" class="w-full py-2.5 px-3 rounded-xl bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30 text-xs font-bold flex items-center justify-center gap-2 transition"><i data-lucide="download" class="w-4 h-4"></i><span>دانلود خودکار ۲ آیکون PNG برای گیت‌هاب</span></button>
+        <button onclick="closeInstallModal()" class="w-full py-2.5 rounded-xl bg-brand-500 hover:bg-brand-600 text-white text-xs font-bold transition">بستن پنجره</button>
+      </div>
+    </div>
+  </div>
   <!-- Header Bar -->
-  <header class="sticky top-0 z-40 glass-panel border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm"><div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2"><div class="flex items-center gap-3"><div class="w-10 h-10 bg-gradient-to-tr from-brand-600 to-brand-400 text-white rounded-xl shadow-lg shadow-brand-500/25 flex items-center justify-center shrink-0"><i data-lucide="wallet" class="w-5 h-5"></i></div><div><div class="flex items-center gap-2"><h1 class="text-sm sm:text-base font-black text-slate-900 dark:text-white leading-tight">داشبورد هوشمند دارایی‌ها</h1><span id="headerProfileBadge" class="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20">پروفایل اصلی</span></div><p class="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">نرخ مستقیم بازار داخل + رزرو خودکار جهانی و تتر</p></div></div><div class="flex items-center gap-2"><button id="exportBtn" onclick="exportSummaryAsImage()" class="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-xl transition border border-emerald-500/30 active:scale-95"><i data-lucide="camera" class="w-4 h-4"></i><span class="hidden sm:inline" id="exportBtnText">خروجی تصویر خلاصه</span></button><button onclick="updateAllPrices()" id="refreshBtn" class="flex items-center gap-1.5 px-3 py-2 text-xs font-bold bg-brand-500/10 hover:bg-brand-500/20 text-brand-700 dark:text-brand-400 rounded-xl transition border border-brand-500/30 active:scale-95"><i data-lucide="refresh-cw" id="refreshIcon" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">به‌روزرسانی آنلاین</span></button><button onclick="toggleTheme()" title="تغییر تم" class="p-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-200/60 dark:bg-slate-800/70 rounded-xl border border-slate-300/60 dark:border-slate-700 transition active:scale-95"><i data-lucide="sun" id="themeIcon" class="w-4 h-4"></i></button></div></div></header>
+  <header class="sticky top-0 z-40 glass-panel border-b border-slate-200/80 dark:border-slate-800/80 shadow-sm"><div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-2"><div class="flex items-center gap-2.5"><div class="w-9 h-9 sm:w-10 sm:h-10 bg-gradient-to-tr from-brand-600 to-brand-400 text-white rounded-xl shadow-lg shadow-brand-500/25 flex items-center justify-center shrink-0"><i data-lucide="wallet" class="w-5 h-5"></i></div><div><div class="flex items-center gap-2"><h1 class="text-xs sm:text-base font-black text-slate-900 dark:text-white leading-tight">داشبورد هوشمند دارایی‌ها</h1><span id="headerProfileBadge" class="hidden md:inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-brand-500/10 text-brand-600 dark:text-brand-400 border border-brand-500/20">پروفایل اصلی</span></div><p class="text-[10px] sm:text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">نرخ مستقیم بازار داخل + رزرو جهانی و تتر</p></div></div><div class="flex items-center gap-1.5 sm:gap-2"><button id="pwaInstallBtn" onclick="triggerPWAInstall()" title="نصب اپلیکیشن (WebAPK)" class="flex items-center gap-1 px-2.5 py-2 text-xs font-bold bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 rounded-xl transition border border-indigo-500/30 active:scale-95"><i data-lucide="smartphone" class="w-4 h-4"></i><span class="hidden lg:inline">نصب اپ</span></button><button id="exportBtn" onclick="exportSummaryAsImage()" title="خروجی تصویر خلاصه" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 text-xs font-bold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 rounded-xl transition border border-emerald-500/30 active:scale-95"><i data-lucide="camera" class="w-4 h-4"></i><span class="hidden sm:inline" id="exportBtnText">خروجی تصویر</span></button><button onclick="updateAllPrices()" id="refreshBtn" title="به‌روزرسانی آنلاین نرخ‌ها" class="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 text-xs font-bold bg-brand-500/10 hover:bg-brand-500/20 text-brand-700 dark:text-brand-400 rounded-xl transition border border-brand-500/30 active:scale-95"><i data-lucide="refresh-cw" id="refreshIcon" class="w-3.5 h-3.5"></i><span class="hidden sm:inline">به‌روزرسانی</span></button><button onclick="toggleTheme()" title="تغییر تم" class="p-2 text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-200/60 dark:bg-slate-800/70 rounded-xl border border-slate-300/60 dark:border-slate-700 transition active:scale-95"><i data-lucide="sun" id="themeIcon" class="w-4 h-4"></i></button></div></div></header>
   <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
     <!-- نوار ابزار مدیریت چند پروفایلی و بکاپ JSON -->
     <div class="glass-panel rounded-2xl p-2.5 px-3.5 mb-6 flex flex-wrap items-center justify-between gap-3 shadow-sm border-r-4 border-r-indigo-500">
       <div class="flex flex-wrap items-center gap-2">
         <div class="flex items-center gap-1.5 text-xs font-bold text-slate-600 dark:text-slate-300 pl-1"><i data-lucide="users" class="w-4 h-4 text-indigo-500"></i><span>سبد دارایی:</span></div>
-        <select id="profileSelect" onchange="switchProfile(this.value)" class="bg-slate-100 dark:bg-slate-800/90 border border-slate-300/80 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs font-bold rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-indigo-500 transition cursor-pointer min-w-[145px]"></select>
+        <select id="profileSelect" onchange="switchProfile(this.value)" class="bg-slate-100 dark:bg-slate-800/90 border border-slate-300/80 dark:border-slate-700 text-slate-800 dark:text-slate-100 text-xs font-bold rounded-xl px-3 py-1.5 outline-none focus:ring-2 focus:ring-indigo-500 transition cursor-pointer min-w-[140px]"></select>
         <button onclick="createNewProfile()" title="افزودن پروفایل جدید" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-indigo-500/10 hover:bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/25 transition active:scale-95"><i data-lucide="plus" class="w-3.5 h-3.5"></i><span>جدید</span></button>
         <button onclick="renameCurrentProfile()" title="تغییر نام پروفایل فعلی" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-slate-200/70 hover:bg-slate-300/70 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 border border-slate-300/60 dark:border-slate-700 transition active:scale-95"><i data-lucide="pencil" class="w-3 h-3"></i><span class="hidden sm:inline">ویرایش نام</span></button>
         <button onclick="deleteCurrentProfile()" title="حذف پروفایل فعلی" class="flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-bold bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/25 transition active:scale-95"><i data-lucide="trash-2" class="w-3 h-3"></i><span class="hidden sm:inline">حذف</span></button>
@@ -84,26 +89,87 @@
       <div class="glass-panel p-5 sm:p-6 rounded-2xl shadow-sm"><div class="flex items-center justify-between mb-4 pb-3 border-b border-slate-200/80 dark:border-slate-800/80"><h3 class="font-black text-sm flex items-center gap-2"><i data-lucide="list-tree" class="w-4 h-4 text-brand-500"></i>جدول تفکیکی محاسبات ریالی و دلاری</h3></div><div class="overflow-x-auto"><table class="w-full text-right text-xs num-tabular"><thead><tr class="text-slate-400 border-b border-slate-200/70 dark:border-slate-800/80 text-[11px]"><th class="pb-3 font-bold">کلاس دارایی</th><th class="pb-3 font-bold">موجودی ثبت‌شده</th><th class="pb-3 font-bold">نرخ واحد (USD)</th><th class="pb-3 font-bold">نرخ واحد (تومان)</th><th class="pb-3 font-bold">معادل دلاری کل</th><th class="pb-3 font-bold">ارزش کل (تومان)</th><th class="pb-3 font-bold text-left">سهم</th></tr></thead><tbody id="breakdownTableBody" class="divide-y divide-slate-200/50 dark:divide-slate-800/60"></tbody></table></div></div>
     </div>
   </main>
-
   <!-- منوی شناور پایینی (Floating Bottom Glass Dock) -->
-  <nav aria-label="منوی جابجایی صفحات" class="fixed safe-bottom-dock inset-x-0 z-40 flex justify-center px-3 sm:px-4 pointer-events-none">
+  <nav aria-label="منوی جابجایی صفحات" class="fixed bottom-4 inset-x-0 z-40 flex justify-center px-3 sm:px-4 pointer-events-none">
     <div class="pointer-events-auto w-full max-w-md glass-dock p-1.5 rounded-2xl grid grid-cols-3 gap-1.5">
-      <button id="btn-tab-dashboard" onclick="switchTab('dashboard')" class="py-2 sm:py-2.5 px-2 rounded-xl text-[11px] sm:text-xs font-extrabold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-lg shadow-brand-500/30 active:scale-95">
-        <i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i><span>داشبورد</span>
-      </button>
-      <button id="btn-tab-manage" onclick="switchTab('manage')" class="py-2 sm:py-2.5 px-2 rounded-xl text-[11px] sm:text-xs font-extrabold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/70 active:scale-95">
-        <i data-lucide="sliders-horizontal" class="w-4 h-4 shrink-0"></i><span>موجودی و نرخ</span>
-      </button>
-      <button id="btn-tab-analysis" onclick="switchTab('analysis')" class="py-2 sm:py-2.5 px-2 rounded-xl text-[11px] sm:text-xs font-extrabold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/70 active:scale-95">
-        <i data-lucide="pie-chart" class="w-4 h-4 shrink-0"></i><span>ترکیب و تحلیل</span>
-      </button>
+      <button id="btn-tab-dashboard" onclick="switchTab('dashboard')" class="py-2 sm:py-2.5 px-2 rounded-xl text-[11px] sm:text-xs font-extrabold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 bg-gradient-to-r from-brand-600 to-brand-500 text-white shadow-lg shadow-brand-500/30 active:scale-95"><i data-lucide="layout-dashboard" class="w-4 h-4 shrink-0"></i><span>داشبورد</span></button>
+      <button id="btn-tab-manage" onclick="switchTab('manage')" class="py-2 sm:py-2.5 px-2 rounded-xl text-[11px] sm:text-xs font-extrabold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/70 active:scale-95"><i data-lucide="sliders-horizontal" class="w-4 h-4 shrink-0"></i><span>موجودی و نرخ</span></button>
+      <button id="btn-tab-analysis" onclick="switchTab('analysis')" class="py-2 sm:py-2.5 px-2 rounded-xl text-[11px] sm:text-xs font-extrabold flex flex-col sm:flex-row items-center justify-center gap-1 sm:gap-2 transition-all duration-200 text-slate-600 dark:text-slate-400 hover:bg-slate-200/60 dark:hover:bg-slate-800/70 active:scale-95"><i data-lucide="pie-chart" class="w-4 h-4 shrink-0"></i><span>ترکیب و تحلیل</span></button>
     </div>
   </nav>
-
   <!-- قالب مخفی خروجی تصویر -->
   <div id="exportSnapshotContainer" class="fixed -left-[9999px] top-0 w-[740px] p-8 bg-slate-950 text-slate-100 border border-slate-800 rounded-3xl space-y-6 num-tabular" style="direction: rtl;"><div class="flex items-center justify-between border-b border-slate-800 pb-5"><div class="flex items-center gap-4"><div class="w-12 h-12 bg-gradient-to-tr from-brand-600 to-brand-400 text-white rounded-2xl flex items-center justify-center font-bold shadow-lg shadow-brand-500/20"><i data-lucide="wallet" class="w-6 h-6"></i></div><div><div class="flex items-center gap-2"><h2 class="text-xl font-black text-white leading-tight">گزارش وضعیت پرتفوی دارایی‌ها</h2><span id="snapProfileBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">پروفایل اصلی</span></div><p class="text-xs text-slate-400 mt-1">محاسبه هوشمند بر پایه نرخ مستقیم بازار و تتر آنلاین</p></div></div><div class="text-left text-xs text-slate-400 space-y-1"><div><span class="text-slate-200 font-bold text-sm" id="snapJalali">--</span></div><div dir="ltr" class="font-mono text-xs text-slate-400"><span id="snapGregorian">--</span> | <span id="snapTime">--</span></div></div></div><div class="grid grid-cols-2 gap-4"><div class="bg-slate-900/95 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between"><div class="space-y-1"><div class="text-xs text-slate-400 font-bold">ارزش کل دارایی‌ها</div><div class="flex items-baseline gap-2 pt-1"><span class="text-3xl font-black text-white" id="snapTotalTomanVal">0</span><span class="text-sm font-bold text-brand-400">تومان</span></div></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-800/80"><span class="text-[11px] text-slate-400 font-bold">معادل دلاری (تتر):</span><span class="text-lg font-black text-emerald-400" dir="ltr" id="snapTotalUSDT">$0.00</span></div></div><div class="bg-slate-900/95 p-5 rounded-2xl border border-slate-800 flex flex-col justify-between"><div class="space-y-1"><div class="text-xs text-slate-400 font-bold">سرمایه اولیه واردشده</div><div class="flex items-baseline gap-1.5 pt-1" dir="ltr"><span class="text-sm font-bold text-slate-400">$</span><span class="text-3xl font-black text-blue-400" id="snapInitCapDisplay">0</span></div></div><div class="flex items-center justify-between mt-4 pt-3 border-t border-slate-800/80"><span class="text-[11px] text-slate-400 font-bold">سود / زیان خالص:</span><span class="text-lg font-black" dir="ltr" id="snapPnlDisplay">$0.00</span></div></div></div><div><div class="text-xs font-black text-slate-400 mb-3 px-1">تفکیک دارایی‌ها</div><div id="snapBreakdownList" class="space-y-2.5"></div></div><div class="pt-4 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400"><div class="flex items-center gap-4"><span>نرخ محاسبه تتر: <strong id="snapUsdtRate" class="text-slate-200 font-bold">---</strong></span><span>انس طلا: <strong id="snapGoldRate" class="text-slate-200 font-bold" dir="ltr">---</strong></span></div><span class="text-[11px] text-slate-500">داشبورد هوشمند دارایی‌ها</span></div></div>
-
   <script>
+    // ثبت Service Worker واقعی برای فعال‌سازی WebAPK در کروم اندروید
+    if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js', { scope: './' }).catch(() => {});
+      });
+    }
+
+    let deferredInstallPrompt = null;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+      const btn = document.getElementById('pwaInstallBtn');
+      if (btn) btn.classList.add('ring-2', 'ring-indigo-500', 'animate-pulse');
+    });
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      document.getElementById('pwaInstallBtn')?.classList.add('hidden');
+      showToast('اپلیکیشن با موفقیت نصب شد');
+    });
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+      document.addEventListener('DOMContentLoaded', () => document.getElementById('pwaInstallBtn')?.classList.add('hidden'));
+    }
+
+    // تابع تولید و دانلود خودکار آیکون‌های استاندارد 192 و 512 برای آپلود در گیت‌هاب
+    function generateIconBlob(size) {
+      const c = document.createElement('canvas'); c.width = size; c.height = size; const ctx = c.getContext('2d');
+      const bg = ctx.createLinearGradient(0, 0, size, size); bg.addColorStop(0, '#0284c7'); bg.addColorStop(1, '#020617');
+      ctx.fillStyle = bg; ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(0, 0, size, size, size * 0.22); else ctx.rect(0, 0, size, size);
+      ctx.fill();
+      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = size * 0.06;
+      if (ctx.roundRect) { ctx.beginPath(); ctx.roundRect(size * 0.2, size * 0.26, size * 0.6, size * 0.48, size * 0.08); ctx.stroke(); }
+      else ctx.strokeRect(size * 0.2, size * 0.26, size * 0.6, size * 0.48);
+      ctx.fillStyle = '#10b981'; ctx.beginPath(); ctx.arc(size * 0.64, size * 0.5, size * 0.065, 0, Math.PI * 2); ctx.fill();
+      return c.toDataURL('image/png');
+    }
+
+    function downloadGithubIcons() {
+      [192, 512].forEach((sz, idx) => {
+        setTimeout(() => {
+          const a = document.createElement('a');
+          a.href = generateIconBlob(sz);
+          a.download = `icon-${sz}.png`;
+          a.click();
+        }, idx * 350);
+      });
+      showToast('فایل‌های icon-192.png و icon-512.png دانلود شدند');
+    }
+
+    async function triggerPWAInstall() {
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        const { outcome } = await deferredInstallPrompt.userChoice;
+        if (outcome === 'accepted') { deferredInstallPrompt = null; document.getElementById('pwaInstallBtn')?.classList.add('hidden'); }
+        return;
+      }
+      const modal = document.getElementById('installGuideModal'); const body = document.getElementById('installModalBody');
+      body.innerHTML = `
+        <div class="p-3 rounded-xl bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 space-y-2">
+          <div class="font-bold text-brand-500">چک‌لیست نصب کامل (WebAPK) در گیت‌هاب:</div>
+          <div>۱. فایل‌های <code>index.html</code>، <code>manifest.json</code> و <code>sw.js</code> را در گیت‌هاب خود قرار دهید.</div>
+          <div>۲. با دکمه پایین همین کادر، دو آیکون <code>icon-192.png</code> و <code>icon-512.png</code> را دانلود کرده و کنار فایل‌ها در گیت‌هاب آپلود کنید.</div>
+          <div>۳. پس از باز کردن لینک گیت‌هاب در کروم گوشی، گزینه <strong>Install App (نصب برنامه)</strong> فعال می‌شود.</div>
+        </div>
+      `;
+      modal.classList.remove('hidden'); modal.classList.add('flex');
+      lucide.createIcons();
+    }
+    function closeInstallModal() { const m = document.getElementById('installGuideModal'); m.classList.add('hidden'); m.classList.remove('flex'); }
+
     const APP_PREFIX = 'PORTFOLIO_PRO';
     const PROFILE_KEYS = ['app_qty_v10', 'app_initial_capital', 'fb_usdt', 'fb_gold', 'fb_silver', 'fb_copper', 'fb_copper_discount'];
     const ASSET_DEFINITIONS = [
@@ -123,134 +189,59 @@
     let myChart = null; let toastTimeout = null;
     const GRAMS_PER_TROY_OUNCE = 31.1034768; const LB_TO_KG = 2.20462262;
 
-    /* تولید خودکار آیکون 512x512 و مانیفست PWA داخل تک‌فایل */
-    function setupSingleFilePWA() {
-      if (['file:', 'content:'].includes(window.location.protocol)) {
-        document.getElementById('localFileWarning')?.classList.remove('hidden');
-      }
-      try {
-        const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
-        const ctx = canvas.getContext('2d');
-        const grad = ctx.createLinearGradient(0, 0, 512, 512);
-        grad.addColorStop(0, '#0284c7'); grad.addColorStop(1, '#0f172a');
-        ctx.fillStyle = grad;
-        ctx.beginPath(); ctx.roundRect(0, 0, 512, 512, 115); ctx.fill();
-        ctx.strokeStyle = 'rgba(56, 189, 248, 0.35)'; ctx.lineWidth = 12; ctx.stroke();
-        ctx.fillStyle = '#ffffff';
-        ctx.beginPath(); ctx.roundRect(116, 156, 280, 200, 36); ctx.fill();
-        ctx.fillStyle = '#0284c7';
-        ctx.beginPath(); ctx.roundRect(280, 224, 130, 64, 20); ctx.fill();
-        ctx.fillStyle = '#f59e0b';
-        ctx.beginPath(); ctx.arc(315, 256, 14, 0, Math.PI * 2); ctx.fill();
-        const iconDataUrl = canvas.toDataURL('image/png');
-        document.getElementById('dynamicFavicon').href = iconDataUrl;
-        document.getElementById('dynamicAppleIcon').href = iconDataUrl;
-        const manifest = {
-          name: 'داشبورد هوشمند دارایی‌ها',
-          short_name: 'دارایی‌ها',
-          description: 'مدیریت پرتفوی دارایی و نرخ لحظه‌ای ارز و فلزات',
-          start_url: window.location.href.split('#')[0],
-          display: 'standalone',
-          orientation: 'portrait',
-          background_color: '#020617',
-          theme_color: '#020617',
-          dir: 'rtl',
-          lang: 'fa-IR',
-          icons: [
-            { src: iconDataUrl, sizes: '192x192', type: 'image/png', purpose: 'any maskable' },
-            { src: iconDataUrl, sizes: '512x512', type: 'image/png', purpose: 'any maskable' }
-          ]
-        };
-        document.getElementById('dynamicManifest').href = 'data:application/manifest+json;charset=utf-8,' + encodeURIComponent(JSON.stringify(manifest));
-      } catch (e) {}
-    }
-
     const ProfileStorage = {
-      listKey: `${APP_PREFIX}_profiles_list`,
-      activeKey: `${APP_PREFIX}_active_profile`,
-      migratedKey: `${APP_PREFIX}_migrated_v1`,
+      listKey: `${APP_PREFIX}_profiles_list`, activeKey: `${APP_PREFIX}_active_profile`, migratedKey: `${APP_PREFIX}_migrated_v1`,
       buildKey(profileId, key) { return `${APP_PREFIX}_${profileId}_${key}`; },
       getItem(key) { return localStorage.getItem(this.buildKey(activeProfileId, key)); },
       setItem(key, val) { localStorage.setItem(this.buildKey(activeProfileId, key), val); },
       init() {
         try {
-          const rawList = localStorage.getItem(this.listKey);
-          profilesList = rawList ? JSON.parse(rawList) : [];
-          if (!Array.isArray(profilesList) || profilesList.length === 0) {
-            profilesList = [{ id: 'default', name: 'پروفایل اصلی (پیش‌فرض)' }];
-            localStorage.setItem(this.listKey, JSON.stringify(profilesList));
-          }
-          const savedActive = localStorage.getItem(this.activeKey);
-          activeProfileId = profilesList.some(p => p.id === savedActive) ? savedActive : profilesList[0].id;
+          const rawList = localStorage.getItem(this.listKey); profilesList = rawList ? JSON.parse(rawList) : [];
+          if (!Array.isArray(profilesList) || profilesList.length === 0) { profilesList = [{ id: 'default', name: 'پروفایل اصلی (پیش‌فرض)' }]; localStorage.setItem(this.listKey, JSON.stringify(profilesList)); }
+          const savedActive = localStorage.getItem(this.activeKey); activeProfileId = profilesList.some(p => p.id === savedActive) ? savedActive : profilesList[0].id;
           localStorage.setItem(this.activeKey, activeProfileId);
           if (!localStorage.getItem(this.migratedKey)) {
-            PROFILE_KEYS.forEach(k => {
-              const oldVal = localStorage.getItem(k);
-              const targetKey = this.buildKey('default', k);
-              if (oldVal !== null && localStorage.getItem(targetKey) === null) localStorage.setItem(targetKey, oldVal);
-            });
+            PROFILE_KEYS.forEach(k => { const oldVal = localStorage.getItem(k); const targetKey = this.buildKey('default', k); if (oldVal !== null && localStorage.getItem(targetKey) === null) localStorage.setItem(targetKey, oldVal); });
             localStorage.setItem(this.migratedKey, 'true');
           }
-        } catch (e) {
-          profilesList = [{ id: 'default', name: 'پروفایل اصلی (پیش‌فرض)' }]; activeProfileId = 'default';
-        }
+        } catch (e) { profilesList = [{ id: 'default', name: 'پروفایل اصلی (پیش‌فرض)' }]; activeProfileId = 'default'; }
       },
       saveList() { localStorage.setItem(this.listKey, JSON.stringify(profilesList)); },
       getActiveName() { return (profilesList.find(p => p.id === activeProfileId)?.name) || 'پروفایل اصلی'; }
     };
 
-    window.addEventListener('DOMContentLoaded', () => {
-      setupSingleFilePWA(); ProfileStorage.init(); renderProfileBar(); loadStoredData(); initChart(); renderUIInputs(); recalculateAndRender(); updateAllPrices();
-    });
+    window.addEventListener('DOMContentLoaded', () => { ProfileStorage.init(); renderProfileBar(); loadStoredData(); initChart(); renderUIInputs(); recalculateAndRender(); updateAllPrices(); });
 
     function renderProfileBar() {
-      const sel = document.getElementById('profileSelect'); if (!sel) return;
-      sel.innerHTML = '';
-      profilesList.forEach(p => {
-        const opt = document.createElement('option'); opt.value = p.id; opt.textContent = p.name;
-        if (p.id === activeProfileId) opt.selected = true;
-        sel.appendChild(opt);
-      });
+      const sel = document.getElementById('profileSelect'); if (!sel) return; sel.innerHTML = '';
+      profilesList.forEach(p => { const opt = document.createElement('option'); opt.value = p.id; opt.textContent = p.name; if (p.id === activeProfileId) opt.selected = true; sel.appendChild(opt); });
       const activeName = ProfileStorage.getActiveName();
       ['headerProfileBadge', 'manageProfileBadge', 'snapProfileBadge'].forEach(id => { const el = document.getElementById(id); if (el) el.innerText = activeName; });
     }
 
     function switchProfile(newProfileId) {
       if (!profilesList.some(p => p.id === newProfileId)) return;
-      activeProfileId = newProfileId;
-      localStorage.setItem(ProfileStorage.activeKey, activeProfileId);
-      renderProfileBar(); loadStoredData(); renderUIInputs(); recalculateAndRender();
-      showToast(`پروفایل «${ProfileStorage.getActiveName()}» بارگذاری شد`);
+      activeProfileId = newProfileId; localStorage.setItem(ProfileStorage.activeKey, activeProfileId);
+      renderProfileBar(); loadStoredData(); renderUIInputs(); recalculateAndRender(); showToast(`پروفایل «${ProfileStorage.getActiveName()}» بارگذاری شد`);
     }
 
     function createNewProfile() {
-      const rawName = prompt('نام پروفایل (سبد دارایی) جدید را وارد کنید:');
-      if (rawName === null) return;
-      const name = rawName.trim();
-      if (!name) { showToast('نام پروفایل نمی‌تواند خالی باشد'); return; }
+      const rawName = prompt('نام پروفایل (سبد دارایی) جدید را وارد کنید:'); if (rawName === null) return;
+      const name = rawName.trim(); if (!name) { showToast('نام پروفایل نمی‌تواند خالی باشد'); return; }
       if (profilesList.some(p => p.name === name)) { showToast('این نام قبلاً ثبت شده است'); return; }
       const newId = 'p_' + Date.now();
-      ['fb_usdt', 'fb_gold', 'fb_silver', 'fb_copper'].forEach(k => {
-        const cur = ProfileStorage.getItem(k);
-        if (cur !== null) localStorage.setItem(ProfileStorage.buildKey(newId, k), cur);
-      });
+      ['fb_usdt', 'fb_gold', 'fb_silver', 'fb_copper'].forEach(k => { const cur = ProfileStorage.getItem(k); if (cur !== null) localStorage.setItem(ProfileStorage.buildKey(newId, k), cur); });
       localStorage.setItem(ProfileStorage.buildKey(newId, 'app_qty_v10'), JSON.stringify({ gold18: 0, silver999: 0, copper999: 0, usdt: 0, toman: 0, bourse: 0 }));
-      localStorage.setItem(ProfileStorage.buildKey(newId, 'app_initial_capital'), '0');
-      localStorage.setItem(ProfileStorage.buildKey(newId, 'fb_copper_discount'), '0');
-      profilesList.push({ id: newId, name });
-      ProfileStorage.saveList();
-      switchProfile(newId);
+      localStorage.setItem(ProfileStorage.buildKey(newId, 'app_initial_capital'), '0'); localStorage.setItem(ProfileStorage.buildKey(newId, 'fb_copper_discount'), '0');
+      profilesList.push({ id: newId, name }); ProfileStorage.saveList(); switchProfile(newId);
     }
 
     function renameCurrentProfile() {
       const current = profilesList.find(p => p.id === activeProfileId); if (!current) return;
-      const rawName = prompt('نام جدید پروفایل را وارد کنید:', current.name);
-      if (rawName === null) return;
-      const name = rawName.trim();
-      if (!name) { showToast('نام پروفایل نمی‌تواند خالی باشد'); return; }
+      const rawName = prompt('نام جدید پروفایل را وارد کنید:', current.name); if (rawName === null) return;
+      const name = rawName.trim(); if (!name) { showToast('نام پروفایل نمی‌تواند خالی باشد'); return; }
       if (profilesList.some(p => p.id !== activeProfileId && p.name === name)) { showToast('این نام تکراری است'); return; }
-      current.name = name; ProfileStorage.saveList(); renderProfileBar();
-      showToast('نام پروفایل با موفقیت ویرایش شد');
+      current.name = name; ProfileStorage.saveList(); renderProfileBar(); showToast('نام پروفایل با موفقیت ویرایش شد');
     }
 
     function deleteCurrentProfile() {
@@ -258,60 +249,37 @@
       const current = profilesList.find(p => p.id === activeProfileId);
       if (!confirm(`آیا از حذف کامل پروفایل «${current?.name || ''}» و موجودی‌های ثبت‌شده در آن اطمینان دارید؟`)) return;
       PROFILE_KEYS.forEach(k => localStorage.removeItem(ProfileStorage.buildKey(activeProfileId, k)));
-      profilesList = profilesList.filter(p => p.id !== activeProfileId);
-      ProfileStorage.saveList();
-      switchProfile(profilesList[0].id);
-      showToast('پروفایل انتخاب‌شده حذف گردید');
+      profilesList = profilesList.filter(p => p.id !== activeProfileId); ProfileStorage.saveList(); switchProfile(profilesList[0].id); showToast('پروفایل انتخاب‌شده حذف گردید');
     }
 
     function exportJSONBackup() {
       const backupObj = { app: APP_PREFIX, version: 1, exportedAt: new Date().toISOString(), activeProfileId, profilesList, profilesData: {} };
-      profilesList.forEach(p => {
-        backupObj.profilesData[p.id] = {};
-        PROFILE_KEYS.forEach(k => {
-          const val = localStorage.getItem(ProfileStorage.buildKey(p.id, k));
-          if (val !== null) backupObj.profilesData[p.id][k] = val;
-        });
-      });
-      const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url; a.download = `portfolio-backup-${new Date().toISOString().slice(0, 10)}.json`; a.click();
-      URL.revokeObjectURL(url);
+      profilesList.forEach(p => { backupObj.profilesData[p.id] = {}; PROFILE_KEYS.forEach(k => { const val = localStorage.getItem(ProfileStorage.buildKey(p.id, k)); if (val !== null) backupObj.profilesData[p.id][k] = val; }); });
+      const blob = new Blob([JSON.stringify(backupObj, null, 2)], { type: 'application/json' }); const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = `portfolio-backup-${new Date().toISOString().slice(0, 10)}.json`; a.click(); URL.revokeObjectURL(url);
       showToast('فایل پشتیبان (JSON) از تمام پروفایل‌ها دانلود شد');
     }
 
     function importJSONBackup(event) {
-      const file = event.target.files?.[0]; if (!file) return;
-      const reader = new FileReader();
+      const file = event.target.files?.[0]; if (!file) return; const reader = new FileReader();
       reader.onload = (e) => {
         try {
           const parsed = JSON.parse(e.target.result);
-          if (!parsed || !Array.isArray(parsed.profilesList) || parsed.profilesList.length === 0 || typeof parsed.profilesData !== 'object') {
-            alert('ساختار فایل JSON معتبر نیست.'); return;
-          }
+          if (!parsed || !Array.isArray(parsed.profilesList) || parsed.profilesList.length === 0 || typeof parsed.profilesData !== 'object') { alert('ساختار فایل JSON معتبر نیست.'); return; }
           if (!confirm(`آیا مایلید ${parsed.profilesList.length} پروفایل موجود در فایل پشتیبان جایگزین اطلاعات فعلی شوند؟`)) return;
           profilesList.forEach(p => PROFILE_KEYS.forEach(k => localStorage.removeItem(ProfileStorage.buildKey(p.id, k))));
-          profilesList = parsed.profilesList;
-          activeProfileId = profilesList.some(p => p.id === parsed.activeProfileId) ? parsed.activeProfileId : profilesList[0].id;
-          ProfileStorage.saveList();
-          localStorage.setItem(ProfileStorage.activeKey, activeProfileId);
-          profilesList.forEach(p => {
-            const pData = parsed.profilesData[p.id] || {};
-            PROFILE_KEYS.forEach(k => { if (pData[k] !== undefined && pData[k] !== null) localStorage.setItem(ProfileStorage.buildKey(p.id, k), String(pData[k])); });
-          });
-          renderProfileBar(); loadStoredData(); renderUIInputs(); recalculateAndRender();
-          showToast('اطلاعات تمام پروفایل‌ها با موفقیت بازیابی شد');
-        } catch (err) { alert('خطا در خواندن فایل JSON پشتیبان.'); }
-        finally { event.target.value = ''; }
+          profilesList = parsed.profilesList; activeProfileId = profilesList.some(p => p.id === parsed.activeProfileId) ? parsed.activeProfileId : profilesList[0].id;
+          ProfileStorage.saveList(); localStorage.setItem(ProfileStorage.activeKey, activeProfileId);
+          profilesList.forEach(p => { const pData = parsed.profilesData[p.id] || {}; PROFILE_KEYS.forEach(k => { if (pData[k] !== undefined && pData[k] !== null) localStorage.setItem(ProfileStorage.buildKey(p.id, k), String(pData[k])); }); });
+          renderProfileBar(); loadStoredData(); renderUIInputs(); recalculateAndRender(); showToast('اطلاعات تمام پروفایل‌ها با موفقیت بازیابی شد');
+        } catch (err) { alert('خطا در خواندن فایل JSON پشتیبان.'); } finally { event.target.value = ''; }
       };
       reader.readAsText(file);
     }
 
     async function fetchWithTimeout(url, timeoutMs = 4000) {
       const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), timeoutMs);
-      try { const res = await fetch(url, { signal: controller.signal, cache: 'no-store' }); clearTimeout(timer); return res; }
-      catch (err) { clearTimeout(timer); throw err; }
+      try { const res = await fetch(url, { signal: controller.signal, cache: 'no-store' }); clearTimeout(timer); return res; } catch (err) { clearTimeout(timer); throw err; }
     }
 
     function showToast(message) {
@@ -322,13 +290,11 @@
 
     function switchTab(tabName) {
       ['dashboard', 'manage', 'analysis'].forEach(t => {
-        document.getElementById('tab-' + t).classList.add('hidden');
-        const btn = document.getElementById('btn-tab-' + t);
+        document.getElementById('tab-' + t).classList.add('hidden'); const btn = document.getElementById('btn-tab-' + t);
         btn.classList.remove('bg-gradient-to-r', 'from-brand-600', 'to-brand-500', 'text-white', 'shadow-lg', 'shadow-brand-500/30');
         btn.classList.add('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-200/60', 'dark:hover:bg-slate-800/70');
       });
-      document.getElementById('tab-' + tabName).classList.remove('hidden');
-      const activeBtn = document.getElementById('btn-tab-' + tabName);
+      document.getElementById('tab-' + tabName).classList.remove('hidden'); const activeBtn = document.getElementById('btn-tab-' + tabName);
       activeBtn.classList.remove('text-slate-600', 'dark:text-slate-400', 'hover:bg-slate-200/60', 'dark:hover:bg-slate-800/70');
       activeBtn.classList.add('bg-gradient-to-r', 'from-brand-600', 'to-brand-500', 'text-white', 'shadow-lg', 'shadow-brand-500/30');
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -339,11 +305,7 @@
       assetQuantities = { gold18: 0, silver999: 0, copper999: 0, usdt: 0, toman: 0, bourse: 0 };
       try { const q = ProfileStorage.getItem('app_qty_v10'); if (q) assetQuantities = { ...assetQuantities, ...JSON.parse(q) }; } catch (e) {}
       const defaults = { fb_usdt: ['fallback_usdt', '232000'], fb_gold: ['fallback_gold', '2400'], fb_silver: ['fallback_silver', '28.5'], fb_copper: ['fallback_copper', '14238.5'], fb_copper_discount: ['copper_discount', '0'], app_initial_capital: ['initial_capital', '0'] };
-      Object.entries(defaults).forEach(([k, [id, defVal]]) => {
-        const v = ProfileStorage.getItem(k);
-        const el = document.getElementById(id);
-        if (el) el.value = (v !== null && v !== '') ? v : defVal;
-      });
+      Object.entries(defaults).forEach(([k, [id, defVal]]) => { const v = ProfileStorage.getItem(k); const el = document.getElementById(id); if (el) el.value = (v !== null && v !== '') ? v : defVal; });
       if (!liveUSDTPrice.isOnline) liveUSDTPrice.price = parseFloat(document.getElementById('fallback_usdt').value) || 232000;
       if (usdSources.gold === 'رزرو دستی') livePricesUSD.gold = parseFloat(document.getElementById('fallback_gold').value) || 2400;
       if (usdSources.silver === 'رزرو دستی') livePricesUSD.silver = parseFloat(document.getElementById('fallback_silver').value) || 28.5;
@@ -353,28 +315,21 @@
     function saveAssets(e) {
       if (e) e.preventDefault();
       ASSET_DEFINITIONS.forEach(a => { const el = document.getElementById(`qty_${a.id}`); if (el) assetQuantities[a.id] = parseFloat(el.value) || 0; });
-      ProfileStorage.setItem('app_qty_v10', JSON.stringify(assetQuantities));
-      ProfileStorage.setItem('app_initial_capital', document.getElementById('initial_capital').value);
+      ProfileStorage.setItem('app_qty_v10', JSON.stringify(assetQuantities)); ProfileStorage.setItem('app_initial_capital', document.getElementById('initial_capital').value);
       recalculateAndRender(); switchTab('dashboard'); showToast(`موجودی «${ProfileStorage.getActiveName()}» ذخیره شد`);
     }
 
     function saveConfig(changedField) {
       const fbUsdtVal = document.getElementById('fallback_usdt').value; const fbGoldVal = document.getElementById('fallback_gold').value;
-      const fbSilverVal = document.getElementById('fallback_silver').value; const fbCopperVal = document.getElementById('fallback_copper').value;
-      const fbDiscountVal = document.getElementById('copper_discount').value;
-      ProfileStorage.setItem('fb_usdt', fbUsdtVal); ProfileStorage.setItem('fb_gold', fbGoldVal);
-      ProfileStorage.setItem('fb_silver', fbSilverVal); ProfileStorage.setItem('fb_copper', fbCopperVal); ProfileStorage.setItem('fb_copper_discount', fbDiscountVal);
+      const fbSilverVal = document.getElementById('fallback_silver').value; const fbCopperVal = document.getElementById('fallback_copper').value; const fbDiscountVal = document.getElementById('copper_discount').value;
+      ProfileStorage.setItem('fb_usdt', fbUsdtVal); ProfileStorage.setItem('fb_gold', fbGoldVal); ProfileStorage.setItem('fb_silver', fbSilverVal); ProfileStorage.setItem('fb_copper', fbCopperVal); ProfileStorage.setItem('fb_copper_discount', fbDiscountVal);
       if (changedField === 'copper' || usdSources.copper === 'رزرو دستی') {
         livePricesUSD.copper = parseFloat(fbCopperVal) || 14238.5; usdSources.copper = 'رزرو دستی';
-        document.getElementById('copperSourceIndicator')?.classList.add('hidden');
-        document.getElementById('fallback_copper')?.classList.remove('bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-300', 'dark:border-emerald-800');
+        document.getElementById('copperSourceIndicator')?.classList.add('hidden'); document.getElementById('fallback_copper')?.classList.remove('bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-300', 'dark:border-emerald-800');
       }
       if (changedField === 'gold') { livePricesUSD.gold = parseFloat(fbGoldVal) || 2400; usdSources.gold = 'رزرو دستی'; directPricesToman.gold18 = { price: null, source: null, isDirect: false }; }
       if (changedField === 'silver') { livePricesUSD.silver = parseFloat(fbSilverVal) || 28.5; usdSources.silver = 'رزرو دستی'; directPricesToman.silver999 = { price: null, source: null, isDirect: false }; }
-      if (changedField === 'usdt' && !liveUSDTPrice.isOnline) {
-        liveUSDTPrice.price = parseFloat(fbUsdtVal) || 232000;
-        document.getElementById('usdtDisplayRate').innerText = Math.round(liveUSDTPrice.price).toLocaleString('fa-IR');
-      }
+      if (changedField === 'usdt' && !liveUSDTPrice.isOnline) { liveUSDTPrice.price = parseFloat(fbUsdtVal) || 232000; document.getElementById('usdtDisplayRate').innerText = Math.round(liveUSDTPrice.price).toLocaleString('fa-IR'); }
       recalculateAndRender(); showToast('تنظیمات نرخ پشتیبان و کسورات ذخیره شد');
     }
 
@@ -387,31 +342,20 @@
     function renderUIInputs() {
       const container = document.getElementById('assetsInputsContainer'); container.innerHTML = '';
       ASSET_DEFINITIONS.forEach(a => {
-        const val = assetQuantities[a.id] || 0; const displayVal = val !== 0 ? val : '';
-        const formattedPreview = val > 0 ? `${val.toLocaleString('fa-IR')} ${a.unit}` : `۰ ${a.unit}`;
-        const field = document.createElement('div');
-        field.className = 'p-3 rounded-xl bg-slate-100/60 dark:bg-slate-900/50 border border-slate-200/70 dark:border-slate-800/80';
+        const val = assetQuantities[a.id] || 0; const displayVal = val !== 0 ? val : ''; const formattedPreview = val > 0 ? `${val.toLocaleString('fa-IR')} ${a.unit}` : `۰ ${a.unit}`;
+        const field = document.createElement('div'); field.className = 'p-3 rounded-xl bg-slate-100/60 dark:bg-slate-900/50 border border-slate-200/70 dark:border-slate-800/80';
         field.innerHTML = `<div class="flex items-center justify-between mb-1.5"><label for="qty_${a.id}" class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background-color: ${a.color}"></span>${a.name}</label><span id="preview_qty_${a.id}" class="text-[10px] font-bold text-slate-400 num-tabular">${formattedPreview}</span></div><div class="relative"><input type="number" step="any" id="qty_${a.id}" value="${displayVal}" placeholder="0" oninput="updateInputPreview('qty_${a.id}', '${a.unit}')" class="w-full pl-3 pr-9 py-2 bg-white dark:bg-slate-800/90 border border-slate-200 dark:border-slate-700/80 rounded-lg focus:ring-2 focus:ring-brand-500 outline-none text-xs font-bold num-tabular transition"><span class="absolute right-3 top-2.5 text-slate-400"><i data-lucide="${a.icon}" class="w-3.5 h-3.5"></i></span></div>`;
         container.appendChild(field);
       });
       updateInputPreview('initial_capital', 'دلار', true); lucide.createIcons();
     }
 
-    function normalizeTomanPrice(rawPrice) {
-      let p = parseFloat(String(rawPrice).replace(/,/g, '')); if (!p || isNaN(p)) return null;
-      if (p >= 500000) p = p / 10; return (p > 40000 && p < 500000) ? p : null;
-    }
-
+    function normalizeTomanPrice(rawPrice) { let p = parseFloat(String(rawPrice).replace(/,/g, '')); if (!p || isNaN(p)) return null; if (p >= 500000) p = p / 10; return (p > 40000 && p < 500000) ? p : null; }
     function normalizeDomesticMetalPrice(rawVal, theoreticalToman) {
-      if (rawVal === null || rawVal === undefined) return null;
-      let p = parseFloat(String(rawVal).replace(/,/g, '').trim());
+      if (rawVal === null || rawVal === undefined) return null; let p = parseFloat(String(rawVal).replace(/,/g, '').trim());
       if (!p || isNaN(p) || p <= 0 || !theoreticalToman || theoreticalToman <= 0) return null;
       const minV = theoreticalToman * 0.72; const maxV = theoreticalToman * 1.35;
-      if (p >= minV && p <= maxV) return p;
-      if ((p / 10) >= minV && (p / 10) <= maxV) return p / 10;
-      if ((p / 1000) >= minV && (p / 1000) <= maxV) return p / 1000;
-      if ((p / 10000) >= minV && (p / 10000) <= maxV) return p / 10000;
-      return null;
+      if (p >= minV && p <= maxV) return p; if ((p / 10) >= minV && (p / 10) <= maxV) return p / 10; if ((p / 1000) >= minV && (p / 1000) <= maxV) return p / 1000; if ((p / 10000) >= minV && (p / 10000) <= maxV) return p / 10000; return null;
     }
 
     function extractCandidatesFromData(data, keys, nameKeywords = []) {
@@ -420,95 +364,34 @@
         if (!item || typeof item !== 'object') return;
         const idStr = String(item.symbol || item.key || item.code || item.slug || item.id || '').toLowerCase();
         const nameStr = String(item.name || item.title || item.name_fa || item.label || '');
-        const keyMatched = keys.some(k => idStr === k.toLowerCase());
-        const nameMatched = nameKeywords.some(kw => nameStr.includes(kw));
-        if (keyMatched || nameMatched) {
+        if (keys.some(k => idStr === k.toLowerCase()) || nameKeywords.some(kw => nameStr.includes(kw))) {
           const raw = item.price ?? item.v ?? item.value ?? item.sell_price?.value ?? item.last ?? item.buy;
           if (raw !== undefined && raw !== null && typeof raw !== 'object') results.push(raw);
         }
       };
-      if (Array.isArray(data)) { data.forEach(checkItem); }
+      if (Array.isArray(data)) data.forEach(checkItem);
       else if (typeof data === 'object') {
-        for (const k of keys) {
-          if (data[k] !== undefined && data[k] !== null) {
-            const v = data[k];
-            if (typeof v === 'number' || typeof v === 'string') results.push(v);
-            else if (typeof v === 'object') { const raw = v.price ?? v.v ?? v.value ?? v.sell_price?.value; if (raw !== undefined) results.push(raw); }
-          }
-        }
-        Object.values(data).forEach(sub => {
-          if (Array.isArray(sub)) sub.forEach(checkItem);
-          else if (sub && typeof sub === 'object') {
-            checkItem(sub);
-            for (const k of keys) {
-              if (sub[k] !== undefined) {
-                const sv = sub[k];
-                if (typeof sv === 'number' || typeof sv === 'string') results.push(sv);
-                else if (sv && typeof sv === 'object') { const r = sv.price ?? sv.v ?? sv.value; if (r !== undefined) results.push(r); }
-              }
-            }
-          }
-        });
+        for (const k of keys) { if (data[k] !== undefined && data[k] !== null) { const v = data[k]; if (typeof v === 'number' || typeof v === 'string') results.push(v); else if (typeof v === 'object') { const raw = v.price ?? v.v ?? v.value ?? v.sell_price?.value; if (raw !== undefined) results.push(raw); } } }
+        Object.values(data).forEach(sub => { if (Array.isArray(sub)) sub.forEach(checkItem); else if (sub && typeof sub === 'object') { checkItem(sub); for (const k of keys) { if (sub[k] !== undefined) { const sv = sub[k]; if (typeof sv === 'number' || typeof sv === 'string') results.push(sv); else if (sv && typeof sv === 'object') { const r = sv.price ?? sv.v ?? sv.value; if (r !== undefined) results.push(r); } } } } });
       }
       return results;
     }
 
     async function fetchUSDTWithFailover(cachedResponses = {}) {
       const endpoints = [
-        async () => {
-          const data = cachedResponses.nabz || await (await fetchWithTimeout('https://raw.githubusercontent.com/itsyebekhe/nabz/main/market.json')).json();
-          cachedResponses.nabz = data;
-          const cands = extractCandidatesFromData(data, ['usdt', 'usd', 'dollar', 'price_dollar_rl'], ['تتر', 'دلار آزاد']);
-          for (const c of cands) { const p = normalizeTomanPrice(c); if (p) return { price: p, source: 'نبض بازار (GitHub)', isOnline: true }; }
-        },
-        async () => {
-          const data = cachedResponses.kifpool || await (await fetchWithTimeout('https://kifpool-live.apidarkness.workers.dev/all')).json();
-          cachedResponses.kifpool = data;
-          const usd = data?.data?.currencies?.find(c => ['usd', 'usdt'].includes((c.symbol || '').toLowerCase()));
-          const p = normalizeTomanPrice(usd?.price); if (p) return { price: p, source: 'کیف‌پول لایو', isOnline: true };
-        },
-        async () => {
-          const data = cachedResponses.alnchnd || await (await fetchWithTimeout('https://alnchnd.apidarkness.workers.dev/currency')).json();
-          cachedResponses.alnchnd = data;
-          const usd = data?.currency_prices?.items?.find(i => ['usd', 'usdt'].includes((i.code || '').toLowerCase()));
-          const p = normalizeTomanPrice(usd?.sell_price?.value); if (p) return { price: p, source: 'آلان‌چند', isOnline: true };
-        },
-        async () => {
-          const data = cachedResponses.tgjuCurr || await (await fetchWithTimeout('https://tgju.apidarkness.workers.dev/currency')).json();
-          cachedResponses.tgjuCurr = data;
-          const usd = data?.data?.find(i => i.key === 'price_dollar_rl' || (i.name && i.name.includes('دلار')));
-          const p = normalizeTomanPrice(usd?.price); if (p) return { price: p, source: 'TGJU', isOnline: true };
-        },
-        async () => {
-          const data = await (await fetchWithTimeout('https://api.wallex.ir/v1/markets')).json();
-          const p = normalizeTomanPrice(data?.result?.symbols?.USDTTMN?.stats?.lastPrice); if (p) return { price: p, source: 'والکس', isOnline: true };
-        },
-        async () => {
-          const data = await (await fetchWithTimeout('https://api.exir.io/v2/ticker?symbol=usdt-irt')).json();
-          const p = normalizeTomanPrice(data?.last); if (p) return { price: p, source: 'اکسیر', isOnline: true };
-        },
-        async () => {
-          const data = await (await fetchWithTimeout('https://api.nobitex.ir/v3/orderbook/USDTIRT')).json();
-          const p = normalizeTomanPrice(data?.lastTradePrice); if (p) return { price: p, source: 'نوبیتکس', isOnline: true };
-        },
-        async () => {
-          const data = await (await fetchWithTimeout('https://publicapi.ramzinex.com/1/pair/11')).json();
-          const p = normalizeTomanPrice(data?.data?.buy); if (p) return { price: p, source: 'رمزینکس', isOnline: true };
-        },
-        async () => {
-          const data = await (await fetchWithTimeout('https://api.bitpin.ir/v1/mth/markets/')).json();
-          const list = data?.results || data;
-          if (Array.isArray(list)) { const usdt = list.find(m => m.code === 'USDT_IRT' || m.currency1_code === 'USDT'); const p = normalizeTomanPrice(usdt?.price); if (p) return { price: p, source: 'بیت‌پین', isOnline: true }; }
-        },
-        async () => {
-          const res = await fetchWithTimeout('https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.nobitex.ir/v3/orderbook/USDTIRT'));
-          const json = await res.json(); const data = JSON.parse(json.contents);
-          const p = normalizeTomanPrice(data?.lastTradePrice); if (p) return { price: p, source: 'نوبیتکس (پراکسی)', isOnline: true };
-        }
+        async () => { const data = cachedResponses.nabz || await (await fetchWithTimeout('https://raw.githubusercontent.com/itsyebekhe/nabz/main/market.json')).json(); cachedResponses.nabz = data; for (const c of extractCandidatesFromData(data, ['usdt', 'usd', 'dollar', 'price_dollar_rl'], ['تتر', 'دلار آزاد'])) { const p = normalizeTomanPrice(c); if (p) return { price: p, source: 'نبض بازار (GitHub)', isOnline: true }; } },
+        async () => { const data = cachedResponses.kifpool || await (await fetchWithTimeout('https://kifpool-live.apidarkness.workers.dev/all')).json(); cachedResponses.kifpool = data; const usd = data?.data?.currencies?.find(c => ['usd', 'usdt'].includes((c.symbol || '').toLowerCase())); const p = normalizeTomanPrice(usd?.price); if (p) return { price: p, source: 'کیف‌پول لایو', isOnline: true }; },
+        async () => { const data = cachedResponses.alnchnd || await (await fetchWithTimeout('https://alnchnd.apidarkness.workers.dev/currency')).json(); cachedResponses.alnchnd = data; const usd = data?.currency_prices?.items?.find(i => ['usd', 'usdt'].includes((i.code || '').toLowerCase())); const p = normalizeTomanPrice(usd?.sell_price?.value); if (p) return { price: p, source: 'آلان‌چند', isOnline: true }; },
+        async () => { const data = cachedResponses.tgjuCurr || await (await fetchWithTimeout('https://tgju.apidarkness.workers.dev/currency')).json(); cachedResponses.tgjuCurr = data; const usd = data?.data?.find(i => i.key === 'price_dollar_rl' || (i.name && i.name.includes('دلار'))); const p = normalizeTomanPrice(usd?.price); if (p) return { price: p, source: 'TGJU', isOnline: true }; },
+        async () => { const data = await (await fetchWithTimeout('https://api.wallex.ir/v1/markets')).json(); const p = normalizeTomanPrice(data?.result?.symbols?.USDTTMN?.stats?.lastPrice); if (p) return { price: p, source: 'والکس', isOnline: true }; },
+        async () => { const data = await (await fetchWithTimeout('https://api.exir.io/v2/ticker?symbol=usdt-irt')).json(); const p = normalizeTomanPrice(data?.last); if (p) return { price: p, source: 'اکسیر', isOnline: true }; },
+        async () => { const data = await (await fetchWithTimeout('https://api.nobitex.ir/v3/orderbook/USDTIRT')).json(); const p = normalizeTomanPrice(data?.lastTradePrice); if (p) return { price: p, source: 'نوبیتکس', isOnline: true }; },
+        async () => { const data = await (await fetchWithTimeout('https://publicapi.ramzinex.com/1/pair/11')).json(); const p = normalizeTomanPrice(data?.data?.buy); if (p) return { price: p, source: 'رمزینکس', isOnline: true }; },
+        async () => { const data = await (await fetchWithTimeout('https://api.bitpin.ir/v1/mth/markets/')).json(); const list = data?.results || data; if (Array.isArray(list)) { const usdt = list.find(m => m.code === 'USDT_IRT' || m.currency1_code === 'USDT'); const p = normalizeTomanPrice(usdt?.price); if (p) return { price: p, source: 'بیت‌پین', isOnline: true }; } },
+        async () => { const res = await fetchWithTimeout('https://api.allorigins.win/get?url=' + encodeURIComponent('https://api.nobitex.ir/v3/orderbook/USDTIRT')); const json = await res.json(); const data = JSON.parse(json.contents); const p = normalizeTomanPrice(data?.lastTradePrice); if (p) return { price: p, source: 'نوبیتکس (پراکسی)', isOnline: true }; }
       ];
       for (const fn of endpoints) { try { const r = await fn(); if (r && r.price) return r; } catch (e) {} }
-      const fb = parseFloat(document.getElementById('fallback_usdt').value) || 232000;
-      return { price: fb, source: 'پشتیبان رزرو', isOnline: false };
+      return { price: parseFloat(document.getElementById('fallback_usdt').value) || 232000, source: 'پشتیبان رزرو', isOnline: false };
     }
 
     async function fetchLiveCopperPrice() {
@@ -520,9 +403,7 @@
         async () => { const d = await (await fetchWithTimeout('https://api.codetabs.com/v1/proxy?quest=' + encodeURIComponent(targetUrl))).json(); const p = d?.chart?.result?.[0]?.meta?.regularMarketPrice; if (p) return { price: parseFloat(p), src: 'COMEX (آنلاین)' }; },
         async () => { const j = await (await fetchWithTimeout('https://api.allorigins.win/get?url=' + encodeURIComponent(targetUrl))).json(); const d = JSON.parse(j.contents); const p = d?.chart?.result?.[0]?.meta?.regularMarketPrice; if (p) return { price: parseFloat(p), src: 'COMEX (آنلاین)' }; }
       ];
-      for (const fn of endpoints) {
-        try { const res = await fn(); if (res && typeof res.price === 'number' && !isNaN(res.price)) { const p = res.price; if ((p > 1 && p < 30) || (p >= 100 && p < 50000)) return { price: parseFloat(p.toFixed(4)), source: res.src }; } } catch (e) {}
-      }
+      for (const fn of endpoints) { try { const res = await fn(); if (res && typeof res.price === 'number' && !isNaN(res.price)) { const p = res.price; if ((p > 1 && p < 30) || (p >= 100 && p < 50000)) return { price: parseFloat(p.toFixed(4)), source: res.src }; } } catch (e) {} }
       return null;
     }
 
@@ -540,17 +421,12 @@
         if (copperIndicator) copperIndicator.classList.add('hidden');
         if (copperInput) copperInput.classList.remove('bg-emerald-50', 'dark:bg-emerald-900/20', 'border-emerald-300', 'dark:border-emerald-800');
       }
-
       let gotGoldOunce = false; let gotSilverOunce = false;
       try {
-        const nabzData = cachedResponses.nabz || await (await fetchWithTimeout('https://raw.githubusercontent.com/itsyebekhe/nabz/main/market.json')).json();
-        cachedResponses.nabz = nabzData;
-        const gCands = extractCandidatesFromData(nabzData, ['xau', 'usd_xau', 'ons', 'ons_gold', 'gold_ounce', 'gold'], ['انس طلا', 'اونس طلا']);
-        for (const c of gCands) { const p = parseFloat(String(c).replace(/,/g, '')); if (p > 1500 && p < 10000) { livePricesUSD.gold = p; usdSources.gold = 'نبض بازار (GitHub)'; gotGoldOunce = true; break; } }
-        const sCands = extractCandidatesFromData(nabzData, ['xag', 'usd_xag', 'ons_silver', 'silver_ounce', 'silver'], ['انس نقره', 'اونس نقره']);
-        for (const c of sCands) { const p = parseFloat(String(c).replace(/,/g, '')); if (p > 12 && p < 200) { livePricesUSD.silver = p; usdSources.silver = 'نبض بازار (GitHub)'; gotSilverOunce = true; break; } }
+        const nabzData = cachedResponses.nabz || await (await fetchWithTimeout('https://raw.githubusercontent.com/itsyebekhe/nabz/main/market.json')).json(); cachedResponses.nabz = nabzData;
+        for (const c of extractCandidatesFromData(nabzData, ['xau', 'usd_xau', 'ons', 'ons_gold', 'gold_ounce', 'gold'], ['انس طلا', 'اونس طلا'])) { const p = parseFloat(String(c).replace(/,/g, '')); if (p > 1500 && p < 10000) { livePricesUSD.gold = p; usdSources.gold = 'نبض بازار (GitHub)'; gotGoldOunce = true; break; } }
+        for (const c of extractCandidatesFromData(nabzData, ['xag', 'usd_xag', 'ons_silver', 'silver_ounce', 'silver'], ['انس نقره', 'اونس نقره'])) { const p = parseFloat(String(c).replace(/,/g, '')); if (p > 12 && p < 200) { livePricesUSD.silver = p; usdSources.silver = 'نبض بازار (GitHub)'; gotSilverOunce = true; break; } }
       } catch (e) {}
-
       if (!gotGoldOunce || !gotSilverOunce) {
         try {
           const tgjuData = await (await fetchWithTimeout('https://tgju.apidarkness.workers.dev/gold-global')).json();
@@ -558,13 +434,9 @@
           if (!gotSilverOunce) { const s = tgjuData?.data?.find(i => i.key === 'silver' || (i.name && i.name.includes('نقره'))); const p = parseFloat(String(s?.price).replace(/,/g, '')); if (p > 12 && p < 200) { livePricesUSD.silver = p; usdSources.silver = 'TGJU (Global)'; gotSilverOunce = true; } }
         } catch (e) {}
       }
-
       if (!gotGoldOunce || !gotSilverOunce) {
         try {
-          const [gRes, sRes] = await Promise.all([
-            !gotGoldOunce ? fetchWithTimeout('https://api.gold-api.com/price/XAU') : Promise.resolve(null),
-            !gotSilverOunce ? fetchWithTimeout('https://api.gold-api.com/price/XAG') : Promise.resolve(null)
-          ]);
+          const [gRes, sRes] = await Promise.all([!gotGoldOunce ? fetchWithTimeout('https://api.gold-api.com/price/XAU') : Promise.resolve(null), !gotSilverOunce ? fetchWithTimeout('https://api.gold-api.com/price/XAG') : Promise.resolve(null)]);
           if (gRes && gRes.ok) { const gData = await gRes.json(); if (gData?.price > 1500) { livePricesUSD.gold = parseFloat(gData.price); usdSources.gold = 'Gold-API'; } }
           if (sRes && sRes.ok) { const sData = await sRes.json(); if (sData?.price > 12) { livePricesUSD.silver = parseFloat(sData.price); usdSources.silver = 'Gold-API'; } }
         } catch (e) {}
@@ -573,30 +445,20 @@
 
     async function fetchDirectDomesticMetals(theoreticalGold18, theoreticalSilver999, cachedResponses = {}) {
       directPricesToman = { gold18: { price: null, source: null, isDirect: false }, silver999: { price: null, source: null, isDirect: false } };
-      const goldKeys = ['geram18', 'gold18', '18ayar', 'ir_gold_18k', 'tala18', 'geram_18', 'gold_18', 'ayar18'];
-      const goldNames = ['طلای 18', 'طلای ۱۸', 'گرم 18', 'گرم ۱۸', '18 عیار', '۱۸ عیار'];
-      const silverKeys = ['silver_999', 'silver999', 'geram_silver', 'silver_gram', 'ir_silver', 'noghreh', 'silver'];
-      const silverNames = ['گرم نقره', 'نقره 999', 'نقره ۹۹۹', 'نقره خام'];
-
+      const goldKeys = ['geram18', 'gold18', '18ayar', 'ir_gold_18k', 'tala18', 'geram_18', 'gold_18', 'ayar18']; const goldNames = ['طلای 18', 'طلای ۱۸', 'گرم 18', 'گرم ۱۸', '18 عیار', '۱۸ عیار'];
+      const silverKeys = ['silver_999', 'silver999', 'geram_silver', 'silver_gram', 'ir_silver', 'noghreh', 'silver']; const silverNames = ['گرم نقره', 'نقره 999', 'نقره ۹۹۹', 'نقره خام'];
       const sources = [
         { name: 'نبض بازار', getter: async () => cachedResponses.nabz || await (await fetchWithTimeout('https://raw.githubusercontent.com/itsyebekhe/nabz/main/market.json')).json() },
         { name: 'TGJU داخلی', getter: async () => await (await fetchWithTimeout('https://tgju.apidarkness.workers.dev/gold')).json() },
         { name: 'آلان‌چند', getter: async () => await (await fetchWithTimeout('https://alnchnd.apidarkness.workers.dev/gold')).json() },
         { name: 'کیف‌پول لایو', getter: async () => cachedResponses.kifpool || await (await fetchWithTimeout('https://kifpool-live.apidarkness.workers.dev/all')).json() }
       ];
-
       for (const src of sources) {
         if (directPricesToman.gold18.isDirect && directPricesToman.silver999.isDirect) break;
         try {
           const data = await src.getter();
-          if (!directPricesToman.gold18.isDirect) {
-            const gCands = extractCandidatesFromData(data, goldKeys, goldNames);
-            for (const raw of gCands) { const validP = normalizeDomesticMetalPrice(raw, theoreticalGold18); if (validP) { directPricesToman.gold18 = { price: validP, source: src.name, isDirect: true }; break; } }
-          }
-          if (!directPricesToman.silver999.isDirect) {
-            const sCands = extractCandidatesFromData(data, silverKeys, silverNames);
-            for (const raw of sCands) { const validS = normalizeDomesticMetalPrice(raw, theoreticalSilver999); if (validS) { directPricesToman.silver999 = { price: validS, source: src.name, isDirect: true }; break; } }
-          }
+          if (!directPricesToman.gold18.isDirect) { for (const raw of extractCandidatesFromData(data, goldKeys, goldNames)) { const validP = normalizeDomesticMetalPrice(raw, theoreticalGold18); if (validP) { directPricesToman.gold18 = { price: validP, source: src.name, isDirect: true }; break; } } }
+          if (!directPricesToman.silver999.isDirect) { for (const raw of extractCandidatesFromData(data, silverKeys, silverNames)) { const validS = normalizeDomesticMetalPrice(raw, theoreticalSilver999); if (validS) { directPricesToman.silver999 = { price: validS, source: src.name, isDirect: true }; break; } } }
         } catch (e) {}
       }
     }
@@ -610,71 +472,53 @@
       const theoGold18 = (livePricesUSD.gold / GRAMS_PER_TROY_OUNCE) * 0.75 * liveUSDTPrice.price;
       const theoSilver999 = (livePricesUSD.silver / GRAMS_PER_TROY_OUNCE) * 0.999 * liveUSDTPrice.price;
       await fetchDirectDomesticMetals(theoGold18, theoSilver999, cachedResponses);
-
       document.getElementById('usdtDisplayRate').innerText = Math.round(liveUSDTPrice.price).toLocaleString('fa-IR');
       document.getElementById('usdtSourceBadge').innerText = liveUSDTPrice.source;
       const pulsePing = document.getElementById('pulsePing'); const pulseDot = document.getElementById('pulseDot');
       if (liveUSDTPrice.isOnline) { pulsePing.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75'; pulseDot.className = 'relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500'; }
       else { pulsePing.className = 'hidden'; pulseDot.className = 'relative inline-flex rounded-full h-2.5 w-2.5 bg-amber-500'; }
-
       if (icon) icon.classList.remove('animate-spin'); if (btn) btn.disabled = false;
       document.getElementById('lastUpdateText').innerHTML = `<i data-lucide="clock" class="w-3 h-3"></i><span>آخرین دریافت: ${new Date().toLocaleTimeString('fa-IR')}</span>`;
       recalculateAndRender();
     }
 
     function calculatePortfolioMetrics() {
-      const initCap = parseFloat(document.getElementById('initial_capital').value) || 0;
-      const usdtRate = liveUSDTPrice.price;
-      const discountPercent = parseFloat(document.getElementById('copper_discount')?.value) || 0;
-      let grandTotalToman = 0; let activeCount = 0;
-
+      const initCap = parseFloat(document.getElementById('initial_capital').value) || 0; const usdtRate = liveUSDTPrice.price;
+      const discountPercent = parseFloat(document.getElementById('copper_discount')?.value) || 0; let grandTotalToman = 0; let activeCount = 0;
       const items = ASSET_DEFINITIONS.map(asset => {
         let pricePerUnitUSD = 0; let pricePerUnitToman = 0; let sourceText = ''; let isFallback = false;
         if (asset.type === 'gold') {
           const theoToman = (livePricesUSD.gold / GRAMS_PER_TROY_OUNCE) * asset.purity * usdtRate;
           if (directPricesToman.gold18.isDirect && directPricesToman.gold18.price > 0) {
-            pricePerUnitToman = directPricesToman.gold18.price;
-            pricePerUnitUSD = usdtRate > 0 ? (pricePerUnitToman / usdtRate) : 0;
+            pricePerUnitToman = directPricesToman.gold18.price; pricePerUnitUSD = usdtRate > 0 ? (pricePerUnitToman / usdtRate) : 0;
             const bubble = theoToman > 0 ? (((pricePerUnitToman - theoToman) / theoToman) * 100).toFixed(1) : '0.0';
             sourceText = `${directPricesToman.gold18.source} (مستقیم | حباب ${bubble > 0 ? '+' + bubble : bubble}%)`;
           } else {
-            pricePerUnitUSD = (livePricesUSD.gold / GRAMS_PER_TROY_OUNCE) * asset.purity;
-            pricePerUnitToman = pricePerUnitUSD * usdtRate;
-            sourceText = `${usdSources.gold} × تتر (رزرو جهانی)`;
-            isFallback = usdSources.gold === 'رزرو دستی';
+            pricePerUnitUSD = (livePricesUSD.gold / GRAMS_PER_TROY_OUNCE) * asset.purity; pricePerUnitToman = pricePerUnitUSD * usdtRate;
+            sourceText = `${usdSources.gold} × تتر (رزرو جهانی)`; isFallback = usdSources.gold === 'رزرو دستی';
           }
         } else if (asset.type === 'silver') {
           const theoToman = (livePricesUSD.silver / GRAMS_PER_TROY_OUNCE) * asset.purity * usdtRate;
           if (directPricesToman.silver999.isDirect && directPricesToman.silver999.price > 0) {
-            pricePerUnitToman = directPricesToman.silver999.price;
-            pricePerUnitUSD = usdtRate > 0 ? (pricePerUnitToman / usdtRate) : 0;
+            pricePerUnitToman = directPricesToman.silver999.price; pricePerUnitUSD = usdtRate > 0 ? (pricePerUnitToman / usdtRate) : 0;
             const bubble = theoToman > 0 ? (((pricePerUnitToman - theoToman) / theoToman) * 100).toFixed(1) : '0.0';
             sourceText = `${directPricesToman.silver999.source} (مستقیم | حباب ${bubble > 0 ? '+' + bubble : bubble}%)`;
           } else {
-            pricePerUnitUSD = (livePricesUSD.silver / GRAMS_PER_TROY_OUNCE) * asset.purity;
-            pricePerUnitToman = pricePerUnitUSD * usdtRate;
-            sourceText = `${usdSources.silver} × تتر (رزرو جهانی)`;
-            isFallback = usdSources.silver === 'رزرو دستی';
+            pricePerUnitUSD = (livePricesUSD.silver / GRAMS_PER_TROY_OUNCE) * asset.purity; pricePerUnitToman = pricePerUnitUSD * usdtRate;
+            sourceText = `${usdSources.silver} × تتر (رزرو جهانی)`; isFallback = usdSources.silver === 'رزرو دستی';
           }
         } else if (asset.type === 'copper') {
-          let cIn = livePricesUSD.copper;
-          let kgUsd = cIn >= 1000 ? (cIn / 1000) : (cIn >= 100 ? (cIn / 100) * LB_TO_KG : cIn * LB_TO_KG);
+          let cIn = livePricesUSD.copper; let kgUsd = cIn >= 1000 ? (cIn / 1000) : (cIn >= 100 ? (cIn / 100) * LB_TO_KG : cIn * LB_TO_KG);
           if (discountPercent > 0) kgUsd = kgUsd * (1 - (discountPercent / 100));
           pricePerUnitUSD = kgUsd / 1000; pricePerUnitToman = pricePerUnitUSD * usdtRate;
-          sourceText = `${usdSources.copper} × تتر` + (discountPercent > 0 ? ` (-${discountPercent}%)` : '');
-          isFallback = usdSources.copper === 'رزرو دستی';
-        } else if (asset.type === 'usd') {
-          pricePerUnitUSD = 1.0; pricePerUnitToman = usdtRate; sourceText = liveUSDTPrice.source; isFallback = !liveUSDTPrice.isOnline;
-        } else if (asset.type === 'toman') {
-          pricePerUnitUSD = usdtRate > 0 ? (1.0 / usdtRate) : 0; pricePerUnitToman = 1.0; sourceText = 'ارزش ثابت ریالی';
-        }
+          sourceText = `${usdSources.copper} × تتر` + (discountPercent > 0 ? ` (-${discountPercent}%)` : ''); isFallback = usdSources.copper === 'رزرو دستی';
+        } else if (asset.type === 'usd') { pricePerUnitUSD = 1.0; pricePerUnitToman = usdtRate; sourceText = liveUSDTPrice.source; isFallback = !liveUSDTPrice.isOnline; }
+        else if (asset.type === 'toman') { pricePerUnitUSD = usdtRate > 0 ? (1.0 / usdtRate) : 0; pricePerUnitToman = 1.0; sourceText = 'ارزش ثابت ریالی'; }
         const qty = assetQuantities[asset.id] || 0; const totalValToman = qty * pricePerUnitToman; const totalValUSD = usdtRate > 0 ? (totalValToman / usdtRate) : 0;
         if (totalValToman > 0) activeCount++; grandTotalToman += totalValToman;
         return { ...asset, qty, pricePerUnitUSD, pricePerUnitToman, totalValToman, totalValUSD, sourceText, isFallback };
       });
-
-      const grandTotalUSDT = usdtRate > 0 ? (grandTotalToman / usdtRate) : 0;
-      const pnlUSD = grandTotalUSDT - initCap; const pnlPercent = initCap > 0 ? ((pnlUSD / initCap) * 100) : 0;
+      const grandTotalUSDT = usdtRate > 0 ? (grandTotalToman / usdtRate) : 0; const pnlUSD = grandTotalUSDT - initCap; const pnlPercent = initCap > 0 ? ((pnlUSD / initCap) * 100) : 0;
       return { initCap, usdtRate, grandTotalToman, grandTotalUSDT, pnlUSD, pnlPercent, activeCount, items };
     }
 
@@ -687,7 +531,6 @@
       let cUnit = livePricesUSD.copper >= 1000 ? '$/Ton' : (livePricesUSD.copper >= 100 ? '¢/lb' : '$/lb');
       document.getElementById('spotCopperDisplay').innerText = `${livePricesUSD.copper.toLocaleString('en-US', { maximumFractionDigits: 4 })} (${cUnit})`;
       document.getElementById('spotCopperSource').innerText = usdSources.copper;
-
       document.getElementById('initialCapitalDisplay').innerText = m.initCap.toLocaleString('en-US');
       document.getElementById('activeAssetsCountBadge').innerText = `${m.activeCount.toLocaleString('fa-IR')} دارایی فعال`;
       document.getElementById('totalValueDisplay').innerText = Math.round(m.grandTotalToman).toLocaleString('fa-IR');
@@ -704,12 +547,10 @@
       const cardsGrid = document.getElementById('pricesCardsGrid'); const tableBody = document.getElementById('breakdownTableBody'); const legendContainer = document.getElementById('chartLegendContainer');
       cardsGrid.innerHTML = ''; tableBody.innerHTML = ''; legendContainer.innerHTML = '';
       const chartLabels = []; const chartData = []; const chartColors = [];
-
       m.items.forEach(item => {
         const sharePercent = m.grandTotalToman > 0 ? ((item.totalValToman / m.grandTotalToman) * 100) : 0;
         const usdFormatted = item.pricePerUnitUSD < 1 ? item.pricePerUnitUSD.toFixed(4) : item.pricePerUnitUSD.toLocaleString('en-US', { maximumFractionDigits: 2 });
-        const card = document.createElement('div');
-        card.className = 'glass-panel p-4 rounded-2xl card-hover flex flex-col justify-between h-full border-t-4 num-tabular'; card.style.borderTopColor = item.color;
+        const card = document.createElement('div'); card.className = 'glass-panel p-4 rounded-2xl card-hover flex flex-col justify-between h-full border-t-4 num-tabular'; card.style.borderTopColor = item.color;
         card.innerHTML = `<div><div class="flex items-center justify-between mb-2"><span class="text-xs font-bold text-slate-700 dark:text-slate-200">${item.name}</span><div class="p-1.5 rounded-lg" style="background-color: ${item.color}18; color: ${item.color}"><i data-lucide="${item.icon}" class="w-4 h-4"></i></div></div><div class="mt-1"><div class="text-base font-black text-slate-900 dark:text-white">${Math.round(item.pricePerUnitToman).toLocaleString('fa-IR')} <span class="text-[10px] text-slate-400 font-normal">تومان</span></div><div class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5" dir="ltr">${item.type === 'toman' ? '~ $' : '$'}${usdFormatted}</div></div></div><div class="mt-3 pt-2.5 border-t border-slate-200/60 dark:border-slate-800/70 space-y-1 text-[10px]"><div class="flex items-center justify-between text-slate-500 dark:text-slate-400"><span>موجودی:</span><strong class="font-bold text-slate-700 dark:text-slate-200">${item.qty.toLocaleString('fa-IR')} ${item.unit}</strong></div><div class="flex items-center justify-between text-slate-400"><span>منبع:</span><span class="truncate max-w-[115px] ${item.isFallback ? 'text-amber-500 font-semibold' : 'text-emerald-600 dark:text-emerald-400 font-medium'}" title="${item.sourceText}">${item.sourceText}</span></div></div>`;
         cardsGrid.appendChild(card);
 
@@ -724,7 +565,6 @@
           legendContainer.appendChild(leg);
         }
       });
-
       document.getElementById('analysisEmptyState').classList.toggle('hidden', m.grandTotalToman > 0);
       document.getElementById('analysisChartContent').classList.toggle('hidden', m.grandTotalToman <= 0);
       lucide.createIcons(); updateChart(chartLabels, chartData, chartColors);
@@ -746,12 +586,7 @@
     }
 
     function updateChart(labels, data, colors) { if (!myChart) return; myChart.data.labels = labels; myChart.data.datasets[0].data = data; myChart.data.datasets[0].backgroundColor = colors; myChart.update(); }
-    function toggleTheme() {
-      const isDark = document.documentElement.classList.toggle('dark');
-      document.getElementById('themeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
-      document.getElementById('metaThemeColor')?.setAttribute('content', isDark ? '#020617' : '#f1f5f9');
-      lucide.createIcons(); if (myChart) myChart.update();
-    }
+    function toggleTheme() { const isDark = document.documentElement.classList.toggle('dark'); document.getElementById('themeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon'); lucide.createIcons(); if (myChart) myChart.update(); }
 
     async function exportSummaryAsImage() {
       const exportBtn = document.getElementById('exportBtn'); const exportBtnText = document.getElementById('exportBtnText');
@@ -784,7 +619,7 @@
         const link = document.createElement('a'); link.download = `portfolio-${ProfileStorage.getActiveName()}-${now.toISOString().slice(0, 10)}.png`; link.href = canvas.toDataURL('image/png'); link.click();
         showToast('تصویر گزارش با کیفیت بالا دانلود شد');
       } catch (err) { showToast('خطا در تولید تصویر گزارش'); }
-      finally { if (exportBtn) exportBtn.disabled = false; if (exportBtnText) exportBtnText.innerText = 'خروجی تصویر خلاصه'; }
+      finally { if (exportBtn) exportBtn.disabled = false; if (exportBtnText) exportBtnText.innerText = 'خروجی تصویر'; }
     }
   </script>
 </body>
